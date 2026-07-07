@@ -1,0 +1,10 @@
+{
+  "paths": {
+    "mappings": [
+      "/content/mango-assets-hub/:/"
+    ],
+    "includes": [
+      "/content/mango-assets-hub/"
+    ]
+  }
+}
