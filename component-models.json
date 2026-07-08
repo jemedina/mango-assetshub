@@ -142,6 +142,18 @@
     ]
   },
   {
+    "id": "assetslisting",
+    "fields": [
+      {
+        "component": "richtext",
+        "name": "text",
+        "value": "",
+        "label": "Text",
+        "valueType": "string"
+      }
+    ]
+  },
+  {
     "id": "assetsnavigation",
     "fields": [
       {

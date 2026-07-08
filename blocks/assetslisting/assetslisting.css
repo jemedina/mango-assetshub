@@ -1,0 +1,10 @@
+.assetslisting {
+  padding: 24px;
+}
+
+.assetslisting-path {
+  margin: 0;
+  font-size: var(--body-font-size-s);
+  font-weight: 700;
+  word-break: break-all;
+}
