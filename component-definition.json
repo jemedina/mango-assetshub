@@ -84,14 +84,14 @@
       "components": [
         {
           "title": "Assets Navigation",
-          "id": "assets-navigation",
+          "id": "assetsnavigation",
           "plugins": {
             "xwalk": {
               "page": {
                 "resourceType": "core/franklin/components/block/v1/block",
                 "template": {
                   "name": "Assets Navigation",
-                  "model": "assets-navigation"
+                  "model": "assetsnavigation"
                 }
               }
             }

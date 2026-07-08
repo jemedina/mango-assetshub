@@ -142,7 +142,7 @@
     ]
   },
   {
-    "id": "assets-navigation",
+    "id": "assetsnavigation",
     "fields": [
       {
         "component": "richtext",
