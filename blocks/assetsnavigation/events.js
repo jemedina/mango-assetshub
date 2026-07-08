@@ -1,5 +1,6 @@
 import { fetchFolders } from './data.js';
 import { createFolderNode, createFolderState } from './render.js';
+import { navigate, subscribeRoute } from '../../scripts/router.js';
 
 const NAV_SELECTOR = '.assetsnavigation-link, .assetsnavigation-folder-button';
 
@@ -7,6 +8,11 @@ function setActiveNav(block, activeButton) {
   block.querySelectorAll(NAV_SELECTOR).forEach((button) => {
     button.setAttribute('aria-current', button === activeButton ? 'page' : 'false');
   });
+}
+
+function highlightView(block, view) {
+  const link = block.querySelector(`.assetsnavigation-link[data-view="${view}"]`);
+  setActiveNav(block, link);
 }
 
 async function loadChildFolders(button, group) {
@@ -55,13 +61,28 @@ export default function bindAssetsNavigation(block) {
       return;
     }
 
-    const button = event.target.closest(NAV_SELECTOR);
-    if (!button || !block.contains(button)) return;
-
-    setActiveNav(block, button);
-
-    if (button.classList.contains('has-children')) {
-      await toggleControlledGroup(button);
+    // Primary nav -> route change. Active state is applied by the route
+    // subscriber below, so back/forward and deep links stay in sync.
+    const link = event.target.closest('.assetsnavigation-link');
+    if (link && block.contains(link)) {
+      if (link.dataset.view) navigate({ view: link.dataset.view });
+      return;
     }
+
+    const folderButton = event.target.closest('.assetsnavigation-folder-button');
+    if (!folderButton || !block.contains(folderButton)) return;
+
+    setActiveNav(block, folderButton);
+
+    if (folderButton.classList.contains('has-children')) {
+      await toggleControlledGroup(folderButton);
+    }
+
+    // Next step: folder -> assets-listing with its path once that block reads
+    // `path` from the route, e.g.:
+    // navigate({ view: 'assets-listing', path: folderButton.dataset.folderHref });
   });
+
+  // Reflect the active view from the route (deep links, back/forward, default).
+  subscribeRoute((route) => highlightView(block, route.view));
 }

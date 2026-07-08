@@ -1,7 +1,7 @@
 export const primaryNavItems = [
-  { id: 'all-assets', label: 'Todos los assets' },
-  { id: 'recent', label: 'Recientes' },
-  { id: 'recent-downloads', label: 'Descargas recientes' },
+  { id: 'all-assets', label: 'Todos los assets', view: 'assets-listing' },
+  { id: 'recent', label: 'Recientes', view: 'recents' },
+  { id: 'recent-downloads', label: 'Descargas recientes', view: 'recent-downloads' },
 ];
 
 export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';

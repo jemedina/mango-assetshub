@@ -6,9 +6,11 @@ import {
   decorateTemplateAndTheme,
   waitForFirstImage,
   loadSection,
-  loadSections,
   loadCSS,
 } from './aem.js';
+
+// eslint-disable-next-line import/no-cycle
+import { initHub } from './hub.js';
 
 /**
  * Moves all the attributes from a given elmenet to another given element.
@@ -156,7 +158,8 @@ async function loadLazy(doc) {
   main.before(leftNav);
   await loadLeftNav(leftNav);
 
-  await loadSections(main);
+  // The hub takes over <main> and renders SPA views driven by the router.
+  initHub(main);
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;

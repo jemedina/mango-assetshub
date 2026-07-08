@@ -26,10 +26,11 @@ function createPrimaryNav() {
   nav.className = 'assetsnavigation-primary';
   nav.setAttribute('aria-label', 'Assets navigation');
 
-  primaryNavItems.forEach((item, index) => {
+  primaryNavItems.forEach((item) => {
     const button = createButton('assetsnavigation-link', item.label, {
       'data-nav-id': item.id,
-      'aria-current': index === 0 ? 'page' : 'false',
+      'data-view': item.view,
+      'aria-current': 'false',
     });
     nav.append(button);
   });

@@ -103,6 +103,20 @@ body.appear > main {
   min-width: 0;
 }
 
+.hub-view {
+  min-height: 100vh;
+}
+
+.hub-view-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  padding: 24px;
+  color: #757575;
+  font-size: var(--body-font-size-s);
+}
+
 @media (width < 900px) {
   body.appear:has(.leftnav) {
     grid-template-columns: 1fr;
