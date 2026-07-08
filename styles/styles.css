@@ -95,7 +95,7 @@ body.appear:has(.leftnav) {
   inset: 0 auto 0 0;
   width: var(--leftnav-width);
   height: 100vh;
-  overflow-y: auto;
+  overflow: hidden;
 }
 
 body.appear > main {
