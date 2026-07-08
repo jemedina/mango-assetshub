@@ -7,7 +7,6 @@ import {
   isAssetEntity,
   getLinkHref,
   toPathname,
-  loadRenditionUrl,
 } from '../../scripts/assets-api.js';
 
 const ASSETS_LISTING_VIEW = 'assets-listing';
@@ -53,10 +52,17 @@ function createAssetCard(asset) {
 
   const thumb = document.createElement('span');
   thumb.className = 'assetslisting-thumb';
-  const img = document.createElement('img');
-  img.loading = 'lazy';
-  img.alt = asset.name;
-  thumb.append(img);
+  const src = toPathname(asset.content);
+  if (src) {
+    const img = document.createElement('img');
+    img.loading = 'lazy';
+    img.alt = asset.name;
+    img.src = src;
+    img.addEventListener('error', () => thumb.classList.add('is-empty'));
+    thumb.append(img);
+  } else {
+    thumb.classList.add('is-empty');
+  }
 
   const name = document.createElement('figcaption');
   name.className = 'assetslisting-name';
@@ -71,29 +77,10 @@ function createAssetCard(asset) {
     card.append(meta);
   }
 
-  return { card, img };
+  return card;
 }
 
-/**
- * Loads an asset thumbnail asynchronously. Registers created object URLs for
- * later cleanup and bails out if the render became stale meanwhile.
- */
-async function fillThumb(img, asset, register, isStale) {
-  if (!asset.content) return;
-  try {
-    const url = await loadRenditionUrl(asset.content);
-    if (isStale()) {
-      if (url.startsWith('blob:')) URL.revokeObjectURL(url);
-      return;
-    }
-    if (url.startsWith('blob:')) register(url);
-    img.src = url;
-  } catch {
-    img.closest('.assetslisting-thumb')?.classList.add('is-empty');
-  }
-}
-
-function renderListing(block, data, register, isStale) {
+function renderListing(block, data) {
   const entities = data.entities || [];
   const folders = entities.filter(isFolderEntity).map(toFolder);
   const assets = entities.filter(isAssetEntity).map(toAsset);
@@ -116,11 +103,7 @@ function renderListing(block, data, register, isStale) {
   grid.className = 'assetslisting-grid';
 
   folders.forEach((folder) => grid.append(createFolderCard(folder)));
-  assets.forEach((asset) => {
-    const { card, img } = createAssetCard(asset);
-    grid.append(card);
-    fillThumb(img, asset, register, isStale);
-  });
+  assets.forEach((asset) => grid.append(createAssetCard(asset)));
 
   block.replaceChildren(header, grid);
 }
@@ -141,23 +124,17 @@ export default function decorate(block) {
   }
 
   let seq = 0;
-  let objectUrls = [];
-  const revoke = () => {
-    objectUrls.forEach(URL.revokeObjectURL);
-    objectUrls = [];
-  };
 
   async function update(route) {
     const path = route.path || ROOT_PATH;
     const current = seq + 1;
     seq = current;
-    revoke();
     block.replaceChildren(createState('Cargando assets...'));
 
     try {
       const data = await fetchAssets(path);
       if (current !== seq) return;
-      renderListing(block, data, (url) => objectUrls.push(url), () => current !== seq);
+      renderListing(block, data);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
@@ -179,7 +156,6 @@ export default function decorate(block) {
   const unsubscribe = subscribeRoute((route) => {
     if (!block.isConnected) {
       unsubscribe();
-      revoke();
       return;
     }
     if (route.view === ASSETS_LISTING_VIEW) update(route);
