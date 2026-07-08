@@ -4,10 +4,17 @@ export const primaryNavItems = [
   { id: 'recent-downloads', label: 'Descargas recientes' },
 ];
 
-export const user = {
-  name: 'Mango User',
-  profile: 'Admin',
-};
+export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';
+
+export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
+  const url = new URL(path, window.location);
+  const response = await fetch(url.pathname);
+  if (!response.ok) {
+    throw new Error(`Unable to load auth status: ${response.status}`);
+  }
+
+  return response.json();
+}
 
 function getSelfHref(entity) {
   return entity.links?.find((link) => link.rel?.includes('self'))?.href;

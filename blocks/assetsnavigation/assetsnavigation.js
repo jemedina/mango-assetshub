@@ -1,6 +1,12 @@
 import bindAssetsNavigation from './events.js';
-import { fetchFolders } from './data.js';
-import renderAssetsNavigation, { createFolderState, renderFolderTree } from './render.js';
+import { fetchFolders, fetchAuthStatus } from './data.js';
+import renderAssetsNavigation, {
+  createFolderState,
+  renderFolderTree,
+  renderUser,
+  renderUserLoading,
+  renderUserLogin,
+} from './render.js';
 
 async function loadFolders(block) {
   const tree = block.querySelector('.assetsnavigation-folder-tree');
@@ -18,6 +24,22 @@ async function loadFolders(block) {
   }
 }
 
+async function loadUser(block) {
+  const footer = block.querySelector('.assetsnavigation-user');
+  if (!footer) return;
+
+  renderUserLoading(footer);
+
+  try {
+    const status = await fetchAuthStatus();
+    renderUser(footer, status.userId);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    renderUserLogin(footer);
+  }
+}
+
 /**
  * Loads and decorates the assetsnavigation block.
  * @param {Element} block The assetsnavigation block element
@@ -25,5 +47,5 @@ async function loadFolders(block) {
 export default async function decorate(block) {
   block.replaceChildren(...renderAssetsNavigation());
   bindAssetsNavigation(block);
-  await loadFolders(block);
+  await Promise.all([loadFolders(block), loadUser(block)]);
 }

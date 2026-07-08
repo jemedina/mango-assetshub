@@ -1,4 +1,4 @@
-import { primaryNavItems, user } from './data.js';
+import { primaryNavItems, AUTH_STATUS_PATH } from './data.js';
 
 function createButton(className, text, attributes = {}) {
   const button = document.createElement('button');
@@ -111,11 +111,29 @@ function createContent(folders) {
 function createUser() {
   const footer = document.createElement('div');
   footer.className = 'assetsnavigation-user';
-  footer.innerHTML = `
-    <p class="assetsnavigation-user-name">${user.name}</p>
-    <p class="assetsnavigation-user-profile">${user.profile}</p>
-  `;
   return footer;
+}
+
+export function renderUserLoading(footer) {
+  const state = document.createElement('p');
+  state.className = 'assetsnavigation-user-profile';
+  state.textContent = 'Cargando usuario...';
+  footer.replaceChildren(state);
+}
+
+export function renderUser(footer, userId) {
+  const name = document.createElement('p');
+  name.className = 'assetsnavigation-user-name';
+  name.textContent = userId;
+  footer.replaceChildren(name);
+}
+
+export function renderUserLogin(footer) {
+  const button = createButton('assetsnavigation-login', 'Login');
+  button.addEventListener('click', () => {
+    window.location.assign(AUTH_STATUS_PATH);
+  });
+  footer.replaceChildren(button);
 }
 
 export function createFolderState(message) {
