@@ -1,4 +1,6 @@
 import { getRoute, subscribeRoute } from '../../scripts/router.js';
+// eslint-disable-next-line import/no-cycle
+import { isEditMode } from '../../scripts/scripts.js';
 
 /**
  * Renders the current route path into the given element.
@@ -21,6 +23,13 @@ export default function decorate(block) {
   const path = document.createElement('p');
   path.className = 'assetslisting-path';
   block.replaceChildren(path);
+
+  // In Universal Editor the route is not driving anything, so just show a static
+  // placeholder and don't wire the router (avoids mutating instrumented markup).
+  if (isEditMode()) {
+    path.textContent = 'Assets listing (vista dinámica en runtime)';
+    return;
+  }
 
   renderPath(path, getRoute());
 

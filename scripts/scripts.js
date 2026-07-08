@@ -6,11 +6,22 @@ import {
   decorateTemplateAndTheme,
   waitForFirstImage,
   loadSection,
+  loadSections,
   loadCSS,
 } from './aem.js';
 
 // eslint-disable-next-line import/no-cycle
 import { initHub } from './hub.js';
+
+/**
+ * Detects whether the page is rendered inside Universal Editor (authoring mode).
+ * In that mode the SPA/router must not take over the DOM, otherwise the editor
+ * behaves erratically because the JS mutates the instrumented markup.
+ * @returns {boolean}
+ */
+export function isEditMode() {
+  return document.querySelector('[data-aue-resource], [data-richtext-resource]') !== null;
+}
 
 /**
  * Moves all the attributes from a given elmenet to another given element.
@@ -158,8 +169,14 @@ async function loadLazy(doc) {
   main.before(leftNav);
   await loadLeftNav(leftNav);
 
-  // The hub takes over <main> and renders SPA views driven by the router.
-  initHub(main);
+  if (isEditMode()) {
+    // Authoring: keep the authored content in <main> so Universal Editor can
+    // manage it. The SPA/router stays off.
+    await loadSections(main);
+  } else {
+    // Runtime: the hub takes over <main> and renders SPA views via the router.
+    initHub(main);
+  }
 
   const { hash } = window.location;
   const element = hash ? doc.getElementById(hash.substring(1)) : false;
