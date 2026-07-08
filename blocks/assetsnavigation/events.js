@@ -10,8 +10,19 @@ function setActiveNav(block, activeButton) {
   });
 }
 
-function highlightView(block, view) {
-  const link = block.querySelector(`.assetsnavigation-link[data-view="${view}"]`);
+const ASSETS_LISTING_VIEW = 'assets-listing';
+
+function highlightRoute(block, route) {
+  // assets-listing scoped to a folder -> highlight that folder if it's rendered.
+  if (route.view === ASSETS_LISTING_VIEW && route.path) {
+    const folder = block.querySelector(
+      `.assetsnavigation-folder-button[data-folder-href="${route.path}"]`,
+    );
+    setActiveNav(block, folder || null);
+    return;
+  }
+
+  const link = block.querySelector(`.assetsnavigation-link[data-view="${route.view}"]`);
   setActiveNav(block, link);
 }
 
@@ -72,17 +83,15 @@ export default function bindAssetsNavigation(block) {
     const folderButton = event.target.closest('.assetsnavigation-folder-button');
     if (!folderButton || !block.contains(folderButton)) return;
 
-    setActiveNav(block, folderButton);
+    // Folder -> assets-listing scoped to its path (active state via the route).
+    const path = folderButton.dataset.folderHref;
+    if (path) navigate({ view: ASSETS_LISTING_VIEW, path });
 
     if (folderButton.classList.contains('has-children')) {
       await toggleControlledGroup(folderButton);
     }
-
-    // Next step: folder -> assets-listing with its path once that block reads
-    // `path` from the route, e.g.:
-    // navigate({ view: 'assets-listing', path: folderButton.dataset.folderHref });
   });
 
-  // Reflect the active view from the route (deep links, back/forward, default).
-  subscribeRoute((route) => highlightView(block, route.view));
+  // Reflect the active nav from the route (deep links, back/forward, default).
+  subscribeRoute((route) => highlightRoute(block, route));
 }
