@@ -38,6 +38,7 @@
 
   /* nav height */
   --nav-height: 64px;
+  --leftnav-width: 300px;
 }
 
 /* fallback fonts */
@@ -81,10 +82,49 @@ body {
 }
 
 body.appear {
-  display: block;
+  display: grid;
+  grid-template-columns: 1fr;
 }
 
-header {
+body.appear:has(.leftnav) {
+  grid-template-columns: var(--leftnav-width) minmax(0, 1fr);
+}
+
+.leftnav {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: var(--leftnav-width);
+  height: 100vh;
+  overflow-y: auto;
+}
+
+body.appear > main {
+  grid-column: 2;
+  min-width: 0;
+}
+
+@media (width < 900px) {
+  body.appear:has(.leftnav) {
+    grid-template-columns: 1fr;
+  }
+
+  .leftnav {
+    position: static;
+    width: 100%;
+    height: auto;
+  }
+
+  body.appear > main {
+    grid-column: auto;
+  }
+}
+
+header:empty,
+footer:empty {
+  display: none;
+}
+
+header:has(.header) {
   height: var(--nav-height);
 }
 

@@ -631,6 +631,18 @@ async function loadFooter(footer) {
 }
 
 /**
+ * Loads a block named 'assetsnavigation' into the left navigation container.
+ * @param {Element} leftNav left navigation element
+ * @returns {Promise}
+ */
+async function loadLeftNav(leftNav) {
+  const leftNavBlock = buildBlock('assetsnavigation', '');
+  leftNav.append(leftNavBlock);
+  decorateBlock(leftNavBlock);
+  return loadBlock(leftNavBlock);
+}
+
+/**
  * Wait for Image.
  * @param {Element} section section element
  */
@@ -698,6 +710,7 @@ export {
   loadCSS,
   loadFooter,
   loadHeader,
+  loadLeftNav,
   loadScript,
   loadSection,
   loadSections,
