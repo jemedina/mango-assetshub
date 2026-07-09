@@ -27,7 +27,7 @@ function createPrimaryNav() {
   nav.setAttribute('aria-label', 'Assets navigation');
 
   primaryNavItems.forEach((item) => {
-    const button = createButton('assetsnavigation-link', item.label, {
+    const button = createButton('assetsnavigation-item assetsnavigation-link', item.label, {
       'data-nav-id': item.id,
       'data-view': item.view,
       'aria-current': 'false',
@@ -44,7 +44,7 @@ export function createFolderNode(folder, level = 0) {
 
   const hasAuthoredChildren = Array.isArray(folder.children) && folder.children.length > 0;
   const hasChildren = hasAuthoredChildren || Boolean(folder.hasChildren);
-  const button = createButton('assetsnavigation-folder-button', folder.label, {
+  const button = createButton('assetsnavigation-item assetsnavigation-folder-button', folder.label, {
     'data-folder-id': folder.id,
     'data-folder-href': folder.href || '',
     'data-level': level,
@@ -78,7 +78,7 @@ function createFolders(folders = []) {
   section.className = 'assetsnavigation-folders';
   section.setAttribute('aria-labelledby', 'assetsnavigation-folders-toggle');
 
-  const toggle = createButton('assetsnavigation-folders-toggle', 'Carpetas', {
+  const toggle = createButton('assetsnavigation-item assetsnavigation-folders-toggle', 'Carpetas', {
     id: 'assetsnavigation-folders-toggle',
     'aria-expanded': 'false',
     'aria-controls': 'assetsnavigation-folder-tree',

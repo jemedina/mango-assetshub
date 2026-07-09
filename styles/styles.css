@@ -39,6 +39,29 @@
   /* nav height */
   --nav-height: 64px;
   --leftnav-width: 300px;
+
+  /* assets hub ui tokens */
+  --ah-surface: var(--background-color);
+  --ah-surface-muted: #f2f2f2;
+  --ah-border-color: #e5e5e5;
+  --ah-text: var(--text-color);
+  --ah-text-muted: #757575;
+  --ah-text-subtle: #5f5f5f;
+  --ah-accent: var(--text-color);
+  --ah-accent-hover: #2a2a2a;
+  --ah-on-accent: var(--background-color);
+  --ah-radius-s: 6px;
+  --ah-radius-m: 8px;
+  --ah-control-min-height: 40px;
+  --ah-transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  /* assets hub spacing scale */
+  --ah-space-2xs: 2px;
+  --ah-space-xs: 6px;
+  --ah-space-s: 8px;
+  --ah-space-m: 12px;
+  --ah-space-l: 16px;
+  --ah-space-xl: 24px;
 }
 
 /* fallback fonts */

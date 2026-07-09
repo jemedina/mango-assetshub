@@ -1,12 +1,12 @@
 .assetslisting {
-  padding: 24px;
+  padding: var(--ah-space-xl);
 }
 
 .assetslisting-header {
   display: flex;
   align-items: baseline;
-  gap: 12px;
-  margin-bottom: 20px;
+  gap: var(--ah-space-m);
+  margin-bottom: var(--ah-space-xl);
 }
 
 .assetslisting-title {
@@ -17,44 +17,46 @@
 
 .assetslisting-count {
   margin: 0;
-  color: #757575;
+  color: var(--ah-text-muted);
   font-size: 14px;
 }
 
 .assetslisting-state {
   margin: 0;
   padding: 40px 0;
-  color: #757575;
+  color: var(--ah-text-muted);
   font-size: var(--body-font-size-s);
 }
 
 .assetslisting-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 16px;
+  gap: var(--ah-space-l);
 }
 
+/* base card, shared by folder and asset variants */
 .assetslisting-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--ah-space-s);
   margin: 0;
-  padding: 8px;
-  border: 1px solid #e5e5e5;
-  border-radius: 8px;
-  background: #fff;
+  padding: var(--ah-space-s);
+  border: 1px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-m);
+  background: var(--ah-surface);
   text-align: left;
 }
 
 .assetslisting-card-folder {
+  color: inherit;
   cursor: pointer;
   font: inherit;
-  color: inherit;
+  transition: var(--ah-transition);
 }
 
 .assetslisting-card-folder:hover,
 .assetslisting-card-folder:focus-visible {
-  border-color: #131313;
+  border-color: var(--ah-accent);
   outline: none;
 }
 
@@ -64,8 +66,8 @@
   justify-content: center;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: 6px;
-  background: #f2f2f2;
+  border-radius: var(--ah-radius-s);
+  background: var(--ah-surface-muted);
 }
 
 .assetslisting-thumb img {
@@ -95,7 +97,7 @@
 }
 
 .assetslisting-meta {
-  color: #757575;
+  color: var(--ah-text-muted);
   font-size: 12px;
   line-height: 1.2;
 }
