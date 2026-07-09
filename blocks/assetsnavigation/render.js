@@ -44,6 +44,7 @@ export function createFolderNode(folder, level = 0) {
 
   const hasAuthoredChildren = Array.isArray(folder.children) && folder.children.length > 0;
   const hasChildren = hasAuthoredChildren || Boolean(folder.hasChildren);
+  const expanded = hasChildren && Boolean(folder.expanded);
   const button = createButton('assetsnavigation-item assetsnavigation-folder-button', folder.label, {
     'data-folder-id': folder.id,
     'data-folder-href': folder.href || '',
@@ -53,7 +54,7 @@ export function createFolderNode(folder, level = 0) {
   button.style.setProperty('--folder-level', level);
 
   if (hasChildren) {
-    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     button.classList.add('has-children');
   }
 
@@ -63,7 +64,7 @@ export function createFolderNode(folder, level = 0) {
     const group = document.createElement('ul');
     group.className = 'assetsnavigation-folder-group';
     group.dataset.loaded = hasAuthoredChildren ? 'true' : 'false';
-    group.hidden = true;
+    group.hidden = !expanded;
     if (hasAuthoredChildren) {
       folder.children.forEach((child) => group.append(createFolderNode(child, level + 1)));
     }
@@ -71,6 +72,25 @@ export function createFolderNode(folder, level = 0) {
   }
 
   return item;
+}
+
+/**
+ * Turns a reveal response (map of path -> child folders) plus the set of paths
+ * that should be open into a nested folder-node tree ready for createFolderNode.
+ * @param {Object} levels map of folder path to its child folders
+ * @param {Set<string>} expanded paths that must render expanded
+ * @param {string} path the level to build from (the DAM root on the first call)
+ * @returns {Array} nested folder nodes
+ */
+export function buildFolderNodes(levels, expanded, path) {
+  const folders = levels[path] || [];
+  return folders.map((folder) => {
+    if (folder.hasChildren && expanded.has(folder.href) && levels[folder.href]) {
+      const children = buildFolderNodes(levels, expanded, folder.href);
+      return { ...folder, expanded: true, children };
+    }
+    return folder;
+  });
 }
 
 function createFolders(folders = []) {

@@ -29,6 +29,22 @@ export async function fetchAssetsList(path = DAM_ROOT) {
 }
 
 /**
+ * Reveals the child folders of several paths in a single request, so the tree
+ * can be expanded down to a deep path without an N-level request waterfall.
+ * @param {string[]} paths JCR folder paths to reveal
+ * @returns {Promise<{ levels: Object<string, Array> }>}
+ */
+export async function fetchAssetsReveal(paths) {
+  const url = new URL(LIST_ENDPOINT, window.location);
+  url.searchParams.set('reveal', paths.join(','));
+  const response = await fetch(`${url.pathname}${url.search}`);
+  if (!response.ok) {
+    throw new Error(`Unable to load folder tree: ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
  * Display label for a folder or asset entry: its authored title when present,
  * falling back to its node name.
  * @param {{ title?: string, name: string }} item

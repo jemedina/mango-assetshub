@@ -1,27 +1,17 @@
-import bindAssetsNavigation from './events.js';
-import { fetchFolders, fetchAuthStatus } from './data.js';
+import bindAssetsNavigation, { revealTree, highlightRoute, ASSETS_LISTING_VIEW } from './events.js';
+import { fetchAuthStatus } from './data.js';
 import renderAssetsNavigation, {
-  createFolderState,
-  renderFolderTree,
   renderUser,
   renderUserLoading,
   renderUserLogin,
 } from './render.js';
+import { getRoute } from '../../scripts/router.js';
 
 async function loadFolders(block) {
-  const tree = block.querySelector('.assetsnavigation-folder-tree');
-  if (!tree) return;
-
-  tree.replaceChildren(createFolderState('Cargando carpetas...'));
-
-  try {
-    const folders = await fetchFolders();
-    renderFolderTree(tree, folders);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-    tree.replaceChildren(createFolderState('No se pudieron cargar las carpetas'));
-  }
+  const { view, path } = getRoute();
+  const activePath = view === ASSETS_LISTING_VIEW ? path : '';
+  await revealTree(block, activePath);
+  highlightRoute(block, getRoute());
 }
 
 async function loadUser(block) {
