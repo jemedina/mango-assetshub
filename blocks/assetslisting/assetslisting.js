@@ -1,16 +1,9 @@
 import { getRoute, subscribeRoute, navigate } from '../../scripts/router.js';
 // eslint-disable-next-line import/no-cycle
 import { isEditMode } from '../../scripts/scripts.js';
-import {
-  fetchAssets,
-  isFolderEntity,
-  isAssetEntity,
-  getLinkHref,
-  toPathname,
-} from '../../scripts/assets-api.js';
+import { fetchAssetsList, displayLabel, DAM_ROOT } from '../../scripts/assets-api.js';
 
 const ASSETS_LISTING_VIEW = 'assets-listing';
-const ROOT_PATH = '/api/assets.json';
 
 function createState(message) {
   const state = document.createElement('p');
@@ -19,45 +12,41 @@ function createState(message) {
   return state;
 }
 
-function toFolder(entity) {
-  return {
-    name: entity.properties?.name || 'Sin nombre',
-    href: toPathname(getLinkHref(entity, 'self')),
-  };
-}
-
-function toAsset(entity) {
-  return {
-    name: entity.properties?.name || 'Sin nombre',
-    format: entity.properties?.metadata?.['dc:format'] || '',
-    content: getLinkHref(entity, 'content'),
-  };
+function folderTitle(path) {
+  if (!path || path === DAM_ROOT) return 'Todos los assets';
+  return path.split('/').pop();
 }
 
 function createFolderCard(folder) {
   const card = document.createElement('button');
   card.type = 'button';
   card.className = 'assetslisting-card assetslisting-card-folder';
-  card.dataset.href = folder.href;
-  card.innerHTML = `
-    <span class="assetslisting-thumb assetslisting-thumb-folder" aria-hidden="true"></span>
-    <span class="assetslisting-name">${folder.name}</span>
-  `;
+  card.dataset.href = folder.path;
+
+  const thumb = document.createElement('span');
+  thumb.className = 'assetslisting-thumb assetslisting-thumb-folder';
+  thumb.setAttribute('aria-hidden', 'true');
+
+  const name = document.createElement('span');
+  name.className = 'assetslisting-name';
+  name.textContent = displayLabel(folder);
+
+  card.append(thumb, name);
   return card;
 }
 
 function createAssetCard(asset) {
   const card = document.createElement('figure');
   card.className = 'assetslisting-card assetslisting-card-asset';
+  const label = displayLabel(asset);
 
   const thumb = document.createElement('span');
   thumb.className = 'assetslisting-thumb';
-  const src = toPathname(asset.content);
-  if (src) {
+  if (asset.path) {
     const img = document.createElement('img');
     img.loading = 'lazy';
-    img.alt = asset.name;
-    img.src = src;
+    img.alt = label;
+    img.src = asset.path;
     img.addEventListener('error', () => thumb.classList.add('is-empty'));
     thumb.append(img);
   } else {
@@ -66,7 +55,7 @@ function createAssetCard(asset) {
 
   const name = document.createElement('figcaption');
   name.className = 'assetslisting-name';
-  name.textContent = asset.name;
+  name.textContent = label;
 
   card.append(thumb, name);
 
@@ -81,13 +70,12 @@ function createAssetCard(asset) {
 }
 
 function renderListing(block, data) {
-  const entities = data.entities || [];
-  const folders = entities.filter(isFolderEntity).map(toFolder);
-  const assets = entities.filter(isAssetEntity).map(toAsset);
+  const folders = data.folders || [];
+  const assets = data.assets || [];
 
   const header = document.createElement('div');
   header.className = 'assetslisting-header';
-  const title = data.properties?.name || 'Todos los assets';
+  const title = folderTitle(data.path);
   const total = folders.length + assets.length;
   header.innerHTML = `
     <p class="assetslisting-title">${title}</p>
@@ -126,13 +114,13 @@ export default function decorate(block) {
   let seq = 0;
 
   async function update(route) {
-    const path = route.path || ROOT_PATH;
+    const path = route.path || DAM_ROOT;
     const current = seq + 1;
     seq = current;
     block.replaceChildren(createState('Cargando assets...'));
 
     try {
-      const data = await fetchAssets(path);
+      const data = await fetchAssetsList(path);
       if (current !== seq) return;
       renderListing(block, data);
     } catch (error) {

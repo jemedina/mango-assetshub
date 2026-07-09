@@ -35,9 +35,7 @@ async function loadChildFolders(button, group) {
     const folders = await fetchFolders(button.dataset.folderHref);
     group.replaceChildren();
 
-    if (!folders.length) {
-      group.append(createFolderState('No hay subcarpetas'));
-    } else {
+    if (folders.length) {
       const level = Number(button.dataset.level || 0) + 1;
       folders.forEach((folder) => group.append(createFolderNode(folder, level)));
     }

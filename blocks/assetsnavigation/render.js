@@ -43,7 +43,7 @@ export function createFolderNode(folder, level = 0) {
   item.className = 'assetsnavigation-folder-item';
 
   const hasAuthoredChildren = Array.isArray(folder.children) && folder.children.length > 0;
-  const hasChildren = hasAuthoredChildren || Boolean(folder.href);
+  const hasChildren = hasAuthoredChildren || Boolean(folder.hasChildren);
   const button = createButton('assetsnavigation-folder-button', folder.label, {
     'data-folder-id': folder.id,
     'data-folder-href': folder.href || '',

@@ -1,9 +1,4 @@
-import {
-  fetchAssets,
-  isFolderEntity,
-  getLinkHref,
-  toPathname,
-} from '../../scripts/assets-api.js';
+import { fetchAssetsList, displayLabel, DAM_ROOT } from '../../scripts/assets-api.js';
 
 export const primaryNavItems = [
   { id: 'all-assets', label: 'Todos los assets', view: 'assets-listing' },
@@ -23,24 +18,16 @@ export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
   return response.json();
 }
 
-function isVisibleFolder(entity) {
-  return isFolderEntity(entity) && entity.properties?.hidden !== 'true';
-}
-
-function toFolder(entity) {
-  const name = entity.properties?.name || 'Untitled';
-  const href = toPathname(getLinkHref(entity, 'self'));
-
+function toFolder(folder) {
   return {
-    id: href || name,
-    label: name,
-    href,
+    id: folder.path,
+    label: displayLabel(folder),
+    href: folder.path,
+    hasChildren: folder.hasChildren,
   };
 }
 
-export async function fetchFolders(path = '/api/assets.json') {
-  const data = await fetchAssets(path);
-  return (data.entities || [])
-    .filter(isVisibleFolder)
-    .map(toFolder);
+export async function fetchFolders(path = DAM_ROOT) {
+  const data = await fetchAssetsList(path);
+  return (data.folders || []).map(toFolder);
 }
