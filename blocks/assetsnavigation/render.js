@@ -1,4 +1,4 @@
-import { primaryNavItems, buildLoginUrl } from './data.js';
+import { primaryNavItems, startLogin } from './data.js';
 
 function createButton(className, text, attributes = {}) {
   const button = document.createElement('button');
@@ -152,7 +152,7 @@ export function renderUser(footer, userId) {
 export function renderUserLogin(footer) {
   const button = createButton('assetsnavigation-login', 'Login');
   button.addEventListener('click', () => {
-    window.location.assign(buildLoginUrl());
+    startLogin();
   });
   footer.replaceChildren(button);
 }

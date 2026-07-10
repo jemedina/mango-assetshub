@@ -13,10 +13,14 @@ export const primaryNavItems = [
 
 export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';
 
-// Unprotected login gate (Sling servlet). It stores the return destination in a
-// cookie and hands off to the protected callback, which forces the AEM login and
-// then bounces the user back here. See MangoAssetsManager LoginRedirectServlet.
-export const LOGIN_PATH = '/bin/assetshub/auth/login';
+// Protected callback servlet (LoginCallbackServlet). Navigating STRAIGHT to it —
+// a protected route — triggers the AEM/IMS login, and once authenticated AEM
+// replays the request so the servlet redirects the user back. Going directly,
+// with no intermediate redirect, mirrors the flow that reliably completes the
+// IMS login (an extra redirect hop in front of it broke the round-trip).
+export const LOGIN_CALLBACK_PATH = '/bin/assetshub/auth/callback';
+
+const REDIRECT_COOKIE = 'mango-login-redirect';
 
 export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
   const url = new URL(path, window.location);
@@ -29,24 +33,20 @@ export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
 }
 
 /**
- * Builds the URL of the login gate, carrying the user's current location as the
- * post-login destination and the current host as the cookie domain.
- *
- * The whole client-side location — path, query and hash — is sent as `redirect`,
- * so the hash-based SPA view (see scripts/router.js) is restored after login.
- * The gate validates it to a same-origin path before use.
- * @returns {string} same-origin path, e.g. /bin/assetshub/auth/login?redirect=...&domain=...
+ * Starts login. Remembers the current location — path, query and hash, so the
+ * hash-based SPA view (see scripts/router.js) is restored — in a cookie the
+ * callback reads, then navigates straight to the protected callback route to
+ * trigger the AEM/IMS login. On return the callback (or, as a fallback, the EDS
+ * client-side restore in scripts/login-return.js) sends the user back here.
  */
-export function buildLoginUrl() {
+export function startLogin() {
   const {
-    pathname, search, hash, hostname,
+    pathname, search, hash, protocol,
   } = window.location;
-  const url = new URL(LOGIN_PATH, window.location);
-  url.searchParams.set('redirect', `${pathname}${search}${hash}`);
-  if (hostname) {
-    url.searchParams.set('domain', hostname);
-  }
-  return `${url.pathname}${url.search}`;
+  const returnTo = `${pathname}${search}${hash}`;
+  const secure = protocol === 'https:' ? '; Secure' : '';
+  document.cookie = `${REDIRECT_COOKIE}=${encodeURIComponent(returnTo)}; Path=/; Max-Age=1800; SameSite=Lax${secure}`;
+  window.location.assign(LOGIN_CALLBACK_PATH);
 }
 
 function toFolder(folder) {
