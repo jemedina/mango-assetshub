@@ -13,12 +13,13 @@ export const primaryNavItems = [
 
 export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';
 
-// Protected callback servlet (LoginCallbackServlet). Navigating STRAIGHT to it —
-// a protected route — triggers the AEM/IMS login, and once authenticated AEM
-// replays the request so the servlet redirects the user back. Going directly,
-// with no intermediate redirect, mirrors the flow that reliably completes the
-// IMS login (an extra redirect hop in front of it broke the round-trip).
-export const LOGIN_CALLBACK_PATH = '/bin/assetshub/auth/callback';
+// Protected login servlet (LoginServlet). Navigating STRAIGHT to it — a
+// protected route — triggers the AEM/IMS login, and once authenticated AEM
+// replays the request so the servlet redirects the user back to the saved
+// target. Going directly, with no intermediate redirect, mirrors the flow that
+// reliably completes the IMS login (an extra redirect hop in front of it broke
+// the round-trip).
+export const LOGIN_PATH = '/bin/assetshub/auth/login';
 
 const REDIRECT_COOKIE = 'mango-login-redirect';
 
@@ -35,8 +36,8 @@ export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
 /**
  * Starts login. Remembers the current location — path, query and hash, so the
  * hash-based SPA view (see scripts/router.js) is restored — in a cookie the
- * callback reads, then navigates straight to the protected callback route to
- * trigger the AEM/IMS login. On return the callback (or, as a fallback, the EDS
+ * login servlet reads, then navigates straight to the protected login route to
+ * trigger the AEM/IMS login. On return the servlet (or, as a fallback, the EDS
  * client-side restore in scripts/login-return.js) sends the user back here.
  */
 export function startLogin() {
@@ -46,7 +47,7 @@ export function startLogin() {
   const returnTo = `${pathname}${search}${hash}`;
   const secure = protocol === 'https:' ? '; Secure' : '';
   document.cookie = `${REDIRECT_COOKIE}=${encodeURIComponent(returnTo)}; Path=/; Max-Age=1800; SameSite=Lax${secure}`;
-  window.location.assign(LOGIN_CALLBACK_PATH);
+  window.location.assign(LOGIN_PATH);
 }
 
 function toFolder(folder) {

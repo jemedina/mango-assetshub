@@ -1,12 +1,12 @@
 /*
  * Post-login view restoration.
  *
- * The login gate (AEM LoginRedirectServlet) saves where the user was — path,
- * query and hash — in the `mango-login-redirect` cookie before sending them
- * through the AEM/IMS login. AEM's post-login redirect can't carry a URL
- * fragment and, on publish, often lands the user on a base page instead of the
- * callback, so the hash-based SPA view (see scripts/router.js) is lost. On load
- * we read that cookie, clear it, and restore the destination.
+ * The login gate (AEM LoginServlet at /bin/assetshub/auth/login) saves where the
+ * user was — path, query and hash — in the `mango-login-redirect` cookie before
+ * sending them through the AEM/IMS login. AEM's post-login redirect can't carry
+ * a URL fragment and, on publish, often lands the user on a base page instead of
+ * the saved target, so the hash-based SPA view (see scripts/router.js) is lost.
+ * On load we read that cookie, clear it, and restore the destination.
  *
  * Runs before the router starts so the restored hash is in place on first
  * render. The cookie is only ever a same-origin path, re-validated here.
