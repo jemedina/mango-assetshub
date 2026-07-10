@@ -12,6 +12,7 @@ import {
 
 // eslint-disable-next-line import/no-cycle
 import { initHub } from './hub.js';
+import restoreLoginReturn from './login-return.js';
 
 /**
  * Detects whether the page is rendered inside Universal Editor (authoring mode).
@@ -197,6 +198,9 @@ function loadDelayed() {
 }
 
 async function loadPage() {
+  // Restore the pre-login view (hash) before the router reads the URL. If it
+  // triggers a full navigation the document is unloading, so stop here.
+  if (restoreLoginReturn()) return;
   await loadEager(document);
   await loadLazy(document);
   loadDelayed();
