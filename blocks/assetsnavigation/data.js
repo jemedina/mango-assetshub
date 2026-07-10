@@ -13,6 +13,11 @@ export const primaryNavItems = [
 
 export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';
 
+// Unprotected login gate (Sling servlet). It stores the return destination in a
+// cookie and hands off to the protected callback, which forces the AEM login and
+// then bounces the user back here. See MangoAssetsManager LoginRedirectServlet.
+export const LOGIN_PATH = '/bin/assetshub/auth/login';
+
 export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
   const url = new URL(path, window.location);
   const response = await fetch(url.pathname);
@@ -21,6 +26,27 @@ export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
   }
 
   return response.json();
+}
+
+/**
+ * Builds the URL of the login gate, carrying the user's current location as the
+ * post-login destination and the current host as the cookie domain.
+ *
+ * The whole client-side location — path, query and hash — is sent as `redirect`,
+ * so the hash-based SPA view (see scripts/router.js) is restored after login.
+ * The gate validates it to a same-origin path before use.
+ * @returns {string} same-origin path, e.g. /bin/assetshub/auth/login?redirect=...&domain=...
+ */
+export function buildLoginUrl() {
+  const {
+    pathname, search, hash, hostname,
+  } = window.location;
+  const url = new URL(LOGIN_PATH, window.location);
+  url.searchParams.set('redirect', `${pathname}${search}${hash}`);
+  if (hostname) {
+    url.searchParams.set('domain', hostname);
+  }
+  return `${url.pathname}${url.search}`;
 }
 
 function toFolder(folder) {
