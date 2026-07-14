@@ -57,13 +57,39 @@ Guarda esta tabla. Todo lo demás se deriva de aquí.
 | **Repository ID en Cloud Manager** | `268060` |
 | **Path de contenido en AEM** | `/content/eds-mango-assets-hub-ans` |
 | **Admin de aem.live** | `ignacio.mancilla@anseris.es` |
-| **Cuenta técnica** | `32edf9e8-47ab-414d-8ce9-2f7c9849f9cb@techacct.adobe.com` |
-| **Client ID (Cloud Manager API)** | `814ff9e54f93415281c8f25578a6...` (Adobe Developer Console) |
+| **Cuenta técnica** | `32edf9e8-…@techacct.adobe.com` |
+| **Client ID (Cloud Manager API)** | `814ff9e5…` |
 
 > **Regla de oro del naming:** `org` y `site` de aem.live construyen la URL como
 > `https://main--<site>--<org>.aem.page`. El `site` debe coincidir con el **Site name** que
 > le pongas al sitio en AEM (define `/content/<site>`), y ese path debe coincidir con `paths.json`.
 > Si estos tres no cuadran, tendrás un 404 permanente sin mensaje de error útil.
+
+> Los valores completos de la cuenta técnica y el Client ID están **deliberadamente truncados**
+> en este documento. Ver la sección 2.1 para saber dónde recuperarlos.
+> `47002` y `268060` no son secretos: son identificadores públicos de Cloud Manager,
+> visibles en la propia UI, y hacen falta en varias llamadas.
+
+---
+
+## 2.1 Credenciales: dónde se obtienen, si se recuperan y cómo se rotan
+
+Ninguna credencial de este montaje debe vivir en el repositorio. Esta tabla dice **dónde ir a buscar
+cada una** cuando se pierda, y **qué se rompe** al rotarla.
+
+| Credencial | Dónde se obtiene | ¿Recuperable? | Cómo se rota | Qué se rompe al rotar |
+|---|---|---|---|---|
+| **Repository access token** (Bitbucket) | Bitbucket → repo → **Repository settings → Security → Access tokens** | **No.** Solo se muestra al crearlo | Crear uno nuevo, actualizarlo en Cloud Manager (**Repositories → Manage Access Tokens**) y revocar el viejo | El sync de código deja de funcionar hasta que Cloud Manager tenga el token nuevo |
+| **Webhook Secret** (Cloud Manager) | Cloud Manager → **Repositories → `•••` → Config Webhook → Generate** | **No.** Solo al generarlo | **Generate** uno nuevo y pegarlo en el webhook de Bitbucket | El webhook devuelve `400 INVALID_SIGNATURE` hasta que Bitbucket tenga el nuevo |
+| **Client ID / API Key** (Cloud Manager API) | [Adobe Developer Console](https://developer.adobe.com/console) → proyecto → credencial **OAuth Server-to-Server** → *API Key (Client ID)* | **Sí.** Siempre visible en la consola | Crear una credencial nueva y sustituir el `api_key=` de la URL del webhook en Bitbucket | El webhook devuelve `401` hasta actualizar la URL |
+| **Secret BYOG (`cm-byog`)** | Cloud Manager → site → **`•••` → Bring Your Own Git** → al seleccionar el repo | **No.** Solo se muestra una vez | Reconfigurar BYOG en el site genera uno nuevo → hay que re-registrarlo con el Admin API (Fase 6.3, llamada 2) | El sync falla con `Unable to fetch hlxignore: 401` |
+| **`auth_token`** (Admin API) | `https://admin.hlx.page/login/<org>/<site>/main` → DevTools → cookie `auth_token` | **Sí.** Se regenera haciendo login | Caduca solo (~24 h). Para automatización, crear API Keys con `POST .../apiKeys.json` | Nada: es de sesión |
+| **ID de la cuenta técnica** | AEM Author → **Tools → Cloud Services → Edge Delivery Services Configuration** → *Properties* → pestaña **Authentication** | **Sí.** Siempre visible ahí | No se rota manualmente: es única por instancia de AEM. Cambia si cambias de entorno | Si cambias de entorno, hay que darle rol **Config Admin** a la nueva |
+| **Roles de aem.live** | `https://tools.aem.live/tools/user-admin/index.html?org=<org>&site=<site>` | **Sí.** *Fetch Users* | Añadir/quitar usuarios ahí | Si te quitas a ti mismo el rol Admin, **te bloqueas fuera de tu propia configuración** |
+
+**Regla práctica:** de las siete, solo tres son irrecuperables — el **token de Bitbucket**, el
+**Webhook Secret** y el **secret `cm-byog`**. Esas tres van al gestor de contraseñas el día que se crean.
+Las demás siempre se pueden volver a mirar en su UI.
 
 ---
 
@@ -620,6 +646,9 @@ Este montaje está sobre un **programa Sandbox** (`47002`). Para llevarlo a prod
 ---
 
 ## 18. Mantenimiento
+
+> Para saber **dónde recuperar o rotar** cada credencial, ver la **sección 2.1**.
+> Esta tabla solo cubre los vencimientos y riesgos.
 
 | Elemento | Vence / Riesgo | Acción |
 |---|---|---|
