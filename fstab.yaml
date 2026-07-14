@@ -1,5 +1,5 @@
 mountpoints:
   /:
-    url: "https://author-p47002-e1212860.adobeaemcloud.com/bin/franklin.delivery/jemedina/mango-assetshub/main"
+    url: "https://author-p47002-e2179869.adobeaemcloud.com/bin/franklin.delivery/anseris-products/eds-mango-assets-hub-ans/main"
     type: "markup"
     suffix: ".html"

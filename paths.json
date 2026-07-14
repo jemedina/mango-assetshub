@@ -1,10 +1,10 @@
 {
   "paths": {
     "mappings": [
-      "/content/mango-assets-hub/:/"
+      "/content/eds-mango-assets-hub-ans/:/"
     ],
     "includes": [
-      "/content/mango-assets-hub/"
+      "/content/eds-mango-assets-hub-ans/"
     ]
   }
 }
