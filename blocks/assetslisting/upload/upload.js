@@ -21,7 +21,7 @@ const ASSETS_LISTING_VIEW = 'assets-listing';
 
 const PERMISSION_MESSAGES = {
   unauthenticated: 'Inicia sesión para poder subir assets.',
-  'unknown-user': 'Tu usuario aún no está aprovisionado en Author, no puedes subir todavía.',
+  'not-found': 'La carpeta de destino no existe.',
   forbidden: 'No tienes permiso para crear assets en esta carpeta.',
   network: 'No se pudo verificar permisos (error de red).',
   error: 'No se pudieron verificar los permisos.',

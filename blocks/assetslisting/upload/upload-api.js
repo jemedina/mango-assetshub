@@ -2,16 +2,17 @@
  * Client for the upload endpoints. Same-origin, so auth is the serving layer's
  * concern — never embed credentials here (public client-side code).
  *
- *  - checkCreatePermission: GET the publish permission bridge, which forwards
- *    the session user + path to author and returns granular flags. Upload is
- *    only offered when the user can create under the target folder.
+ *  - checkCreatePermission: GET the publish permission endpoint, which evaluates
+ *    the session user's own privileges against the publish repository and returns
+ *    granular flags. Upload is only offered when the user can create under the
+ *    target folder.
  *  - uploadAssets: POST a multipart batch to the publish upload bridge, which
  *    fans each file out to author (see the assetshub servlets). Each file's
  *    path relative to the target folder travels as its multipart filename, so
  *    whole folders can be uploaded.
  */
 
-const CHECK_ENDPOINT = '/bin/assetshub/bridge/check';
+const CHECK_ENDPOINT = '/bin/assetshub/permission';
 const UPLOAD_ENDPOINT = '/bin/assetshub/bridge/upload';
 const CSRF_TOKEN_ENDPOINT = '/libs/granite/csrf/token.json';
 
@@ -65,11 +66,12 @@ export async function checkCreatePermission(path) {
     return { allowed: false, reason: 'error' };
   }
 
-  const result = data && data.authorResult;
-  if (result && result.userExists === false) {
-    return { allowed: false, reason: 'unknown-user' };
+  // Publish evaluates the session user's own privileges and returns the flags at
+  // the top level (evaluatedOn: "publish").
+  if (data && data.pathExists === false) {
+    return { allowed: false, reason: 'not-found' };
   }
-  if (result && result.canCreate === true) {
+  if (data && data.canCreate === true) {
     return { allowed: true };
   }
   return { allowed: false, reason: response.ok ? 'forbidden' : 'error' };
