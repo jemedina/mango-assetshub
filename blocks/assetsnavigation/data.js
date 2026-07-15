@@ -4,11 +4,18 @@ import {
   displayLabel,
   DAM_ROOT,
 } from '../../scripts/assets-api.js';
+import { ICON_ALL_ASSETS, ICON_RECENT, ICON_RECENT_DOWNLOADS } from './icons.js';
 
 export const primaryNavItems = [
-  { id: 'all-assets', label: 'Todos los assets', view: 'assets-listing' },
-  { id: 'recent', label: 'Recientes', view: 'recents' },
-  { id: 'recent-downloads', label: 'Descargas recientes', view: 'recent-downloads' },
+  {
+    id: 'all-assets', label: 'Todos los assets', view: 'assets-listing', icon: ICON_ALL_ASSETS,
+  },
+  {
+    id: 'recent', label: 'Recientes', view: 'recents', icon: ICON_RECENT,
+  },
+  {
+    id: 'recent-downloads', label: 'Descargas recientes', view: 'recent-downloads', icon: ICON_RECENT_DOWNLOADS,
+  },
 ];
 
 export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';

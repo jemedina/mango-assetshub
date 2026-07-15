@@ -1,0 +1,93 @@
+:root {
+  /* colors */
+  --background-color: white;
+  --light-color: #f8f8f8;
+  --dark-color: #505050;
+  --text-color: #131313;
+  --link-color: #3b63fb;
+  --link-hover-color: #1d3ecf;
+
+  /* fonts */
+  --body-font-family: roboto, roboto-fallback, sans-serif;
+  --heading-font-family: roboto-condensed, roboto-condensed-fallback, sans-serif;
+
+  /* body sizes */
+  --body-font-size-m: 22px;
+  --body-font-size-s: 19px;
+  --body-font-size-xs: 17px;
+
+  /* heading sizes */
+  --heading-font-size-xxl: 55px;
+  --heading-font-size-xl: 44px;
+  --heading-font-size-l: 34px;
+  --heading-font-size-m: 27px;
+  --heading-font-size-s: 24px;
+  --heading-font-size-xs: 22px;
+
+  /* nav height */
+  --nav-height: 64px;
+  --leftnav-width: 210px;
+
+  /* assets hub ui tokens */
+  --ah-surface: var(--background-color);
+  --ah-surface-muted: #f2f2f2;
+  --ah-border-color: #e5e5e5;
+  --ah-text: var(--text-color);
+  --ah-text-muted: #757575;
+  --ah-text-subtle: #5f5f5f;
+  --ah-accent: var(--text-color);
+  --ah-accent-hover: #2a2a2a;
+  --ah-on-accent: var(--background-color);
+  --ah-radius-2xs: 3.25px;
+  --ah-radius-xs: 5.25px;
+  --ah-radius-s: 6px;
+  --ah-radius-m: 8px;
+  --ah-control-min-height: 40px;
+  --ah-transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+
+  /* assets hub design tokens (Figma: Mango DAM AEM Sites) */
+  --ah-bg-page: #fff;
+  --ah-bg-subtle: #f4f4f4;
+  --ah-bg-muted: #f0f0f0;
+  --ah-border-subtle: #e8e8e8;
+  --ah-text-strong: #111;
+  --ah-text-secondary: #333;
+  --ah-text-placeholder: #888;
+  --ah-overlay-subtle: rgb(0 0 0 / 10%);
+  --ah-scrim: rgb(0 0 0 / 70%);
+  --ah-icon-button-bg: rgb(17 17 17 / 10%);
+
+  /* assets hub tag/badge colors */
+  --ah-tag-amber: rgb(245 166 35 / 80%);
+  --ah-tag-blue: rgb(79 124 255 / 80%);
+  --ah-tag-red: rgb(224 82 82 / 80%);
+  --ah-tag-purple: rgb(167 139 250 / 80%);
+  --ah-tag-teal: rgb(82 196 160 / 80%);
+  --ah-tag-neutral: rgb(17 17 17 / 80%);
+
+  /* assets hub spacing scale */
+  --ah-space-2xs: 2px;
+  --ah-space-xs: 6px;
+  --ah-space-s: 8px;
+  --ah-space-xm: 10.5px;
+  --ah-space-m: 12px;
+  --ah-space-l: 16px;
+  --ah-space-xl: 24px;
+}
+
+@media (width >= 900px) {
+  :root {
+    /* body sizes */
+    --body-font-size-m: 18px;
+    --body-font-size-s: 16px;
+    --body-font-size-xs: 14px;
+
+    /* heading sizes */
+    --heading-font-size-xxl: 45px;
+    --heading-font-size-xl: 36px;
+    --heading-font-size-l: 28px;
+    --heading-font-size-m: 22px;
+    --heading-font-size-s: 20px;
+    --heading-font-size-xs: 18px;
+  }
+}

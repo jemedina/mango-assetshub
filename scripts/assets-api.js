@@ -53,3 +53,30 @@ export async function fetchAssetsReveal(paths) {
 export function displayLabel(item) {
   return item.title || item.name;
 }
+
+const FORMAT_LABELS = {
+  'image/jpeg': 'jpg',
+  'image/jpg': 'jpg',
+  'image/png': 'png',
+  'image/svg+xml': 'svg',
+  'image/gif': 'gif',
+  'image/webp': 'webp',
+  'video/mp4': 'mp4',
+  'video/quicktime': 'mov',
+  'audio/wav': 'wav',
+  'audio/x-wav': 'wav',
+  'audio/wave': 'wav',
+  'audio/mpeg': 'mp3',
+  'application/pdf': 'pdf',
+};
+
+/**
+ * Short extension-style label for an asset's dc:format mimetype
+ * (e.g. "image/jpeg" -> "jpg"), falling back to the mimetype subtype.
+ * @param {string} [format] dc:format value
+ * @returns {string}
+ */
+export function formatLabel(format) {
+  if (!format) return '';
+  return FORMAT_LABELS[format] || format.split('/').pop().split('+')[0];
+}

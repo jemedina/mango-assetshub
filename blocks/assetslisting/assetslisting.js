@@ -1,9 +1,19 @@
 import { getRoute, subscribeRoute, navigate } from '../../scripts/router.js';
 // eslint-disable-next-line import/no-cycle
 import { isEditMode } from '../../scripts/scripts.js';
-import { fetchAssetsList, displayLabel, DAM_ROOT } from '../../scripts/assets-api.js';
+import {
+  fetchAssetsList, displayLabel, formatLabel, DAM_ROOT,
+} from '../../scripts/assets-api.js';
 
 const ASSETS_LISTING_VIEW = 'assets-listing';
+
+// Formats with no raster preview: show the format's file icon + extension
+// instead of attempting an <img> render.
+const ICON_ONLY_FORMATS = new Map([
+  ['pdf', 'file-pdf.svg'],
+  ['svg', 'file-svg.svg'],
+  ['wav', 'file-wav.svg'],
+]);
 
 function createState(message) {
   const state = document.createElement('p');
@@ -27,11 +37,15 @@ function createFolderCard(folder) {
   thumb.className = 'assetslisting-thumb assetslisting-thumb-folder';
   thumb.setAttribute('aria-hidden', 'true');
 
+  const body = document.createElement('span');
+  body.className = 'assetslisting-body';
+
   const name = document.createElement('span');
   name.className = 'assetslisting-name';
   name.textContent = displayLabel(folder);
+  body.append(name);
 
-  card.append(thumb, name);
+  card.append(thumb, body);
   return card;
 }
 
@@ -40,9 +54,21 @@ function createAssetCard(asset) {
   card.className = 'assetslisting-card assetslisting-card-asset';
   const label = displayLabel(asset);
 
+  const format = formatLabel(asset.format);
+
   const thumb = document.createElement('span');
   thumb.className = 'assetslisting-thumb';
-  if (asset.path) {
+  if (format && ICON_ONLY_FORMATS.has(format)) {
+    const icon = document.createElement('img');
+    icon.className = 'assetslisting-thumb-icon';
+    icon.src = `${window.hlx.codeBasePath}/icons/${ICON_ONLY_FORMATS.get(format)}`;
+    icon.alt = '';
+    icon.loading = 'lazy';
+    const ext = document.createElement('span');
+    ext.className = 'assetslisting-thumb-ext';
+    ext.textContent = `.${format}`;
+    thumb.append(icon, ext);
+  } else if (asset.path) {
     const img = document.createElement('img');
     img.loading = 'lazy';
     img.alt = label;
@@ -53,18 +79,30 @@ function createAssetCard(asset) {
     thumb.classList.add('is-empty');
   }
 
+  if (format) {
+    const badge = document.createElement('span');
+    badge.className = 'assetslisting-format-badge';
+    badge.dataset.format = format;
+    badge.textContent = format;
+    thumb.append(badge);
+  }
+
+  const body = document.createElement('span');
+  body.className = 'assetslisting-body';
+
   const name = document.createElement('figcaption');
   name.className = 'assetslisting-name';
   name.textContent = label;
-
-  card.append(thumb, name);
+  body.append(name);
 
   if (asset.format) {
     const meta = document.createElement('span');
     meta.className = 'assetslisting-meta';
     meta.textContent = asset.format;
-    card.append(meta);
+    body.append(meta);
   }
+
+  card.append(thumb, body);
 
   return card;
 }
@@ -101,6 +139,11 @@ function renderListing(block, data) {
  *
  * Reads `path` from the route and lists the folder contents (folders + assets)
  * in a grid, reacting to route changes without reloading the fragment.
+ *
+ * The Figma spec also shows file size, last-modified date and DAM keyword
+ * tags on each asset card. AssetsListServlet (mango-assets-manager) doesn't
+ * return those fields yet — only name/title/path/format — so they're not
+ * rendered here until the backend adds them to the /assets/list payload.
  * @param {Element} block The assetslisting block element
  */
 export default function decorate(block) {

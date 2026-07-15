@@ -1,4 +1,5 @@
 import { primaryNavItems, AUTH_STATUS_PATH } from './data.js';
+import { ICON_COLLECTIONS, ICON_CHEVRON } from './icons.js';
 
 function createButton(className, text, attributes = {}) {
   const button = document.createElement('button');
@@ -15,10 +16,30 @@ function createHeader() {
   const header = document.createElement('div');
   header.className = 'assetsnavigation-header';
   header.innerHTML = `
-    <p class="assetsnavigation-app">Mango</p>
+    <p class="assetsnavigation-app">MANGO</p>
     <p class="assetsnavigation-product">Digital Asset Management</p>
   `;
   return header;
+}
+
+function createPrimaryNavItem(item) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'ah-button-nav assetsnavigation-link';
+  button.dataset.navId = item.id;
+  button.dataset.view = item.view;
+  button.setAttribute('aria-current', 'false');
+
+  const icon = document.createElement('span');
+  icon.className = 'ah-button-nav-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = item.icon;
+
+  const label = document.createElement('span');
+  label.textContent = item.label;
+
+  button.append(icon, label);
+  return button;
 }
 
 function createPrimaryNav() {
@@ -27,12 +48,7 @@ function createPrimaryNav() {
   nav.setAttribute('aria-label', 'Assets navigation');
 
   primaryNavItems.forEach((item) => {
-    const button = createButton('assetsnavigation-item assetsnavigation-link', item.label, {
-      'data-nav-id': item.id,
-      'data-view': item.view,
-      'aria-current': 'false',
-    });
-    nav.append(button);
+    nav.append(createPrimaryNavItem(item));
   });
 
   return nav;
@@ -93,16 +109,42 @@ export function buildFolderNodes(levels, expanded, path) {
   });
 }
 
+function createFoldersToggle() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'ah-button-nav ah-button-nav--section assetsnavigation-folders-toggle';
+  button.id = 'assetsnavigation-folders-toggle';
+  button.setAttribute('aria-expanded', 'false');
+  button.setAttribute('aria-controls', 'assetsnavigation-folder-tree');
+
+  const group = document.createElement('span');
+  group.className = 'ah-button-nav-group';
+
+  const icon = document.createElement('span');
+  icon.className = 'ah-button-nav-icon ah-button-nav-icon--sm';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = ICON_COLLECTIONS;
+
+  const label = document.createElement('span');
+  label.textContent = 'Colecciones';
+
+  group.append(icon, label);
+
+  const chevron = document.createElement('span');
+  chevron.className = 'ah-button-nav-chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+  chevron.innerHTML = ICON_CHEVRON;
+
+  button.append(group, chevron);
+  return button;
+}
+
 function createFolders(folders = []) {
   const section = document.createElement('section');
   section.className = 'assetsnavigation-folders';
   section.setAttribute('aria-labelledby', 'assetsnavigation-folders-toggle');
 
-  const toggle = createButton('assetsnavigation-item assetsnavigation-folders-toggle', 'Carpetas', {
-    id: 'assetsnavigation-folders-toggle',
-    'aria-expanded': 'false',
-    'aria-controls': 'assetsnavigation-folder-tree',
-  });
+  const toggle = createFoldersToggle();
 
   const tree = document.createElement('ul');
   tree.id = 'assetsnavigation-folder-tree';

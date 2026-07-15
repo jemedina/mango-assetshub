@@ -1,7 +1,3 @@
-.assetslisting {
-  padding: var(--ah-space-xl);
-}
-
 .assetslisting-header {
   display: flex;
   align-items: baseline;
@@ -30,21 +26,29 @@
 
 .assetslisting-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: var(--ah-space-l);
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var( --ah-space-xm);
 }
 
 /* base card, shared by folder and asset variants */
 .assetslisting-card {
   display: flex;
   flex-direction: column;
-  gap: var(--ah-space-s);
+  overflow: hidden;
   margin: 0;
-  padding: var(--ah-space-s);
   border: 1px solid var(--ah-border-color);
-  border-radius: var(--ah-radius-m);
+  border-radius: var(--ah-radius-xs);
   background: var(--ah-surface);
   text-align: left;
+  padding: 0;
+}
+
+/* holds the name and (later) size/date/tags; the only part of the card with padding */
+.assetslisting-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+  padding: 8.75px 10.5px;
 }
 
 .assetslisting-card-folder {
@@ -61,12 +65,12 @@
 }
 
 .assetslisting-thumb {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  border-radius: var(--ah-radius-s);
   background: var(--ah-surface-muted);
 }
 
@@ -74,6 +78,63 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.assetslisting-thumb:has(.assetslisting-thumb-icon) {
+  flex-direction: column;
+  gap: var(--ah-space-xs);
+  background: var(--ah-bg-muted);
+}
+
+.assetslisting-thumb .assetslisting-thumb-icon {
+  width: 35px;
+  height: 35px;
+  object-fit: contain;
+}
+
+.assetslisting-thumb-ext {
+  color: var(--ah-text-placeholder);
+  font-size: 11px;
+}
+
+.assetslisting-format-badge {
+  position: absolute;
+  top: var(--ah-space-xs);
+  right: var(--ah-space-xs);
+  padding: 1.75px 5.25px;
+  border-radius: 3.5px;
+  background: var(--ah-tag-neutral);
+  color: var(--ah-bg-page);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  line-height: 15px;
+}
+
+.assetslisting-format-badge[data-format="jpg"],
+.assetslisting-format-badge[data-format="png"],
+.assetslisting-format-badge[data-format="gif"],
+.assetslisting-format-badge[data-format="webp"] {
+  background: var(--ah-tag-blue);
+}
+
+.assetslisting-format-badge[data-format="mp4"],
+.assetslisting-format-badge[data-format="mov"] {
+  background: var(--ah-tag-red);
+}
+
+.assetslisting-format-badge[data-format="svg"] {
+  background: var(--ah-tag-purple);
+}
+
+.assetslisting-format-badge[data-format="wav"],
+.assetslisting-format-badge[data-format="mp3"] {
+  background: var(--ah-tag-teal);
+}
+
+.assetslisting-format-badge[data-format="pdf"] {
+  background: var(--ah-tag-amber);
 }
 
 .assetslisting-thumb.is-empty::after,
