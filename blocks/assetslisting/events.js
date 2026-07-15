@@ -6,7 +6,8 @@
  * markup can be re-rendered on navigation without rebinding listeners.
  */
 
-import { navigate } from '../../scripts/router.js';
+import { navigate, getRoute } from '../../scripts/router.js';
+import { DAM_ROOT } from './data.js';
 import { setUiState } from './state.js';
 
 export const ASSETS_LISTING_VIEW = 'assets-listing';
@@ -47,6 +48,16 @@ export default function bindAssetsListing(block, { getUi, setUi }) {
     const crumb = event.target.closest('.assetslisting-breadcrumb-link');
     if (crumb && crumb.dataset.href) {
       navigate({ view: ASSETS_LISTING_VIEW, path: crumb.dataset.href });
+      return;
+    }
+
+    const uploadButton = event.target.closest('[data-action="upload"]');
+    if (uploadButton) {
+      const path = getRoute().path || DAM_ROOT;
+      // Lazy-load the upload mini-flow: it is only needed on demand.
+      import('./upload/upload.js').then(({ default: openUploadModal }) => {
+        openUploadModal(block, path);
+      });
       return;
     }
 
