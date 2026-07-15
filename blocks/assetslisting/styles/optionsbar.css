@@ -1,0 +1,42 @@
+/* =============================================================== options bar === */
+
+.assetslisting-optionsbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-m);
+  margin-bottom: var(--ah-space-xl);
+  padding-bottom: var(--ah-space-l);
+  border-bottom: 1px solid var(--ah-border-color);
+}
+
+.assetslisting-search {
+  flex: 1 1 240px;
+  min-width: 0;
+  max-width: 420px;
+}
+
+.assetslisting-search-input {
+  width: 100%;
+  min-height: var(--ah-control-min-height);
+  padding: 0 var(--ah-space-m);
+  border: 1px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-s);
+  background: var(--ah-surface);
+  color: inherit;
+  font: inherit;
+  transition: var(--ah-transition);
+}
+
+.assetslisting-search-input:focus-visible {
+  border-color: var(--ah-accent);
+  outline: none;
+}
+
+.assetslisting-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ah-space-s);
+}

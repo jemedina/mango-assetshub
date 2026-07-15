@@ -2,7 +2,7 @@ import { getRoute, subscribeRoute } from '../../scripts/router.js';
 // eslint-disable-next-line import/no-cycle
 import { isEditMode } from '../../scripts/scripts.js';
 import { fetchAssetsList, DAM_ROOT } from './data.js';
-import { renderShell, renderContent, createState } from './render.js';
+import { renderShell, renderContent, createState } from './sections/index.js';
 import bindAssetsListing, { applyUiState, ASSETS_LISTING_VIEW } from './events.js';
 import { getUiState } from './state.js';
 

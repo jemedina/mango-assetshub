@@ -1,0 +1,50 @@
+/* ============================================================ layout shell === */
+
+/*
+ * Two columns: the filters panel (a second left nav) and the main workspace.
+ * When filters are closed the panel collapses to zero and main takes the full
+ * width; when open the panel claims a fixed track and the whole viewer shrinks.
+ */
+.assetslisting {
+  /* Card dimensions are fixed per Figma; the grid packs as many fixed-size
+     cards per row as fit rather than stretching them to fill the row. */
+  --ah-card-width: 208.92px;
+  --ah-card-height: 235.78px;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 100%;
+  color: var(--ah-text);
+}
+
+/* Filters open: the panel claims a fixed track and the viewer shrinks. When
+   closed the panel is removed from the grid (display:none) so a single column
+   lets the viewer take the full width. */
+.assetslisting[data-filters-open="true"] {
+  grid-template-columns: var(--ah-filters-width, 260px) minmax(0, 1fr);
+}
+
+.assetslisting-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: var(--ah-space-xl);
+}
+
+/* ============================================================== responsive === */
+
+@media (width < 600px) {
+  .assetslisting-main {
+    padding: var(--ah-space-l);
+  }
+
+  /* On small screens the filters panel overlays the full width instead of
+     splitting the row, so the viewer stays usable. */
+  .assetslisting[data-filters-open="true"] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .assetslisting[data-filters-open="true"] .assetslisting-main {
+    display: none;
+  }
+}

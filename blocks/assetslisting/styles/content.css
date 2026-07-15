@@ -1,0 +1,19 @@
+/* =================================================================== content === */
+
+.assetslisting-content {
+  flex: 1;
+  min-height: 0;
+}
+
+.assetslisting-state {
+  margin: 0;
+  padding: 40px 0;
+  color: var(--ah-text-muted);
+  font-size: var(--body-font-size-s);
+}
+
+.assetslisting-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--ah-card-width));
+  gap: var(--ah-space-xm);
+}

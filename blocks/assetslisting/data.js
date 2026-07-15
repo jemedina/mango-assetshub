@@ -3,7 +3,7 @@
  *
  * The listing fetch itself lives in the shared assets-api client; this module
  * adds the view-specific derivations (folder title, breadcrumb trail) so the
- * render layer stays free of path arithmetic.
+ * section builders stay free of path arithmetic.
  */
 
 import {
