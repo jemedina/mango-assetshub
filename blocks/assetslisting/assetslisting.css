@@ -6,6 +6,11 @@
  * width; when open the panel claims a fixed track and the whole viewer shrinks.
  */
 .assetslisting {
+  /* Card dimensions are fixed per Figma; the grid packs as many fixed-size
+     cards per row as fit rather than stretching them to fill the row. */
+  --ah-card-width: 208.92px;
+  --ah-card-height: 235.78px;
+
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   min-height: 100%;
@@ -290,17 +295,19 @@
 
 .assetslisting-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fill, var(--ah-card-width));
   gap: var( --ah-space-xm);
 }
 
 /* ------------------------------------------------------------------- cards --- */
 
 .assetslisting-card {
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   margin: 0;
+  height: var(--ah-card-height);
   border: 1px solid var(--ah-border-color);
   border-radius: var(--ah-radius-xs);
   background: var(--ah-surface);
@@ -311,6 +318,7 @@
 /* holds the name and (later) size/date/tags; the only part of the card with padding */
 .assetslisting-body {
   display: flex;
+  flex: none;
   flex-direction: column;
   gap: var(--ah-space-2xs);
   padding: 8.75px 10.5px;
@@ -332,9 +340,10 @@
 .assetslisting-thumb {
   position: relative;
   display: flex;
+  flex: 1;
+  min-height: 0;
   align-items: center;
   justify-content: center;
-  aspect-ratio: 4 / 3;
   overflow: hidden;
   background: var(--ah-surface-muted);
 }
@@ -437,10 +446,11 @@
 .assetslisting[data-view-mode="list"] .assetslisting-card {
   flex-direction: row;
   align-items: center;
+  height: auto;
 }
 
 .assetslisting[data-view-mode="list"] .assetslisting-thumb {
-  flex-shrink: 0;
+  flex: none;
   width: 56px;
   aspect-ratio: 1;
 }
