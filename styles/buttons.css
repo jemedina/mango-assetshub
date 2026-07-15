@@ -51,7 +51,7 @@ p.button-wrapper {
 }
 
 /* section-header variant, e.g. the "Colecciones" folders toggle */
-.ah-button-nav--section {
+.ah-button-nav-section {
   justify-content: space-between;
   gap: 0;
   padding: 3.5px 10.5px;
@@ -69,7 +69,7 @@ p.button-wrapper {
   gap: 5.25px;
 }
 
-.ah-button-nav-icon--sm {
+.ah-button-nav-icon-sm {
   width: 10px;
   height: 10px;
 }
@@ -87,7 +87,7 @@ p.button-wrapper {
   height: 100%;
 }
 
-.ah-button-nav--section[aria-expanded="true"] .ah-button-nav-chevron {
+.ah-button-nav-section[aria-expanded="true"] .ah-button-nav-chevron {
   transform: rotate(180deg);
 }
 

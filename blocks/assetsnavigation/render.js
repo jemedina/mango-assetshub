@@ -112,7 +112,7 @@ export function buildFolderNodes(levels, expanded, path) {
 function createFoldersToggle() {
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = 'ah-button-nav ah-button-nav--section assetsnavigation-folders-toggle';
+  button.className = 'ah-button-nav ah-button-nav-section assetsnavigation-folders-toggle';
   button.id = 'assetsnavigation-folders-toggle';
   button.setAttribute('aria-expanded', 'false');
   button.setAttribute('aria-controls', 'assetsnavigation-folder-tree');
@@ -121,7 +121,7 @@ function createFoldersToggle() {
   group.className = 'ah-button-nav-group';
 
   const icon = document.createElement('span');
-  icon.className = 'ah-button-nav-icon ah-button-nav-icon--sm';
+  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
   icon.setAttribute('aria-hidden', 'true');
   icon.innerHTML = ICON_COLLECTIONS;
 
