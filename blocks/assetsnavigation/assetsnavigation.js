@@ -22,7 +22,13 @@ async function loadUser(block) {
 
   try {
     const status = await fetchAuthStatus();
-    renderUser(footer, status.userId);
+
+    let userName = status.userId;
+    if (status.profile.givenName) {
+      userName = `${status.profile.givenName} ${(status.profile.familyName || '')}`;
+    }
+
+    renderUser(footer, userName);
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);

@@ -1,4 +1,4 @@
-import { primaryNavItems, AUTH_STATUS_PATH } from './data.js';
+import { primaryNavItems, startLogin } from './data.js';
 import { ICON_COLLECTIONS, ICON_CHEVRON } from './icons.js';
 
 function createButton(className, text, attributes = {}) {
@@ -194,7 +194,7 @@ export function renderUser(footer, userId) {
 export function renderUserLogin(footer) {
   const button = createButton('assetsnavigation-login', 'Login');
   button.addEventListener('click', () => {
-    window.location.assign(AUTH_STATUS_PATH);
+    startLogin();
   });
   footer.replaceChildren(button);
 }
