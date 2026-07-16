@@ -49,11 +49,11 @@ export default function createOptionsBar(ui) {
   const toolbar = document.createElement('div');
   toolbar.className = 'assetslisting-toolbar';
 
-  const sort = createButton('assetslisting-button assetslisting-button-ghost', 'Fecha de modificación', {
+  const sort = createButton('btn btn-secondary', 'Fecha de modificación', {
     'data-action': 'sort',
   });
 
-  const filters = createButton('assetslisting-button assetslisting-button-ghost assetslisting-filters-toggle', 'Filtros', {
+  const filters = createButton('btn btn-secondary assetslisting-filters-toggle', 'Filtros', {
     'data-action': 'toggle-filters',
     'aria-expanded': String(ui.filtersOpen),
     'aria-controls': 'assetslisting-filters-panel',

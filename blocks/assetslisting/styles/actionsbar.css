@@ -21,7 +21,7 @@
 .assetslisting-title {
   margin: 0;
   font-size: var(--heading-font-size-s);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   line-height: 1.2;
 }
 
@@ -41,7 +41,7 @@
   align-items: center;
   gap: var(--ah-space-2xs);
   color: var(--ah-text-muted);
-  font-size: 13px;
+  font-size: var(--ah-font-s);
 }
 
 .assetslisting-breadcrumb-item:not(:first-child)::before {
@@ -68,7 +68,7 @@
 
 .assetslisting-breadcrumb-current {
   color: var(--ah-text);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 /* primary actions */

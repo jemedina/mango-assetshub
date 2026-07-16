@@ -59,10 +59,10 @@ export default function createActionsBar(path) {
   const actions = document.createElement('div');
   actions.className = 'assetslisting-actions';
   actions.append(
-    createButton('assetslisting-button assetslisting-button-primary', 'Subir assets', {
+    createButton('btn btn-primary', 'Subir assets', {
       'data-action': 'upload',
     }),
-    createButton('assetslisting-button assetslisting-button-secondary', 'Seleccionar', {
+    createButton('btn btn-secondary', 'Seleccionar', {
       'data-action': 'select',
     }),
   );

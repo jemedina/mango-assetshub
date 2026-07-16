@@ -7,9 +7,15 @@
   --link-color: #3b63fb;
   --link-hover-color: #1d3ecf;
 
-  /* fonts */
-  --body-font-family: roboto, roboto-fallback, sans-serif;
-  --heading-font-family: roboto-condensed, roboto-condensed-fallback, sans-serif;
+  /* fonts — Inter is the single global typeface for body and headings */
+  --body-font-family: inter, inter-fallback, system-ui, -apple-system, sans-serif;
+  --heading-font-family: var(--body-font-family);
+
+  /* font weights (compose, don't hardcode) */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
 
   /* body sizes */
   --body-font-size-m: 22px;
@@ -76,6 +82,14 @@
   --ah-tag-purple: rgb(167 139 250 / 80%);
   --ah-tag-teal: rgb(82 196 160 / 80%);
   --ah-tag-neutral: rgb(17 17 17 / 80%);
+
+  /* assets hub UI type scale (drive text from tokens, not magic numbers) */
+  --ah-font-2xs: 10px;
+  --ah-font-xs: 12px;
+  --ah-font-s: 13px;
+  --ah-font-m: 14px;
+  --ah-font-l: 16px;
+  --ah-font-xl: 18px;
 
   /* assets hub spacing scale */
   --ah-space-2xs: 2px;

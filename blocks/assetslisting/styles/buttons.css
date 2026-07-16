@@ -1,77 +1,27 @@
-/* =================================================================== buttons === */
-
-.assetslisting-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-  border: 1px solid transparent;
-  border-radius: var(--ah-radius-s);
-  cursor: pointer;
-  font-family: Inter, var(--body-font-family);
-  font-size: 12px;
-  font-weight: 500;
-  line-height: 18px;
-  letter-spacing: 0;
-  text-align: center;
-  white-space: nowrap;
-  transition: var(--ah-transition);
-}
+/* =================================================================== buttons ===
+ * Appearance comes from the global .btn system (styles/buttons.css). This file
+ * only sizes and places buttons inside the listing's bars.
+ */
 
 /* Actions bar buttons: 32px tall. */
-.assetslisting-actionsbar .assetslisting-button {
+.assetslisting-actionsbar .btn {
   height: 32px;
   padding: 7px 10.5px;
 }
 
 /* Options bar buttons: 34px tall. */
-.assetslisting-optionsbar .assetslisting-button {
+.assetslisting-optionsbar .btn {
   height: 34px;
   padding: 9.5px 10.5px;
 }
 
-.assetslisting-button-primary {
-  background: var(--ah-text-strong);
-  color: var(--ah-on-accent);
-}
-
-.assetslisting-button-primary:hover,
-.assetslisting-button-primary:focus-visible {
-  background: var(--ah-accent-hover);
-  outline: none;
-}
-
-.assetslisting-button-secondary,
-.assetslisting-button-ghost {
-  background: var(--ah-surface);
-  border-color: var(--ah-border-color);
-  color: var(--ah-text);
-}
-
-.assetslisting-button-secondary:hover,
-.assetslisting-button-secondary:focus-visible,
-.assetslisting-button-ghost:hover,
-.assetslisting-button-ghost:focus-visible {
-  border-color: var(--ah-accent);
-  outline: none;
-}
-
-.assetslisting-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-/* The button's explicit display would otherwise defeat the [hidden] attribute. */
-.assetslisting-button[hidden] {
-  display: none;
-}
-
+/* filters toggle: pressed state */
 .assetslisting-filters-toggle[aria-expanded="true"] {
   background: var(--ah-surface-muted);
   border-color: var(--ah-accent);
 }
 
-/* view toggle */
+/* view toggle — specialised segmented control, not a standard button */
 .assetslisting-viewtoggle {
   display: inline-flex;
   overflow: hidden;
@@ -91,7 +41,7 @@
   background: var(--ah-surface);
   color: var(--ah-text-muted);
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--ah-font-l);
   line-height: 1;
   transition: var(--ah-transition);
 }

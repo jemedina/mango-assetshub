@@ -19,15 +19,15 @@
 .assetsnavigation-app {
   margin: 0;
   font-family: var(--heading-font-family);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--ah-font-xl);
+  font-weight: var(--font-weight-bold);
   line-height: 100%;
 }
 
 .assetsnavigation-product {
   color: var(--ah-text-placeholder);
-  font-size: 10px;
-  font-weight: 400;
+  font-size: var(--ah-font-2xs);
+  font-weight: var(--font-weight-regular);
   line-height: 15px;
   margin: 0;
 }
@@ -72,7 +72,7 @@
   text-align: left;
   white-space: nowrap;
   transition: var(--ah-transition);
-  font-size: 13px;
+  font-size: var(--ah-font-s);
 }
 
 .assetsnavigation-item:hover,
@@ -131,7 +131,7 @@
 .assetsnavigation-folder-state {
   padding: var(--ah-space-s) var(--ah-space-m);
   color: var(--ah-text-muted);
-  font-size: 14px;
+  font-size: var(--ah-font-m);
 }
 
 /* user */
@@ -146,40 +146,24 @@
 
 .assetsnavigation-user-name {
   margin: 0;
-  font-size: 16px;
-  font-weight: 700;
+  font-size: var(--ah-font-l);
+  font-weight: var(--font-weight-bold);
   line-height: 1.3;
 }
 
 .assetsnavigation-user-profile {
   margin: var(--ah-space-xs) 0 0;
   color: var(--ah-text-muted);
-  font-size: 14px;
+  font-size: var(--ah-font-m);
   line-height: 1.3;
 }
 
-/* solid accent button (login) */
+/* login CTA — appearance from .btn.btn--primary, only layout here */
 .assetsnavigation-login {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   min-height: var(--ah-control-min-height);
   padding: 9px var(--ah-space-l);
-  border: 0;
-  border-radius: var(--ah-radius-s);
-  background: var(--ah-accent);
-  color: var(--ah-on-accent);
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1.3;
-  transition: var(--ah-transition);
-}
-
-.assetsnavigation-login:hover,
-.assetsnavigation-login:focus-visible {
-  background: var(--ah-accent-hover);
-  outline: none;
+  font-size: var(--ah-font-m);
+  font-weight: var(--font-weight-bold);
 }
 
 @media (width >= 900px) {

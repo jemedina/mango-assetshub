@@ -192,7 +192,7 @@ export function renderUser(footer, userId) {
 }
 
 export function renderUserLogin(footer) {
-  const button = createButton('assetsnavigation-login', 'Login');
+  const button = createButton('btn btn-primary assetsnavigation-login', 'Login');
   button.addEventListener('click', () => {
     startLogin();
   });

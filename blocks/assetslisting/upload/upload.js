@@ -62,8 +62,8 @@ export default function openUploadModal(block, path) {
 
   const body = el('div', 'assetslisting-upload-body');
   const footer = el('div', 'assetslisting-upload-footer');
-  const cancelBtn = button('assetslisting-button assetslisting-button-secondary', 'Cancelar');
-  const submitBtn = button('assetslisting-button assetslisting-button-primary', 'Subir', { disabled: '' });
+  const cancelBtn = button('btn btn-secondary', 'Cancelar');
+  const submitBtn = button('btn btn-primary', 'Subir', { disabled: '' });
   footer.append(cancelBtn, submitBtn);
 
   dialog.append(header, body, footer);
@@ -141,8 +141,8 @@ export default function openUploadModal(block, path) {
     folderInput.multiple = true;
     folderInput.hidden = true;
     folderInput.webkitdirectory = true;
-    const pickFiles = button('assetslisting-button assetslisting-button-ghost', 'Seleccionar archivos');
-    const pickFolder = button('assetslisting-button assetslisting-button-ghost', 'Seleccionar carpeta');
+    const pickFiles = button('btn btn-secondary', 'Seleccionar archivos');
+    const pickFolder = button('btn btn-secondary', 'Seleccionar carpeta');
     pickers.append(pickFiles, pickFolder, fileInput, folderInput);
 
     const list = el('ul', 'assetslisting-upload-list');

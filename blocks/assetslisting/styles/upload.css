@@ -27,8 +27,8 @@
 
 .assetslisting-upload-title {
   margin: 0;
-  font-size: 18px;
-  font-weight: 700;
+  font-size: var(--ah-font-xl);
+  font-weight: var(--font-weight-bold);
   line-height: 1.3;
 }
 
@@ -44,7 +44,7 @@
   background: transparent;
   color: var(--ah-text-muted);
   cursor: pointer;
-  font-size: 16px;
+  font-size: var(--ah-font-l);
   line-height: 1;
   transition: var(--ah-transition);
 }
@@ -82,13 +82,13 @@
 .assetslisting-upload-dropzone-text {
   margin: 0;
   font-size: 15px;
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
 }
 
 .assetslisting-upload-dropzone-hint {
   margin: 0;
   color: var(--ah-text-muted);
-  font-size: 13px;
+  font-size: var(--ah-font-s);
 }
 
 .assetslisting-upload-pickers {
@@ -122,7 +122,7 @@
 .assetslisting-upload-item-name {
   flex: 1;
   overflow: hidden;
-  font-size: 13px;
+  font-size: var(--ah-font-s);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -137,7 +137,7 @@
   background: transparent;
   color: var(--ah-text-muted);
   cursor: pointer;
-  font-size: 13px;
+  font-size: var(--ah-font-s);
   line-height: 1;
   transition: var(--ah-transition);
 }
@@ -152,7 +152,7 @@
 .assetslisting-upload-status {
   margin: var(--ah-space-l) 0 0;
   color: var(--ah-text-muted);
-  font-size: 13px;
+  font-size: var(--ah-font-s);
 }
 
 .assetslisting-upload-status.is-error {

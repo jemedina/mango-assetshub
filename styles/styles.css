@@ -15,17 +15,16 @@
 @import url('variables.css');
 @import url('buttons.css');
 
-/* fallback fonts (critical: keeps text visible with correct metrics while fonts.css loads lazily) */
+/* Fallback font: keeps text visible with Inter-matched metrics (Arial as the
+   local stand-in) while the lazily-loaded fonts.css swaps in Inter, avoiding
+   layout shift. */
 @font-face {
-  font-family: roboto-condensed-fallback;
-  size-adjust: 88.82%;
+  font-family: inter-fallback;
   src: local('Arial');
-}
-
-@font-face {
-  font-family: roboto-fallback;
-  size-adjust: 99.529%;
-  src: local('Arial');
+  ascent-override: 90%;
+  descent-override: 22.43%;
+  line-gap-override: 0%;
+  size-adjust: 107.4%;
 }
 
 body {
@@ -119,7 +118,7 @@ h6 {
   margin-top: 0.8em;
   margin-bottom: 0.25em;
   font-family: var(--heading-font-family);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   line-height: 1.25;
   scroll-margin: 40px;
 }
@@ -130,6 +129,21 @@ h3 { font-size: var(--heading-font-size-l); }
 h4 { font-size: var(--heading-font-size-m); }
 h5 { font-size: var(--heading-font-size-s); }
 h6 { font-size: var(--heading-font-size-xs); }
+
+/* text utilities — compose type from classes instead of bespoke variants:
+   size (.text-s …), weight (.text-medium …) and tone (.text-muted …). */
+.text-2xs { font-size: var(--ah-font-2xs); }
+.text-xs { font-size: var(--ah-font-xs); }
+.text-s { font-size: var(--ah-font-s); }
+.text-m { font-size: var(--ah-font-m); }
+.text-l { font-size: var(--ah-font-l); }
+.text-xl { font-size: var(--ah-font-xl); }
+.text-regular { font-weight: var(--font-weight-regular); }
+.text-medium { font-weight: var(--font-weight-medium); }
+.text-semibold { font-weight: var(--font-weight-semibold); }
+.text-bold { font-weight: var(--font-weight-bold); }
+.text-muted { color: var(--ah-text-muted); }
+.text-subtle { color: var(--ah-text-subtle); }
 
 p,
 dl,

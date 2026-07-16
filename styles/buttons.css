@@ -1,12 +1,91 @@
-/* buttons */
+/*
+ * ============================================================ buttons ===
+ *
+ * Two button vocabularies live here, both built from the same design tokens:
+ *
+ *   .btn        The reusable app button. Compose a variant onto the base and
+ *               nothing else — blocks add only layout (size, padding, place-
+ *               ment). This is what you reach for 99% of the time:
+ *                 <button class="btn btn-primary">…    dark surface
+ *                 <button class="btn btn-secondary">…  light surface
+ *               Disabled styling is automatic for :disabled / [aria-disabled];
+ *               add .btn-disabled to force it on non-button elements.
+ *
+ *   .button     The EDS authored-content CTA (pill). Emitted by scripts.js when
+ *               an author formats a link, so its markup contract is fixed. Same
+ *               primary/secondary/accent semantics, marketing-pill shape.
+ */
+
+/* ------------------------------------------------------ app button (.btn) --- */
+.btn {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--ah-space-xs);
+  border: 1px solid transparent;
+  border-radius: var(--ah-radius-s);
+  padding: var(--ah-space-s) var(--ah-space-m);
+  font: inherit;
+  font-size: var(--ah-font-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.5;
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: var(--ah-transition);
+}
+
+.btn:focus-visible {
+  outline: none;
+}
+
+/* the explicit inline-flex would otherwise defeat the [hidden] attribute */
+.btn[hidden] {
+  display: none;
+}
+
+/* primary — dark surface, light label */
+.btn-primary {
+  background: var(--ah-text-strong);
+  border-color: var(--ah-text-strong);
+  color: var(--ah-on-accent);
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  background: var(--ah-accent-hover);
+  border-color: var(--ah-accent-hover);
+}
+
+/* secondary — light surface, subtle border */
+.btn-secondary {
+  background: var(--ah-surface);
+  border-color: var(--ah-border-color);
+  color: var(--ah-text);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible {
+  border-color: var(--ah-accent);
+}
+
+/* disabled — grey fill and border, non-interactive */
+.btn:disabled,
+.btn[aria-disabled="true"],
+.btn-disabled {
+  background: var(--ah-surface-muted);
+  border-color: var(--ah-border-color);
+  color: var(--ah-text-muted);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ---------------------------------------------- authored CTA pill (.button) --- */
 p.button-wrapper {
   margin: 12px 0;
 }
-
-/*
- * Assets hub dashboard controls (Figma: Mango DAM AEM Sites). Distinct from
- * the pill CTA buttons above, which are for authored content links.
- */
 
 /* full-width icon + label row, e.g. assetsnavigation primary nav items */
 .ah-button-nav {
@@ -19,8 +98,8 @@ p.button-wrapper {
   background: transparent;
   color: var(--ah-text-secondary);
   cursor: pointer;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ah-font-s);
+  font-weight: var(--font-weight-medium);
   line-height: 19.5px;
   padding: 7px 10.5px;
   text-align: left;
@@ -56,8 +135,8 @@ p.button-wrapper {
   gap: 0;
   padding: 3.5px 10.5px;
   color: var(--ah-text-placeholder);
-  font-size: 10px;
-  font-weight: 700;
+  font-size: var(--ah-font-2xs);
+  font-weight: var(--font-weight-bold);
   letter-spacing: 0.1em;
   line-height: 15px;
   text-transform: uppercase;
