@@ -12,6 +12,7 @@
 export const DAM_ROOT = '/content/dam';
 
 const LIST_ENDPOINT = '/bin/assetshub/assets/list';
+const DETAIL_ENDPOINT = '/bin/assetshub/assets/detail';
 
 /**
  * Fetches the folders and assets directly under a DAM path.
@@ -45,6 +46,22 @@ export async function fetchAssetsReveal(paths) {
 }
 
 /**
+ * Fetches the full detail projection of a single asset (metadata, dimensions,
+ * audit fields, keywords and renditions) for the detail panel.
+ * @param {string} path JCR path of a dam:Asset under /content/dam
+ * @returns {Promise<Object>}
+ */
+export async function fetchAssetDetail(path) {
+  const url = new URL(DETAIL_ENDPOINT, window.location);
+  url.searchParams.set('path', path);
+  const response = await fetch(`${url.pathname}${url.search}`);
+  if (!response.ok) {
+    throw new Error(`Unable to load asset detail: ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
  * Display label for a folder or asset entry: its authored title when present,
  * falling back to its node name.
  * @param {{ title?: string, name: string }} item
@@ -52,6 +69,57 @@ export async function fetchAssetsReveal(paths) {
  */
 export function displayLabel(item) {
   return item.title || item.name;
+}
+
+const BYTES_PER_MB = 1024 * 1024;
+
+/**
+ * Formats a byte count as megabytes with one decimal (per the card/detail spec),
+ * e.g. 524288 -> "0.5 MB". Returns '' for a missing/invalid size.
+ * @param {number} [bytes]
+ * @returns {string}
+ */
+export function formatSizeMb(bytes) {
+  if (typeof bytes !== 'number' || !Number.isFinite(bytes)) return '';
+  return `${(bytes / BYTES_PER_MB).toFixed(1)} MB`;
+}
+
+const DATE_FORMAT = new Intl.DateTimeFormat('es', { day: 'numeric', month: 'short', year: 'numeric' });
+
+/**
+ * Formats an ISO-8601 timestamp as a short Spanish date, e.g. "16 jul 2026".
+ * Returns '' for a missing/unparseable value.
+ * @param {string} [iso]
+ * @returns {string}
+ */
+export function formatDate(iso) {
+  if (!iso) return '';
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? '' : DATE_FORMAT.format(date);
+}
+
+// Raster formats we render as an inline preview; every other format falls back
+// to a file-type icon plus its extension.
+const PREVIEWABLE_FORMATS = new Set(['jpg', 'png', 'gif', 'webp']);
+
+/**
+ * Whether an asset's format renders as an inline image preview.
+ * @param {string} [format] short format label (see formatLabel)
+ * @returns {boolean}
+ */
+export function isPreviewable(format) {
+  return PREVIEWABLE_FORMATS.has(format);
+}
+
+/**
+ * URL of the file-type icon for a format. Icons follow the `file-<format>.svg`
+ * convention under /icons; a format without a dedicated icon falls back to a
+ * generic file glyph via the caller's error handling.
+ * @param {string} format short format label (see formatLabel)
+ * @returns {string}
+ */
+export function assetIconUrl(format) {
+  return `${window.hlx.codeBasePath}/icons/file-${format}.svg`;
 }
 
 const FORMAT_LABELS = {

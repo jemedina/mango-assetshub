@@ -35,13 +35,22 @@ export function applyUiState(block, ui) {
  * Binds the delegated click handler once. `getUi`/`setUi` let the handler read
  * and update the live UI state owned by the block controller.
  * @param {Element} block
- * @param {{ getUi: () => object, setUi: (ui: object) => void }} controller
+ * @param {{
+ *   getUi: () => object, setUi: (ui: object) => void,
+ *   openAsset: (path: string) => void
+ * }} controller
  */
-export default function bindAssetsListing(block, { getUi, setUi }) {
+export default function bindAssetsListing(block, { getUi, setUi, openAsset }) {
   block.addEventListener('click', (event) => {
     const folderCard = event.target.closest('.assetslisting-card-folder');
     if (folderCard && folderCard.dataset.href) {
       navigate({ view: ASSETS_LISTING_VIEW, path: folderCard.dataset.href });
+      return;
+    }
+
+    const assetCard = event.target.closest('.assetslisting-card-asset');
+    if (assetCard && assetCard.dataset.assetPath) {
+      openAsset(assetCard.dataset.assetPath);
       return;
     }
 
@@ -55,7 +64,7 @@ export default function bindAssetsListing(block, { getUi, setUi }) {
     if (uploadButton) {
       const path = getRoute().path || DAM_ROOT;
       // Lazy-load the upload mini-flow: it is only needed on demand.
-      import('./upload/upload.js').then(({ default: openUploadModal }) => {
+      import('./sections/upload/upload.js').then(({ default: openUploadModal }) => {
         openUploadModal(block, path);
       });
       return;
@@ -74,6 +83,16 @@ export default function bindAssetsListing(block, { getUi, setUi }) {
       const ui = setUiState({ viewMode: viewButton.dataset.viewMode });
       setUi(ui);
       applyUiState(block, ui);
+    }
+  });
+
+  // Keyboard activation for the focusable asset cards (role="button").
+  block.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    const assetCard = event.target.closest('.assetslisting-card-asset');
+    if (assetCard && assetCard.dataset.assetPath) {
+      event.preventDefault();
+      openAsset(assetCard.dataset.assetPath);
     }
   });
 }

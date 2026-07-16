@@ -8,8 +8,8 @@
  *      refresh the listing so new assets appear.
  */
 
-import { navigate } from '../../../scripts/router.js';
-import { folderTitle } from '../data.js';
+import { navigate } from '../../../../scripts/router.js';
+import { folderTitle } from '../../data.js';
 import {
   MAX_FILES,
   checkCreatePermission,

@@ -10,6 +10,7 @@
      cards per row as fit rather than stretching them to fill the row. */
   --ah-card-width: 208.92px;
   --ah-card-height: 235.78px;
+  --ah-detail-width: 340px;
 
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -58,6 +59,27 @@
    than being overlaid by it): both the top bars and the filters stay usable. */
 .assetslisting[data-filters-open="true"] .assetslisting-topbar {
   left: calc(var(--leftnav-width) + var(--ah-filters-width, 260px));
+}
+
+/*
+ * Workspace: the card grid on the left and the detail panel (when open) docked
+ * on the right. The panel takes a fixed track and the grid takes the rest,
+ * packing fewer fixed-size columns, so the panel never overlays the listing.
+ */
+.assetslisting-workspace {
+  display: flex;
+  align-items: flex-start;
+  min-height: 0;
+}
+
+.assetslisting-content {
+  min-width: 0;
+}
+
+/* The detail panel is fixed to the viewport (out of flow), so when open the grid
+   reserves its width plus a gap on the right to keep cards clear of it. */
+.assetslisting[data-detail-open="true"] .assetslisting-content {
+  padding-right: calc(var(--ah-detail-width) + var(--ah-space-xl));
 }
 
 /* ============================================================== responsive === */

@@ -1,17 +1,13 @@
 /*
  * Card builders for the content grid: folder cards (navigate on click) and
- * asset cards (thumbnail + format badge + metadata).
+ * asset cards (preview + format badge + a three-row info section).
  */
 
-import { displayLabel, formatLabel } from '../data.js';
-
-// Formats with no raster preview: show the format's file icon + extension
-// instead of attempting an <img> render.
-const ICON_ONLY_FORMATS = new Map([
-  ['pdf', 'file-pdf.svg'],
-  ['svg', 'file-svg.svg'],
-  ['wav', 'file-wav.svg'],
-]);
+import {
+  displayLabel, formatSizeMb, formatDate,
+} from '../data.js';
+import createPreview from '../shared/preview.js';
+import createKeywords from '../shared/keywords.js';
 
 /**
  * Builds a folder card. The click target is the whole button; navigation is
@@ -41,65 +37,55 @@ export function createFolderCard(folder) {
   return card;
 }
 
+function fact(className, text) {
+  const span = document.createElement('span');
+  span.className = className;
+  span.textContent = text;
+  return span;
+}
+
 /**
- * Builds an asset card.
- * @param {{ path?: string, format?: string }} asset
+ * The card's three-row info section: title, then size (left) and date (right),
+ * then keyword chips.
+ */
+function createInfo(asset) {
+  const body = document.createElement('figcaption');
+  body.className = 'assetslisting-body';
+
+  const name = document.createElement('span');
+  name.className = 'assetslisting-name';
+  name.textContent = displayLabel(asset);
+
+  const facts = document.createElement('span');
+  facts.className = 'assetslisting-facts';
+  facts.append(
+    fact('assetslisting-size', formatSizeMb(asset.size)),
+    fact('assetslisting-date', formatDate(asset.uploaded)),
+  );
+
+  body.append(name, facts);
+
+  const keywords = createKeywords(asset.tags, asset.smartTags);
+  if (keywords) body.append(keywords);
+
+  return body;
+}
+
+/**
+ * Builds an asset card: a preview region (image or file icon) with a format
+ * badge, above an info region (name, size + date, keywords). Clicking selects
+ * the asset; selection is wired by the delegated handler in events.js off
+ * `data-asset-path`.
+ * @param {Object} asset asset summary from the listing endpoint
  * @returns {HTMLElement}
  */
 export function createAssetCard(asset) {
   const card = document.createElement('figure');
   card.className = 'assetslisting-card assetslisting-card-asset';
-  const label = displayLabel(asset);
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
+  if (asset.path) card.dataset.assetPath = asset.path;
 
-  const format = formatLabel(asset.format);
-
-  const thumb = document.createElement('span');
-  thumb.className = 'assetslisting-thumb';
-  if (format && ICON_ONLY_FORMATS.has(format)) {
-    const icon = document.createElement('img');
-    icon.className = 'assetslisting-thumb-icon';
-    icon.src = `${window.hlx.codeBasePath}/icons/${ICON_ONLY_FORMATS.get(format)}`;
-    icon.alt = '';
-    icon.loading = 'lazy';
-    const ext = document.createElement('span');
-    ext.className = 'assetslisting-thumb-ext';
-    ext.textContent = `.${format}`;
-    thumb.append(icon, ext);
-  } else if (asset.path) {
-    const img = document.createElement('img');
-    img.loading = 'lazy';
-    img.alt = label;
-    img.src = asset.path;
-    img.addEventListener('error', () => thumb.classList.add('is-empty'));
-    thumb.append(img);
-  } else {
-    thumb.classList.add('is-empty');
-  }
-
-  if (format) {
-    const badge = document.createElement('span');
-    badge.className = 'assetslisting-format-badge';
-    badge.dataset.format = format;
-    badge.textContent = format;
-    thumb.append(badge);
-  }
-
-  const body = document.createElement('span');
-  body.className = 'assetslisting-body';
-
-  const name = document.createElement('figcaption');
-  name.className = 'assetslisting-name';
-  name.textContent = label;
-  body.append(name);
-
-  if (asset.format) {
-    const meta = document.createElement('span');
-    meta.className = 'assetslisting-meta';
-    meta.textContent = asset.format;
-    body.append(meta);
-  }
-
-  card.append(thumb, body);
-
+  card.append(createPreview(asset, { badge: true }), createInfo(asset));
   return card;
 }

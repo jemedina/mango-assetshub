@@ -8,13 +8,26 @@
 
 import {
   fetchAssetsList,
+  fetchAssetDetail,
   displayLabel,
   formatLabel,
+  formatSizeMb,
+  formatDate,
+  isPreviewable,
+  assetIconUrl,
   DAM_ROOT,
 } from '../../scripts/assets-api.js';
 
 export {
-  fetchAssetsList, displayLabel, formatLabel, DAM_ROOT,
+  fetchAssetsList,
+  fetchAssetDetail,
+  displayLabel,
+  formatLabel,
+  formatSizeMb,
+  formatDate,
+  isPreviewable,
+  assetIconUrl,
+  DAM_ROOT,
 };
 
 const ROOT_LABEL = 'Todos los assets';

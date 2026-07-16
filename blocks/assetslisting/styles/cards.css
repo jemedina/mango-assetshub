@@ -14,13 +14,34 @@
   padding: 0;
 }
 
-/* holds the name and (later) size/date/tags; the only part of the card with padding */
+.assetslisting-card-asset {
+  cursor: pointer;
+  transition: var(--ah-transition), box-shadow 0.15s ease;
+}
+
+.assetslisting-card-asset:hover,
+.assetslisting-card-asset:focus-visible {
+  border-color: var(--ah-accent);
+  outline: none;
+}
+
+.assetslisting-card-asset[data-selected="true"] {
+  border-color: var(--ah-accent);
+  box-shadow: 0 0 0 1px var(--ah-accent);
+}
+
+/* Info section: a fixed 80px band holding the name, size/date facts and keywords. */
 .assetslisting-body {
+  box-sizing: border-box;
   display: flex;
   flex: none;
   flex-direction: column;
   gap: var(--ah-space-2xs);
-  padding: 8.75px 10.5px;
+  padding: var(--ah-space-s) var(--ah-space-xm);
+}
+
+.assetslisting-card-asset .assetslisting-body {
+  height: 80px;
 }
 
 .assetslisting-card-folder {
@@ -35,6 +56,8 @@
   border-color: var(--ah-accent);
   outline: none;
 }
+
+/* ================================================================== preview === */
 
 .assetslisting-thumb {
   position: relative;
@@ -53,13 +76,14 @@
   object-fit: cover;
 }
 
-.assetslisting-thumb:has(.assetslisting-thumb-icon) {
+/* file-type preview: icon stacked over the extension label */
+.assetslisting-thumb-file {
   flex-direction: column;
   gap: var(--ah-space-xs);
   background: var(--ah-bg-muted);
 }
 
-.assetslisting-thumb .assetslisting-thumb-icon {
+.assetslisting-thumb-file img {
   width: 35px;
   height: 35px;
   object-fit: contain;
@@ -67,7 +91,15 @@
 
 .assetslisting-thumb-ext {
   color: var(--ah-text-placeholder);
-  font-size: 11px;
+  font-size: var(--ah-font-xs);
+  text-transform: lowercase;
+}
+
+/* generic fallback glyph when a format has no dedicated icon yet */
+.assetslisting-thumb-file.is-generic::before {
+  font-size: 32px;
+  line-height: 1;
+  content: "📄";
 }
 
 .assetslisting-format-badge {
@@ -121,6 +153,8 @@
   content: "📁";
 }
 
+/* ===================================================================== info === */
+
 .assetslisting-name {
   overflow: hidden;
   font-size: var(--ah-font-m);
@@ -130,10 +164,64 @@
   white-space: nowrap;
 }
 
-.assetslisting-meta {
+/* size (left) and date (right) on one row */
+.assetslisting-facts {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--ah-space-s);
   color: var(--ah-text-muted);
   font-size: var(--ah-font-xs);
   line-height: 1.2;
+}
+
+.assetslisting-facts .assetslisting-date {
+  flex: none;
+  color: var(--ah-text-subtle);
+}
+
+/* keyword chips */
+.assetslisting-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ah-space-2xs);
+  margin: var(--ah-space-2xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* in a card the chips are a single clipped row pinned to the bottom of the band */
+.assetslisting-card-asset .assetslisting-keywords {
+  flex-wrap: nowrap;
+  overflow: hidden;
+  margin-top: auto;
+  height: 18px;
+}
+
+.assetslisting-keyword {
+  flex: none;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 1px var(--ah-space-xs);
+  border-radius: var(--ah-radius-2xs);
+  background: var(--ah-bg-muted);
+  color: var(--ah-text-secondary);
+  font-size: var(--ah-font-2xs);
+  line-height: 15px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assetslisting-keyword-smart {
+  background: var(--ah-tag-blue);
+  color: var(--ah-bg-page);
+}
+
+.assetslisting-keywords-empty {
+  color: var(--ah-text-placeholder);
+  font-size: var(--ah-font-2xs);
+  line-height: 15px;
+  list-style: none;
 }
 
 /* list view: one asset per row, thumbnail beside label */
@@ -154,6 +242,13 @@
   aspect-ratio: 1;
 }
 
-.assetslisting[data-view-mode="list"] .assetslisting-name {
+.assetslisting[data-view-mode="list"] .assetslisting-card-asset .assetslisting-body {
   flex: 1;
+  height: auto;
+}
+
+.assetslisting[data-view-mode="list"] .assetslisting-keywords {
+  flex-wrap: wrap;
+  overflow: visible;
+  height: auto;
 }

@@ -12,7 +12,7 @@ import createFiltersPanel from './filters.js';
  * Builds the full listing shell.
  * @param {string} path Current DAM path
  * @param {{ filtersOpen: boolean, viewMode: string }} ui
- * @returns {{ fragment: DocumentFragment, content: Element }}
+ * @returns {{ fragment: DocumentFragment, content: Element, workspace: Element }}
  */
 export default function renderShell(path, ui) {
   const fragment = document.createDocumentFragment();
@@ -25,14 +25,21 @@ export default function renderShell(path, ui) {
   const content = document.createElement('div');
   content.className = 'assetslisting-content';
 
+  // The workspace lays out the (optional) detail panel beside the card grid: the
+  // detail panel claims a fixed track on the left and the grid takes the rest,
+  // so the panel uses the listing's own space instead of overlaying it.
+  const workspace = document.createElement('div');
+  workspace.className = 'assetslisting-workspace';
+  workspace.append(content);
+
   // The actions bar and options bar are pinned together as one fixed section at
   // the top of the workspace; the content region scrolls beneath them.
   const topbar = document.createElement('div');
   topbar.className = 'assetslisting-topbar';
   topbar.append(createActionsBar(path), createOptionsBar(ui));
 
-  main.append(topbar, content);
+  main.append(topbar, workspace);
   fragment.append(panel, main);
 
-  return { fragment, content };
+  return { fragment, content, workspace };
 }

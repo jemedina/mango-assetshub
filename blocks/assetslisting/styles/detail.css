@@ -1,0 +1,272 @@
+/* ============================================================ detail panel === */
+
+/*
+ * The detail panel docks on the right as a borderless, fixed column pinned to
+ * the viewport just below the fixed topbar (like the leftnav). Being fixed, it
+ * stays perfectly static while the card grid scrolls beneath it — full
+ * available height, never drifting. Its body scrolls internally while the
+ * header, preview, tabs and footer stay put.
+ */
+.assetslisting-detail {
+  --ah-detail-header-height: 46.5px;
+  --ah-detail-image-height: 200px;
+
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: var(--ah-detail-width);
+  position: fixed;
+  inset: var(--ah-topbar-height) 0 0 auto;
+  z-index: 9;
+  overflow: hidden;
+  background: var(--ah-surface);
+
+  /* Borderless: a soft shadow on the left edge separates it from the grid. */
+  box-shadow: -1px 0 0 var(--ah-border-subtle), -8px 0 16px rgb(0 0 0 / 3%);
+}
+
+.assetslisting-detail[hidden] {
+  display: none;
+}
+
+/* header — "Detalles" and the edit / close controls */
+.assetslisting-detail-header {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  box-sizing: border-box;
+  height: var(--ah-detail-header-height);
+  padding: 0 var(--ah-space-m);
+  border-bottom: 1px solid var(--ah-border-color);
+}
+
+.assetslisting-detail-title {
+  font-size: var(--ah-font-l);
+  font-weight: var(--font-weight-semibold);
+}
+
+.assetslisting-detail-header-actions {
+  display: flex;
+  gap: var(--ah-space-2xs);
+}
+
+.assetslisting-detail-iconbutton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ah-radius-s);
+  background: transparent;
+  color: var(--ah-text-muted);
+  cursor: pointer;
+  transition: var(--ah-transition);
+}
+
+.assetslisting-detail-iconbutton svg {
+  width: 17px;
+  height: 17px;
+}
+
+.assetslisting-detail-iconbutton:hover,
+.assetslisting-detail-iconbutton:focus-visible {
+  background: var(--ah-surface-muted);
+  color: var(--ah-text);
+  outline: none;
+}
+
+/* preview image */
+.assetslisting-detail-image {
+  flex: none;
+  height: var(--ah-detail-image-height);
+}
+
+.assetslisting-detail-image .assetslisting-thumb {
+  height: 100%;
+}
+
+.assetslisting-detail-image .assetslisting-thumb img {
+  object-fit: contain;
+}
+
+.assetslisting-thumb-detail {
+  background: var(--ah-bg-muted);
+}
+
+/* tabs nav */
+.assetslisting-detail-tabs {
+  display: flex;
+  flex: none;
+  gap: var(--ah-space-s);
+  padding: 0 var(--ah-space-m);
+  border-bottom: 1px solid var(--ah-border-color);
+}
+
+.assetslisting-detail-tab {
+  padding: var(--ah-space-s) 0;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--ah-text-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: var(--ah-font-s);
+  font-weight: var(--font-weight-medium);
+  transition: var(--ah-transition);
+}
+
+.assetslisting-detail-tab:hover,
+.assetslisting-detail-tab:focus-visible {
+  color: var(--ah-text);
+  outline: none;
+}
+
+.assetslisting-detail-tab[aria-selected="true"] {
+  border-bottom-color: var(--ah-accent);
+  color: var(--ah-text);
+}
+
+/* scrollable body */
+.assetslisting-detail-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--ah-space-l) var(--ah-space-m);
+}
+
+.assetslisting-detail-panel[hidden] {
+  display: none;
+}
+
+.assetslisting-detail-empty {
+  margin: 0;
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-s);
+}
+
+/* stacked (label over value) fields — used by the Info tab header block */
+.assetslisting-field-stacked {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+  margin-bottom: var(--ah-space-m);
+}
+
+.assetslisting-field-label {
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-xs);
+}
+
+.assetslisting-field-value {
+  color: var(--ah-text);
+  font-size: var(--ah-font-m);
+  overflow-wrap: break-word;
+}
+
+/* side-by-side label/value rows — used by Info (data) and Metadatos */
+.assetslisting-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+  gap: var(--ah-space-s) var(--ah-space-m);
+  margin: 0;
+}
+
+.assetslisting-fields dt {
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-s);
+}
+
+.assetslisting-fields dd {
+  margin: 0;
+  color: var(--ah-text);
+  font-size: var(--ah-font-s);
+  overflow-wrap: break-word;
+}
+
+/* renditions list */
+.assetslisting-renditions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-s);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.assetslisting-rendition {
+  display: flex;
+  align-items: center;
+  gap: var(--ah-space-m);
+}
+
+.assetslisting-rendition .assetslisting-thumb {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--ah-radius-xs);
+}
+
+.assetslisting-rendition .assetslisting-thumb-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.assetslisting-rendition-meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+  min-width: 0;
+}
+
+.assetslisting-rendition-name {
+  overflow: hidden;
+  color: var(--ah-text);
+  font-size: var(--ah-font-s);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assetslisting-rendition-type {
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-2xs);
+  letter-spacing: 0.05em;
+}
+
+/* footer actions */
+.assetslisting-detail-footer {
+  display: flex;
+  flex: none;
+  gap: var(--ah-space-s);
+  padding: var(--ah-space-m);
+  border-top: 1px solid var(--ah-border-color);
+}
+
+.assetslisting-detail-footer .btn {
+  flex: 1;
+  height: 38px;
+}
+
+/* ============================================================== responsive === */
+
+@media (width < 900px) {
+  /* Below the two-column breakpoint the panel drops out of its fixed dock and
+     stacks in flow, full-width, after the grid. */
+  .assetslisting-workspace {
+    flex-direction: column;
+  }
+
+  .assetslisting-detail {
+    position: static;
+    inset: auto;
+    width: 100%;
+    max-height: 80vh;
+  }
+
+  .assetslisting[data-detail-open="true"] .assetslisting-content {
+    padding-right: 0;
+  }
+}
