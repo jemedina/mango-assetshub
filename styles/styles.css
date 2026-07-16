@@ -62,7 +62,7 @@ body.appear > main {
 
 .hub-view {
   min-height: 100vh;
-  padding: 17.5px;
+  padding: var(--default-layout-padding);
 }
 
 .hub-view-state {
@@ -155,7 +155,7 @@ pre {
 }
 
 main > div {
-  margin: 40px 16px;
+  margin: 34px 0;
 }
 
 input,

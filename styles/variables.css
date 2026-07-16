@@ -66,6 +66,9 @@
   --ah-scrim: rgb(0 0 0 / 70%);
   --ah-icon-button-bg: rgb(17 17 17 / 10%);
 
+  /* layout padding and margins */
+  --default-layout-padding: 18.5px;
+
   /* assets hub tag/badge colors */
   --ah-tag-amber: rgb(245 166 35 / 80%);
   --ah-tag-blue: rgb(79 124 255 / 80%);

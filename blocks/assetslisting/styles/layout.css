@@ -28,7 +28,6 @@
   display: flex;
   flex-direction: column;
   min-width: 0;
-  padding: var(--ah-space-xl);
 
   /* The topbar is lifted out of flow (position: fixed) so the content region
      must reserve the combined bar height to avoid sliding underneath it. */

@@ -17,7 +17,8 @@ export {
   fetchAssetsList, displayLabel, formatLabel, DAM_ROOT,
 };
 
-const ROOT_LABEL = 'Todos';
+const ROOT_LABEL = 'Todos los assets';
+const PRODUCT_LABEL = 'Digital Asset Management';
 
 /**
  * Human label for a DAM path segment. Titles are not available for the ancestor
@@ -49,7 +50,7 @@ export function folderTitle(path) {
  * @returns {Array<{ label: string, path: string, current: boolean }>}
  */
 export function breadcrumbTrail(path) {
-  const trail = [{ label: ROOT_LABEL, path: DAM_ROOT, current: !path || path === DAM_ROOT }];
+  const trail = [{ label: PRODUCT_LABEL, path: DAM_ROOT, current: !path || path === DAM_ROOT }];
 
   if (!path || path === DAM_ROOT || !path.startsWith(`${DAM_ROOT}/`)) {
     return trail;
