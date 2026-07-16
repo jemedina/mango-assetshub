@@ -1,3 +1,10 @@
+/*
+ * Interaction wiring for the navigation block. One delegated click handler on
+ * the block covers the primary nav, the folders toggle and every folder button
+ * (so re-rendered tree nodes need no rebinding), and a route subscription keeps
+ * the tree revealed/highlighted in sync with deep links and back/forward.
+ */
+
 import { fetchFolders, fetchFoldersReveal, ancestorPaths } from './data.js';
 import {
   buildFolderNodes,
@@ -12,9 +19,8 @@ import {
   removeExpanded,
 } from './state.js';
 import { navigate, subscribeRoute } from '../../scripts/router.js';
+import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 import { DAM_ROOT } from '../../scripts/assets-api.js';
-
-export const ASSETS_LISTING_VIEW = 'assets-listing';
 
 const NAV_SELECTOR = '.assetsnavigation-link, .assetsnavigation-folder-button';
 const MAX_REVEAL_PATHS = 64;

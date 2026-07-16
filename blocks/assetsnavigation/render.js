@@ -1,3 +1,10 @@
+/*
+ * DOM builders for the navigation block: header, primary nav, the collapsible
+ * folder tree (recursive folder nodes) and the user footer states. Pure
+ * rendering — clicks are handled by the delegated listener in events.js, keyed
+ * on the data-view / data-folder-href attributes set here.
+ */
+
 import { primaryNavItems, startLogin } from './data.js';
 import { ICON_COLLECTIONS, ICON_CHEVRON } from './icons.js';
 

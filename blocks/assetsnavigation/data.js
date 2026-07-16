@@ -1,3 +1,9 @@
+/*
+ * Data helpers for the navigation block: the primary nav registry, the auth
+ * status / login flow, and folder-tree fetches mapped to the shape the
+ * renderers expect ({ id, label, href, hasChildren }).
+ */
+
 import {
   fetchAssetsList,
   fetchAssetsReveal,

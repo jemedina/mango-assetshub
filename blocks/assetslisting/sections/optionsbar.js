@@ -3,7 +3,7 @@
  * the grid/list view toggle).
  */
 
-import createButton from './dom.js';
+import { createButton } from './dom.js';
 
 function createViewToggle(viewMode) {
   const group = document.createElement('div');

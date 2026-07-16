@@ -7,10 +7,9 @@
  */
 
 import { navigate, getRoute } from '../../scripts/router.js';
+import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 import { DAM_ROOT } from './data.js';
 import { setUiState } from './state.js';
-
-export const ASSETS_LISTING_VIEW = 'assets-listing';
 
 /**
  * Reflects the current UI state onto the block via data attributes. The CSS

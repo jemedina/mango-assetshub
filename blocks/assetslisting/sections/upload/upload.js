@@ -9,15 +9,15 @@
  */
 
 import { navigate } from '../../../../scripts/router.js';
+import { ASSETS_LISTING_VIEW } from '../../../../scripts/hub-views.js';
 import { folderTitle } from '../../data.js';
+import { el, createButton } from '../dom.js';
 import {
   MAX_FILES,
   checkCreatePermission,
   uploadAssets,
 } from './upload-api.js';
 import { itemsFromDrop, itemsFromInput } from './upload-dnd.js';
-
-const ASSETS_LISTING_VIEW = 'assets-listing';
 
 const PERMISSION_MESSAGES = {
   unauthenticated: 'Inicia sesión para poder subir assets.',
@@ -26,20 +26,6 @@ const PERMISSION_MESSAGES = {
   network: 'No se pudo verificar permisos (error de red).',
   error: 'No se pudieron verificar los permisos.',
 };
-
-function el(tag, className, text) {
-  const node = document.createElement(tag);
-  if (className) node.className = className;
-  if (text != null) node.textContent = text;
-  return node;
-}
-
-function button(className, label, attributes = {}) {
-  const node = el('button', className, label);
-  node.type = 'button';
-  Object.entries(attributes).forEach(([name, value]) => node.setAttribute(name, value));
-  return node;
-}
 
 /**
  * Opens the upload modal for a target DAM folder.
@@ -57,13 +43,13 @@ export default function openUploadModal(block, path) {
   const header = el('div', 'assetslisting-upload-header');
   header.append(
     el('h2', 'assetslisting-upload-title', `Subir a ${folderTitle(path)}`),
-    button('assetslisting-upload-close', '✕', { 'aria-label': 'Cerrar' }),
+    createButton('assetslisting-upload-close', '✕', { 'aria-label': 'Cerrar' }),
   );
 
   const body = el('div', 'assetslisting-upload-body');
   const footer = el('div', 'assetslisting-upload-footer');
-  const cancelBtn = button('btn btn-secondary', 'Cancelar');
-  const submitBtn = button('btn btn-primary', 'Subir', { disabled: '' });
+  const cancelBtn = createButton('btn btn-secondary', 'Cancelar');
+  const submitBtn = createButton('btn btn-primary', 'Subir', { disabled: '' });
   footer.append(cancelBtn, submitBtn);
 
   dialog.append(header, body, footer);
@@ -141,8 +127,8 @@ export default function openUploadModal(block, path) {
     folderInput.multiple = true;
     folderInput.hidden = true;
     folderInput.webkitdirectory = true;
-    const pickFiles = button('btn btn-secondary', 'Seleccionar archivos');
-    const pickFolder = button('btn btn-secondary', 'Seleccionar carpeta');
+    const pickFiles = createButton('btn btn-secondary', 'Seleccionar archivos');
+    const pickFolder = createButton('btn btn-secondary', 'Seleccionar carpeta');
     pickers.append(pickFiles, pickFolder, fileInput, folderInput);
 
     const list = el('ul', 'assetslisting-upload-list');
@@ -156,7 +142,7 @@ export default function openUploadModal(block, path) {
       items.forEach((item, index) => {
         const row = el('li', 'assetslisting-upload-item');
         row.append(el('span', 'assetslisting-upload-item-name', item.relativePath));
-        const remove = button('assetslisting-upload-item-remove', '✕', { 'aria-label': `Quitar ${item.relativePath}` });
+        const remove = createButton('assetslisting-upload-item-remove', '✕', { 'aria-label': `Quitar ${item.relativePath}` });
         remove.addEventListener('click', () => {
           items.splice(index, 1);
           refreshList();

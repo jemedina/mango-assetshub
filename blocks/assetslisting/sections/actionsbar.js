@@ -4,7 +4,7 @@
  */
 
 import { folderTitle, breadcrumbTrail } from '../data.js';
-import createButton from './dom.js';
+import { createButton } from './dom.js';
 
 function createBreadcrumb(path) {
   const nav = document.createElement('nav');

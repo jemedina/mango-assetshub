@@ -15,19 +15,11 @@ import {
   subscribeRoute,
   startRouter,
 } from './router.js';
+import { DEFAULT_VIEW, HUB_VIEWS } from './hub-views.js';
 // eslint-disable-next-line import/no-cycle
 import { loadFragment } from '../blocks/fragment/fragment.js';
 
 export const HUB_ROUTE_EVENT = 'hub:routechange';
-
-export const DEFAULT_VIEW = 'assets-listing';
-
-/** Registry of SPA views mapped to their fragment path. */
-export const HUB_VIEWS = {
-  'assets-listing': { fragment: '/hub-fragments/assets-listing' },
-  recents: { fragment: '/hub-fragments/recents' },
-  'recent-downloads': { fragment: '/hub-fragments/recent-downloads' },
-};
 
 let mountEl;
 let currentView;
