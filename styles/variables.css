@@ -45,6 +45,15 @@
   --ah-control-min-height: 40px;
   --ah-transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 
+  /* fixed workspace topbar (actions bar + options bar behave as one section) */
+  --ah-actionsbar-height: 58.5px;
+  --ah-optionsbar-height: 61px;
+  --ah-topbar-height: 119.5px; /* 58.5 + 61 */
+
+  /* leftnav-relative content inset so the fixed bars align with the card grid:
+     16 (main > div margin) + 17.5 (.hub-view padding) + 24 (.assetslisting-main padding) */
+  --ah-topbar-inset: 57.5px;
+
   /* assets hub design tokens (Figma: Mango DAM AEM Sites) */
   --ah-bg-page: #fff;
   --ah-bg-subtle: #f4f4f4;

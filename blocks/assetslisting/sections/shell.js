@@ -25,7 +25,13 @@ export default function renderShell(path, ui) {
   const content = document.createElement('div');
   content.className = 'assetslisting-content';
 
-  main.append(createActionsBar(path), createOptionsBar(ui), content);
+  // The actions bar and options bar are pinned together as one fixed section at
+  // the top of the workspace; the content region scrolls beneath them.
+  const topbar = document.createElement('div');
+  topbar.className = 'assetslisting-topbar';
+  topbar.append(createActionsBar(path), createOptionsBar(ui));
+
+  main.append(topbar, content);
   fragment.append(panel, main);
 
   return { fragment, content };

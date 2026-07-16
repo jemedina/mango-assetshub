@@ -4,21 +4,34 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--ah-control-min-height);
-  padding: 0 var(--ah-space-l);
+  box-sizing: border-box;
   border: 1px solid transparent;
   border-radius: var(--ah-radius-s);
   cursor: pointer;
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.2;
+  font-family: Inter, var(--body-font-family);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 18px;
+  letter-spacing: 0;
+  text-align: center;
   white-space: nowrap;
   transition: var(--ah-transition);
 }
 
+/* Actions bar buttons: 32px tall. */
+.assetslisting-actionsbar .assetslisting-button {
+  height: 32px;
+  padding: 7px 10.5px;
+}
+
+/* Options bar buttons: 34px tall. */
+.assetslisting-optionsbar .assetslisting-button {
+  height: 34px;
+  padding: 9.5px 10.5px;
+}
+
 .assetslisting-button-primary {
-  background: var(--ah-accent);
+  background: var(--ah-text-strong);
   color: var(--ah-on-accent);
 }
 
@@ -70,8 +83,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: var(--ah-control-min-height);
-  min-height: var(--ah-control-min-height);
+  box-sizing: border-box;
+  width: 34px;
+  height: 34px;
   padding: 0 var(--ah-space-s);
   border: 0;
   background: var(--ah-surface);

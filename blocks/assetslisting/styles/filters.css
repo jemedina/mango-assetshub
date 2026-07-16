@@ -11,6 +11,22 @@
   background: var(--ah-surface);
 }
 
+/*
+ * Desktop: the panel is a fixed full-height drawer flush against the leftnav.
+ * Expanding it overlays the fixed topbar (higher z-index) so it runs over the
+ * top menus and spans the full viewport height, like the leftnav itself.
+ */
+@media (width >= 900px) {
+  .assetslisting-filters-panel {
+    position: fixed;
+    inset: 0 auto 0 var(--leftnav-width);
+    z-index: 20;
+    box-sizing: border-box;
+    width: var(--ah-filters-width, 260px);
+    overflow-y: auto;
+  }
+}
+
 /* Collapsed: keep it out of the accessibility tree and the layout. */
 .assetslisting[data-filters-open="false"] .assetslisting-filters-panel {
   display: none;

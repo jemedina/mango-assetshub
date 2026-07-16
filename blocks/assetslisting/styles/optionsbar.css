@@ -2,12 +2,13 @@
 
 .assetslisting-optionsbar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--ah-space-m);
-  margin-bottom: var(--ah-space-xl);
-  padding-bottom: var(--ah-space-l);
+  box-sizing: border-box;
+  height: var(--ah-optionsbar-height);
+  padding: 0 var(--ah-topbar-inset);
+  background: var(--ah-bg-page);
   border-bottom: 1px solid var(--ah-border-color);
 }
 
@@ -18,8 +19,9 @@
 }
 
 .assetslisting-search-input {
+  box-sizing: border-box;
   width: 100%;
-  min-height: var(--ah-control-min-height);
+  height: 34px;
   padding: 0 var(--ah-space-m);
   border: 1px solid var(--ah-border-color);
   border-radius: var(--ah-radius-s);

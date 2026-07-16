@@ -29,9 +29,52 @@
   flex-direction: column;
   min-width: 0;
   padding: var(--ah-space-xl);
+
+  /* The topbar is lifted out of flow (position: fixed) so the content region
+     must reserve the combined bar height to avoid sliding underneath it. */
+  padding-top: calc(var(--ah-topbar-height) - var(--ah-topbar-inset) + var(--ah-space-xl));
+}
+
+/* The filters panel is fixed (out of flow) so it no longer participates in grid
+   auto-placement; pin the workspace to column 2 so it keeps reserving the
+   panel's track instead of collapsing into column 1. */
+.assetslisting[data-filters-open="true"] .assetslisting-main {
+  grid-column: 2;
+}
+
+/*
+ * Fixed workspace topbar: the actions bar and options bar pinned together as a
+ * single section spanning from the leftnav to the right edge, so the card grid
+ * scrolls beneath them. Its inner bars carry the content inset themselves.
+ */
+.assetslisting-topbar {
+  position: fixed;
+  inset: 0 0 auto var(--leftnav-width);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+}
+
+/* With filters open, the topbar shrinks so it sits beside the panel (rather
+   than being overlaid by it): both the top bars and the filters stay usable. */
+.assetslisting[data-filters-open="true"] .assetslisting-topbar {
+  left: calc(var(--leftnav-width) + var(--ah-filters-width, 260px));
 }
 
 /* ============================================================== responsive === */
+
+@media (width < 900px) {
+  /* Below the two-column breakpoint the leftnav stacks on top and is no longer
+     fixed, so the topbar returns to normal flow to avoid overlapping it. */
+  .assetslisting-topbar {
+    position: static;
+    inset: auto;
+  }
+
+  .assetslisting-main {
+    padding-top: var(--ah-space-xl);
+  }
+}
 
 @media (width < 600px) {
   .assetslisting-main {

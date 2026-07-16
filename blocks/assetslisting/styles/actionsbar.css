@@ -2,11 +2,13 @@
 
 .assetslisting-actionsbar {
   display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: var(--ah-space-l);
-  margin-bottom: var(--ah-space-l);
+  box-sizing: border-box;
+  height: var(--ah-actionsbar-height);
+  padding: 0 var(--ah-topbar-inset);
+  background: var(--ah-bg-subtle);
 }
 
 .assetslisting-heading {
