@@ -22,7 +22,8 @@ are declared once in `scripts/hub-views.js`.
 | `events.js` | One delegated click/keydown handler for every control (folder/asset cards, breadcrumb, upload, toggles) |
 | `data.js` | View-specific derivations (folder title, breadcrumb trail); re-exports the shared assets-api client |
 | `state.js` | Persisted UI state (filters open, grid/list mode) in localStorage |
-| `sections/` | DOM builders, one file per region: `shell` → `actionsbar` + `optionsbar` + `filters` + `content` (`cards`) |
+| `selection.js` | Ephemeral multi-selection controller: selection mode + picked paths, drives the selection bar and card checkboxes (never persisted, reset per folder) |
+| `sections/` | DOM builders, one file per region: `shell` → `actionsbar` + `selectionbar` + `optionsbar` + `filters` + `content` (`cards`) |
 | `sections/dom.js` | Shared `el` / `createButton` helpers for the builders |
 | `sections/detail/` | Detail panel: `index.js` (controller), `panel.js` (static shell), `tabs.js` (tab registry + builders), `metadata-config.js` (which metadata keys to surface) |
 | `sections/upload/` | Upload modal: `upload.js` (modal + flow), `upload-api.js` (permission check + multipart POST), `upload-dnd.js` (drop/picker → file list) |

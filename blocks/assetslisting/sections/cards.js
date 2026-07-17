@@ -73,9 +73,11 @@ function createInfo(asset) {
 
 /**
  * Builds an asset card: a preview region (image or file icon) with a format
- * badge, above an info region (name, size + date, keywords). Clicking selects
- * the asset; selection is wired by the delegated handler in events.js off
- * `data-asset-path`.
+ * badge, above an info region (name, size + date, keywords). Clicking opens the
+ * asset, or toggles its selection while selection mode is active; both are wired
+ * by the delegated handler in events.js off `data-asset-path`. The corner
+ * checkbox is decorative — hidden until selection mode, driven by the card's
+ * `data-checked` flag — so it ships with every card and needs no rebind.
  * @param {Object} asset asset summary from the listing endpoint
  * @returns {HTMLElement}
  */
@@ -86,6 +88,10 @@ export function createAssetCard(asset) {
   card.setAttribute('role', 'button');
   if (asset.path) card.dataset.assetPath = asset.path;
 
-  card.append(createPreview(asset, { badge: true }), createInfo(asset));
+  const check = document.createElement('span');
+  check.className = 'assetslisting-check';
+  check.setAttribute('aria-hidden', 'true');
+
+  card.append(check, createPreview(asset, { badge: true }), createInfo(asset));
   return card;
 }

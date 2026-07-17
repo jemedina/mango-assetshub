@@ -36,26 +36,61 @@ export function applyUiState(block, ui) {
  * @param {Element} block
  * @param {{
  *   getUi: () => object, setUi: (ui: object) => void,
- *   openAsset: (path: string) => void
+ *   openAsset: (path: string) => void,
+ *   isSelectionMode: () => boolean, toggleSelectionMode: () => void,
+ *   toggleSelect: (path: string) => void, clearSelection: () => void,
+ *   closeSelection: () => void, downloadSelected: () => void
  * }} controller
  */
-export default function bindAssetsListing(block, { getUi, setUi, openAsset }) {
+export default function bindAssetsListing(block, {
+  getUi, setUi, openAsset,
+  isSelectionMode, toggleSelectionMode, toggleSelect,
+  clearSelection, closeSelection, downloadSelected,
+}) {
   block.addEventListener('click', (event) => {
     const folderCard = event.target.closest('.assetslisting-card-folder');
     if (folderCard && folderCard.dataset.href) {
+      // Navigating exits selection mode implicitly: the shell rebuilds per folder.
       navigate({ view: ASSETS_LISTING_VIEW, path: folderCard.dataset.href });
       return;
     }
 
     const assetCard = event.target.closest('.assetslisting-card-asset');
     if (assetCard && assetCard.dataset.assetPath) {
-      openAsset(assetCard.dataset.assetPath);
+      // In selection mode a card click only picks/unpicks; it no longer opens.
+      if (isSelectionMode()) toggleSelect(assetCard.dataset.assetPath);
+      else openAsset(assetCard.dataset.assetPath);
       return;
     }
 
     const crumb = event.target.closest('.assetslisting-breadcrumb-link');
     if (crumb && crumb.dataset.href) {
       navigate({ view: ASSETS_LISTING_VIEW, path: crumb.dataset.href });
+      return;
+    }
+
+    if (event.target.closest('[data-action="select"]')) {
+      toggleSelectionMode();
+      return;
+    }
+
+    if (event.target.closest('[data-action="selection-clear"]')) {
+      clearSelection();
+      return;
+    }
+
+    if (event.target.closest('[data-action="selection-close"]')) {
+      closeSelection();
+      return;
+    }
+
+    if (event.target.closest('[data-action="selection-download"]')) {
+      downloadSelected();
+      return;
+    }
+
+    if (event.target.closest('[data-action="selection-edit"]')) {
+      // Bulk edit is a placeholder for now, mirroring the detail panel's edit.
       return;
     }
 
@@ -91,7 +126,8 @@ export default function bindAssetsListing(block, { getUi, setUi, openAsset }) {
     const assetCard = event.target.closest('.assetslisting-card-asset');
     if (assetCard && assetCard.dataset.assetPath) {
       event.preventDefault();
-      openAsset(assetCard.dataset.assetPath);
+      if (isSelectionMode()) toggleSelect(assetCard.dataset.assetPath);
+      else openAsset(assetCard.dataset.assetPath);
     }
   });
 }

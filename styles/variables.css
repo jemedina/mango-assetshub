@@ -56,6 +56,11 @@
   --ah-optionsbar-height: 61px;
   --ah-topbar-height: 119.5px; /* 58.5 + 61 */
 
+  /* selection bar: a third bar slotted between the actions and options bars while
+     selection mode is active; a touch darker than the actions bar (#f4f4f4). */
+  --ah-selectionbar-height: 48px;
+  --ah-selectionbar-bg: #e6e6e6;
+
   /* leftnav-relative content inset so the fixed bars align with the card grid:
      16 (main > div margin) + 17.5 (.hub-view padding) + 24 (.assetslisting-main padding) */
   --ah-topbar-inset: 57.5px;

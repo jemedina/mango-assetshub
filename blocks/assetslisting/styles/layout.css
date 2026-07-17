@@ -35,6 +35,15 @@
   padding-top: calc(var(--ah-topbar-height) - var(--ah-topbar-inset) + var(--ah-space-xl));
 }
 
+/* Selection mode adds the selection bar to the fixed topbar, so the content
+   region must reserve its height too. */
+.assetslisting[data-selection-mode="true"] .assetslisting-main {
+  padding-top: calc(
+    var(--ah-topbar-height) + var(--ah-selectionbar-height)
+    - var(--ah-topbar-inset) + var(--ah-space-xl)
+  );
+}
+
 /* The filters panel is fixed (out of flow) so it no longer participates in grid
    auto-placement; pin the workspace to column 2 so it keeps reserving the
    panel's track instead of collapsing into column 1. */
@@ -92,7 +101,8 @@
     inset: auto;
   }
 
-  .assetslisting-main {
+  .assetslisting-main,
+  .assetslisting[data-selection-mode="true"] .assetslisting-main {
     padding-top: var(--ah-space-xl);
   }
 }

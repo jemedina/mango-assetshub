@@ -2,6 +2,7 @@
 
 .assetslisting-card {
   box-sizing: border-box;
+  position: relative;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -25,9 +26,48 @@
   outline: none;
 }
 
-.assetslisting-card-asset[data-selected="true"] {
+.assetslisting-card-asset[data-selected="true"],
+.assetslisting-card-asset[data-checked="true"] {
   border-color: var(--ah-accent);
   box-shadow: 0 0 0 1px var(--ah-accent);
+}
+
+/* selection checkbox — decorative, shown only while selection mode is active */
+.assetslisting-check {
+  position: absolute;
+  top: var(--ah-space-xs);
+  left: var(--ah-space-xs);
+  z-index: 1;
+  box-sizing: border-box;
+  display: none;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-2xs);
+  background: var(--ah-surface);
+  transition: var(--ah-transition);
+}
+
+.assetslisting[data-selection-mode="true"] .assetslisting-check {
+  display: block;
+}
+
+.assetslisting-card-asset[data-checked="true"] .assetslisting-check {
+  border-color: var(--ah-accent);
+  background: var(--ah-accent);
+}
+
+/* checkmark drawn as a rotated border-corner */
+.assetslisting-card-asset[data-checked="true"] .assetslisting-check::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 9px;
+  border: solid var(--ah-on-accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }
 
 /* Info section: a fixed 80px band holding the name, size/date facts and keywords. */

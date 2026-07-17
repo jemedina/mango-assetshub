@@ -1,0 +1,98 @@
+/* ============================================================ selection bar ===
+ * A third top bar slotted between the actions bar and the options bar while
+ * selection mode is active. It carries its own content inset (like the other
+ * bars) and a slightly darker fill so it reads as a distinct mode.
+ */
+
+.assetslisting-selectionbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-l);
+  box-sizing: border-box;
+  height: var(--ah-selectionbar-height);
+  padding: 0 var(--ah-topbar-inset);
+  background: var(--ah-selectionbar-bg);
+  border-top: 1px solid var(--ah-border-color);
+}
+
+/* the flex display would otherwise defeat the [hidden] attribute */
+.assetslisting-selectionbar[hidden] {
+  display: none;
+}
+
+.assetslisting-selection-left,
+.assetslisting-selection-right {
+  display: flex;
+  align-items: center;
+  gap: var(--ah-space-m);
+  min-width: 0;
+}
+
+.assetslisting-selection-count {
+  font-size: var(--ah-font-m);
+  font-weight: var(--font-weight-semibold);
+  color: var(--ah-text);
+  white-space: nowrap;
+}
+
+.assetslisting-selection-size {
+  font-size: var(--ah-font-s);
+  color: var(--ah-text-muted);
+  white-space: nowrap;
+}
+
+/* round "−" deselect-all control */
+.assetslisting-selection-clear {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--ah-border-color);
+  border-radius: 50%;
+  background: var(--ah-surface);
+  color: var(--ah-text);
+  cursor: pointer;
+  font-size: var(--ah-font-l);
+  line-height: 1;
+  transition: var(--ah-transition);
+}
+
+.assetslisting-selection-clear:hover,
+.assetslisting-selection-clear:focus-visible {
+  border-color: var(--ah-accent);
+  outline: none;
+}
+
+/* the bulk-action buttons match the actions-bar button sizing */
+.assetslisting-selectionbar .btn {
+  height: 32px;
+  padding: 7px 10.5px;
+}
+
+/* borderless "✕" close control */
+.assetslisting-selection-close {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: var(--ah-radius-s);
+  background: transparent;
+  color: var(--ah-text-muted);
+  cursor: pointer;
+  font-size: var(--ah-font-m);
+  line-height: 1;
+  transition: var(--ah-transition);
+}
+
+.assetslisting-selection-close:hover,
+.assetslisting-selection-close:focus-visible {
+  background: var(--ah-surface);
+  color: var(--ah-text);
+  outline: none;
+}

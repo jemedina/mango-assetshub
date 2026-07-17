@@ -5,6 +5,7 @@
  */
 
 import createActionsBar from './actionsbar.js';
+import createSelectionBar from './selectionbar.js';
 import createOptionsBar from './optionsbar.js';
 import createFiltersPanel from './filters.js';
 
@@ -33,10 +34,11 @@ export default function renderShell(path, ui) {
   workspace.append(content);
 
   // The actions bar and options bar are pinned together as one fixed section at
-  // the top of the workspace; the content region scrolls beneath them.
+  // the top of the workspace; the content region scrolls beneath them. The
+  // selection bar sits between them and stays hidden until selection mode is on.
   const topbar = document.createElement('div');
   topbar.className = 'assetslisting-topbar';
-  topbar.append(createActionsBar(path), createOptionsBar(ui));
+  topbar.append(createActionsBar(path), createSelectionBar(), createOptionsBar(ui));
 
   main.append(topbar, workspace);
   fragment.append(panel, main);
