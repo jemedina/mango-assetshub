@@ -21,6 +21,13 @@ export function createFolderCard(folder) {
   card.className = 'assetslisting-card assetslisting-card-folder';
   card.dataset.href = folder.path;
 
+  // Same decorative selection checkbox as asset cards: folders are selectable
+  // too (a folder selection shares the whole folder), keyed off `data-checked`.
+  const check = document.createElement('span');
+  check.className = 'assetslisting-check';
+  check.setAttribute('aria-hidden', 'true');
+  card.append(check);
+
   const thumb = document.createElement('span');
   thumb.className = 'assetslisting-thumb assetslisting-thumb-folder';
   thumb.setAttribute('aria-hidden', 'true');
