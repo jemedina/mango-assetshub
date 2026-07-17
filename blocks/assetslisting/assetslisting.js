@@ -34,7 +34,7 @@ export default function decorate(block) {
   let currentFolders = [];
   let seq = 0;
 
-  const selection = createSelection(block, () => currentAssets);
+  const selection = createSelection(block, () => currentAssets, () => currentFolders);
 
   // Reflects the current asset selection onto the cards; a null path clears it.
   function markSelected(path) {
@@ -99,9 +99,8 @@ export default function decorate(block) {
       });
   }
 
-  // Multi-asset share: generate an anonymous OOTB link for the selection instead
-  // of firing N downloads. The current folder is the share anchor (selection is
-  // folder-scoped, so it is always the selection's common parent).
+  // Share: generate an anonymous OOTB link on author (via the publish bridge)
+  // for the selection — folders and/or assets — instead of firing N downloads.
   function shareSelected() {
     const paths = selection.selectedPaths();
     import('./sections/share/share.js').then(({ default: openShareModal }) => {
@@ -109,10 +108,11 @@ export default function decorate(block) {
     });
   }
 
-  // The primary bulk action: one asset downloads, several share. Mirrors the
-  // selection bar's label morph so button and behaviour never disagree.
+  // The primary bulk action: one asset downloads; several elements — or any
+  // folder — share. Mirrors the selection bar's label morph so button and
+  // behaviour never disagree.
   function shareOrDownloadSelected() {
-    if (selection.selectedPaths().length > 1) shareSelected();
+    if (selection.selectedPaths().length > 1 || selection.hasFolderSelected()) shareSelected();
     else downloadSelected();
   }
 

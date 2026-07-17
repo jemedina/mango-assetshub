@@ -27,7 +27,8 @@
 }
 
 .assetslisting-card-asset[data-selected="true"],
-.assetslisting-card-asset[data-checked="true"] {
+.assetslisting-card-asset[data-checked="true"],
+.assetslisting-card-folder[data-checked="true"] {
   border-color: var(--ah-accent);
   box-shadow: 0 0 0 1px var(--ah-accent);
 }
@@ -52,13 +53,15 @@
   display: block;
 }
 
-.assetslisting-card-asset[data-checked="true"] .assetslisting-check {
+.assetslisting-card-asset[data-checked="true"] .assetslisting-check,
+.assetslisting-card-folder[data-checked="true"] .assetslisting-check {
   border-color: var(--ah-accent);
   background: var(--ah-accent);
 }
 
 /* checkmark drawn as a rotated border-corner */
-.assetslisting-card-asset[data-checked="true"] .assetslisting-check::after {
+.assetslisting-card-asset[data-checked="true"] .assetslisting-check::after,
+.assetslisting-card-folder[data-checked="true"] .assetslisting-check::after {
   content: "";
   position: absolute;
   top: 2px;
