@@ -37,8 +37,7 @@
   min-width: 0;
   min-height: 0;
   padding: 10.5px 7px;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden auto;
   overscroll-behavior: contain;
 }
 

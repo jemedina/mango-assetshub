@@ -89,15 +89,6 @@
   opacity: 1;
 }
 
-.assetslisting-thumb:not(.assetslisting-thumb-file) img {
-  transition: transform 0.2s ease;
-}
-
-.assetslisting-card-asset:hover .assetslisting-thumb:not(.assetslisting-thumb-file) img,
-.assetslisting-card-asset:focus-visible .assetslisting-thumb:not(.assetslisting-thumb-file) img {
-  transform: scale(1.05);
-}
-
 /* Info section: a fixed 80px band holding the name, size/date facts and keywords. */
 .assetslisting-body {
   box-sizing: border-box;
@@ -155,6 +146,17 @@
   width: 35px;
   height: 35px;
   object-fit: contain;
+}
+
+/* Hover zoom, non-file thumbnails only (declared after the base img rules so
+   specificity ascends — see stylelint no-descending-specificity). */
+.assetslisting-thumb:not(.assetslisting-thumb-file) img {
+  transition: transform 0.2s ease;
+}
+
+.assetslisting-card-asset:hover .assetslisting-thumb:not(.assetslisting-thumb-file) img,
+.assetslisting-card-asset:focus-visible .assetslisting-thumb:not(.assetslisting-thumb-file) img {
+  transform: scale(1.05);
 }
 
 .assetslisting-thumb-ext {
