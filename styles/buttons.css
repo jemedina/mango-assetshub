@@ -22,9 +22,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: var(--ah-space-xs);
+  gap: 5.25px;
   border: 1px solid transparent;
-  border-radius: var(--ah-radius-s);
+  border-radius: var(--ah-radius-2xs);
   padding: var(--ah-space-s) var(--ah-space-m);
   font: inherit;
   font-size: var(--ah-font-xs);
@@ -46,11 +46,25 @@
   display: none;
 }
 
+/* icon slot, sized relative to the button's own font-size so it fits any .btn context */
+.btn-icon {
+  display: flex;
+  flex: none;
+  width: 1.1em;
+  height: 1.1em;
+}
+
+.btn-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 /* primary — dark surface, light label */
 .btn-primary {
   background: var(--ah-text-strong);
   border-color: var(--ah-text-strong);
   color: var(--ah-on-accent);
+  font-weight: var(--font-weight-semibold);
 }
 
 .btn-primary:hover,
@@ -144,6 +158,8 @@ p.button-wrapper {
 
 .ah-button-nav-group {
   display: flex;
+  flex: 1;
+  min-width: 0;
   align-items: center;
   gap: 5.25px;
 }
@@ -159,6 +175,8 @@ p.button-wrapper {
   width: 10px;
   height: 10px;
   transition: transform 0.15s ease;
+  /* closed: pointing right */
+  transform: rotate(-90deg);
 }
 
 .ah-button-nav-chevron svg {
@@ -166,8 +184,10 @@ p.button-wrapper {
   height: 100%;
 }
 
-.ah-button-nav-section[aria-expanded="true"] .ah-button-nav-chevron {
-  transform: rotate(180deg);
+/* open: pointing down. Generic on [aria-expanded] so it covers any trigger
+   that wraps a chevron directly (the "Carpetas" toggle, folder rows...). */
+[aria-expanded="true"] > .ah-button-nav-chevron {
+  transform: rotate(0deg);
 }
 
 a.button:any-link,

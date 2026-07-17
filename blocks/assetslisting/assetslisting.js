@@ -8,6 +8,7 @@ import bindAssetsListing, { applyUiState } from './events.js';
 import { getUiState } from './state.js';
 import createSelection from './selection.js';
 import createDetailController from './sections/detail/index.js';
+import { sortAssets } from './shared/sort.js';
 
 /**
  * Loads and decorates the assetslisting block.
@@ -30,9 +31,23 @@ export default function decorate(block) {
   let content = null;
   let detail = null;
   let currentAssets = [];
+  let currentFolders = [];
   let seq = 0;
 
   const selection = createSelection(block, () => currentAssets);
+
+  // Re-sorts the already-fetched assets and re-renders — no refetch needed,
+  // since sort is a pure client-side reorder of data already in memory.
+  function renderSorted() {
+    if (!content) return;
+    renderContent(content, {
+      folders: currentFolders,
+      assets: sortAssets(currentAssets, ui.sortField, ui.sortDirection),
+    });
+    // Cards were rebuilt: reflect any live selection back onto them.
+    if (selection.isActive()) selection.refresh();
+    if (detail.isOpen()) markSelected(detail.getPath());
+  }
 
   // Reflects the current asset selection onto the cards; a null path clears it.
   function markSelected(path) {
@@ -105,6 +120,7 @@ export default function decorate(block) {
     getUi: () => ui,
     setUi: (next) => { ui = next; },
     openAsset,
+    renderSorted,
     isSelectionMode: () => selection.isActive(),
     toggleSelectionMode,
     toggleSelect: (path) => selection.toggle(path),
@@ -147,10 +163,10 @@ export default function decorate(block) {
       const data = await fetchAssetsList(path);
       if (current !== seq) return;
       currentAssets = data.assets || [];
-      renderContent(content, data);
-      // Cards were rebuilt: reflect any live selection back onto them.
-      if (selection.isActive()) selection.refresh();
-      if (detail.isOpen()) markSelected(detail.getPath());
+      currentFolders = data.folders || [];
+      renderSorted();
+      const count = block.querySelector('.assetslisting-count');
+      if (count) count.textContent = `${currentAssets.length} assets`;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);

@@ -65,6 +65,9 @@
      16 (main > div margin) + 17.5 (.hub-view padding) + 24 (.assetslisting-main padding) */
   --ah-topbar-inset: 57.5px;
 
+  /* actions bar / options bar own horizontal content padding (Figma: 17.5px) */
+  --ah-topbar-padding-x: 17.5px;
+
   /* assets hub design tokens (Figma: Mango DAM AEM Sites) */
   --ah-bg-page: #fff;
   --ah-bg-subtle: #f4f4f4;
@@ -74,7 +77,7 @@
   --ah-text-secondary: #333;
   --ah-text-placeholder: #888;
   --ah-overlay-subtle: rgb(0 0 0 / 10%);
-  --ah-scrim: rgb(0 0 0 / 70%);
+  --ah-scrim: rgb(0 0 0 / 30%);
   --ah-icon-button-bg: rgb(17 17 17 / 10%);
 
   /* layout padding and margins */
@@ -102,6 +105,7 @@
   --ah-space-s: 8px;
   --ah-space-xm: 10.5px;
   --ah-space-m: 12px;
+  --ah-space-ml: 14px;
   --ah-space-l: 16px;
   --ah-space-xl: 24px;
 }

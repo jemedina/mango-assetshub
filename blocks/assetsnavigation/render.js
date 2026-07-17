@@ -6,7 +6,7 @@
  */
 
 import { primaryNavItems, startLogin } from './data.js';
-import { ICON_COLLECTIONS, ICON_CHEVRON } from './icons.js';
+import { ICON_FOLDER, ICON_CHEVRON } from './icons.js';
 
 function createButton(className, text, attributes = {}) {
   const button = document.createElement('button');
@@ -68,17 +68,41 @@ export function createFolderNode(folder, level = 0) {
   const hasAuthoredChildren = Array.isArray(folder.children) && folder.children.length > 0;
   const hasChildren = hasAuthoredChildren || Boolean(folder.hasChildren);
   const expanded = hasChildren && Boolean(folder.expanded);
-  const button = createButton('assetsnavigation-item assetsnavigation-folder-button', folder.label, {
-    'data-folder-id': folder.id,
-    'data-folder-href': folder.href || '',
-    'data-level': level,
-    'aria-current': 'false',
-  });
-  button.style.setProperty('--folder-level', level);
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'assetsnavigation-folder-button';
+  button.dataset.folderId = folder.id;
+  button.dataset.folderHref = folder.href || '';
+  button.dataset.level = level;
+  button.setAttribute('aria-current', 'false');
+
+  const label = document.createElement('span');
+  label.className = 'assetsnavigation-folder-label';
+  label.textContent = folder.label;
+
+  // Every folder looks the same: icon + label, grouped together (same pattern
+  // as the "Carpetas" toggle) so an expandable one's trailing chevron can be
+  // pushed to the far edge via space-between without spreading icon from label.
+  const icon = document.createElement('span');
+  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = ICON_FOLDER;
+
+  const labelGroup = document.createElement('span');
+  labelGroup.className = 'ah-button-nav-group';
+  labelGroup.append(icon, label);
+  button.append(labelGroup);
 
   if (hasChildren) {
-    button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
     button.classList.add('has-children');
+    button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+
+    const chevron = document.createElement('span');
+    chevron.className = 'ah-button-nav-chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    chevron.innerHTML = ICON_CHEVRON;
+    button.append(chevron);
   }
 
   item.append(button);
@@ -130,10 +154,10 @@ function createFoldersToggle() {
   const icon = document.createElement('span');
   icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
   icon.setAttribute('aria-hidden', 'true');
-  icon.innerHTML = ICON_COLLECTIONS;
+  icon.innerHTML = ICON_FOLDER;
 
   const label = document.createElement('span');
-  label.textContent = 'Colecciones';
+  label.textContent = 'Carpetas';
 
   group.append(icon, label);
 
@@ -191,11 +215,25 @@ export function renderUserLoading(footer) {
   footer.replaceChildren(state);
 }
 
-export function renderUser(footer, userId) {
-  const name = document.createElement('p');
-  name.className = 'assetsnavigation-user-name';
-  name.textContent = userId;
-  footer.replaceChildren(name);
+export function renderUser(footer, { name, initials, role }) {
+  const avatar = document.createElement('span');
+  avatar.className = 'assetsnavigation-user-avatar';
+  avatar.setAttribute('aria-hidden', 'true');
+  avatar.textContent = initials;
+
+  const details = document.createElement('div');
+  details.className = 'assetsnavigation-user-details';
+
+  const nameEl = document.createElement('p');
+  nameEl.className = 'assetsnavigation-user-name';
+  nameEl.textContent = name;
+
+  const roleEl = document.createElement('p');
+  roleEl.className = 'assetsnavigation-user-role';
+  roleEl.textContent = role;
+
+  details.append(nameEl, roleEl);
+  footer.replaceChildren(avatar, details);
 }
 
 export function renderUserLogin(footer) {

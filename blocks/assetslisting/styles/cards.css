@@ -70,6 +70,31 @@
   transform: rotate(45deg);
 }
 
+/* dark scrim on hover, plus a subtle zoom for raster previews only */
+.assetslisting-card-asset .assetslisting-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--ah-scrim);
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+
+.assetslisting-card-asset:hover .assetslisting-thumb::after,
+.assetslisting-card-asset:focus-visible .assetslisting-thumb::after {
+  opacity: 1;
+}
+
+.assetslisting-thumb:not(.assetslisting-thumb-file) img {
+  transition: transform 0.2s ease;
+}
+
+.assetslisting-card-asset:hover .assetslisting-thumb:not(.assetslisting-thumb-file) img,
+.assetslisting-card-asset:focus-visible .assetslisting-thumb:not(.assetslisting-thumb-file) img {
+  transform: scale(1.05);
+}
+
 /* Info section: a fixed 80px band holding the name, size/date facts and keywords. */
 .assetslisting-body {
   box-sizing: border-box;
@@ -144,6 +169,7 @@
 
 .assetslisting-format-badge {
   position: absolute;
+  z-index: 1;
   top: var(--ah-space-xs);
   right: var(--ah-space-xs);
   padding: 1.75px 5.25px;

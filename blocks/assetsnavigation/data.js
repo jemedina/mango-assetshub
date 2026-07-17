@@ -46,6 +46,30 @@ export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
   return response.json();
 }
 
+// The auth status endpoint has no role/title field yet (only profile, groups,
+// permissions) — placeholder until the backend surfaces something to map to
+// a display role. Swap this for a real value (e.g. derived from `groups`)
+// once it does.
+const PLACEHOLDER_ROLE = 'Miembro';
+
+/**
+ * Display name + avatar initials + role for the user footer, built from the
+ * auth profile. Falls back gracefully when given/family name aren't populated
+ * yet (e.g. an identity provider that only sends userId) so the avatar layout
+ * still renders correctly — just with a single-letter initial — until the
+ * backend fills in the full profile.
+ * @param {{ userId: string, profile?: { givenName?: string, familyName?: string } }} status
+ * @returns {{ name: string, initials: string, role: string }}
+ */
+export function userDisplay(status) {
+  const { givenName, familyName } = status.profile || {};
+  const name = givenName ? `${givenName} ${familyName || ''}`.trim() : status.userId;
+  const initials = givenName && familyName
+    ? `${givenName[0]}${familyName[0]}`
+    : (givenName || status.userId || '?')[0];
+  return { name, initials: initials.toUpperCase(), role: PLACEHOLDER_ROLE };
+}
+
 /**
  * Starts login. Remembers the current location — path, query and hash, so the
  * hash-based SPA view (see scripts/router.js) is restored — in a cookie the

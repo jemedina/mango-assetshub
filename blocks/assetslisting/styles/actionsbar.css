@@ -7,7 +7,7 @@
   gap: var(--ah-space-l);
   box-sizing: border-box;
   height: var(--ah-actionsbar-height);
-  padding: 0 var(--ah-topbar-inset);
+  padding: var(--ah-space-xm) var(--ah-topbar-padding-x);
   background: var(--ah-bg-subtle);
 }
 
@@ -20,9 +20,10 @@
 
 .assetslisting-title {
   margin: 0;
-  font-size: var(--heading-font-size-s);
+  font-size: 15px;
   font-weight: var(--font-weight-bold);
-  line-height: 1.2;
+  letter-spacing: -0.01em;
+  line-height: 15px;
 }
 
 /* breadcrumb */

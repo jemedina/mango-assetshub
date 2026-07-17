@@ -7,7 +7,7 @@
 
 import bindAssetsNavigation, { revealTree, highlightRoute } from './events.js';
 import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
-import { fetchAuthStatus } from './data.js';
+import { fetchAuthStatus, userDisplay } from './data.js';
 import renderAssetsNavigation, {
   renderUser,
   renderUserLoading,
@@ -30,13 +30,7 @@ async function loadUser(block) {
 
   try {
     const status = await fetchAuthStatus();
-
-    let userName = status.userId;
-    if (status.profile.givenName) {
-      userName = `${status.profile.givenName} ${(status.profile.familyName || '')}`;
-    }
-
-    renderUser(footer, userName);
+    renderUser(footer, userDisplay(status));
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);

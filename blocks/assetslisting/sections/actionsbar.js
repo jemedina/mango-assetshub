@@ -4,7 +4,8 @@
  */
 
 import { folderTitle, breadcrumbTrail } from '../data.js';
-import { createButton } from './dom.js';
+import { createButton, createIconButton } from './dom.js';
+import { ICON_UPLOAD, ICON_SELECT } from '../shared/icons.js';
 
 function createBreadcrumb(path) {
   const nav = document.createElement('nav');
@@ -59,10 +60,10 @@ export default function createActionsBar(path) {
   const actions = document.createElement('div');
   actions.className = 'assetslisting-actions';
   actions.append(
-    createButton('btn btn-primary', 'Subir assets', {
+    createIconButton('btn btn-primary', 'Subir assets', ICON_UPLOAD, {
       'data-action': 'upload',
     }),
-    createButton('btn btn-secondary', 'Seleccionar', {
+    createIconButton('btn btn-secondary', 'Seleccionar', ICON_SELECT, {
       'data-action': 'select',
     }),
   );

@@ -22,11 +22,8 @@ export const ICON_RECENT_DOWNLOADS = `<svg viewBox="0 0 14 14" fill="none" xmlns
 <path d="M7 8.75V1.75" stroke="currentColor" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-export const ICON_COLLECTIONS = `<svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M3.75 1.25H1.66667C1.43655 1.25 1.25 1.43655 1.25 1.66667V4.58333C1.25 4.81345 1.43655 5 1.66667 5H3.75C3.98012 5 4.16667 4.81345 4.16667 4.58333V1.66667C4.16667 1.43655 3.98012 1.25 3.75 1.25Z" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M8.33333 1.25H6.25C6.01988 1.25 5.83333 1.43655 5.83333 1.66667V2.91667C5.83333 3.14679 6.01988 3.33333 6.25 3.33333H8.33333C8.56345 3.33333 8.75 3.14679 8.75 2.91667V1.66667C8.75 1.43655 8.56345 1.25 8.33333 1.25Z" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M8.33333 5H6.25C6.01988 5 5.83333 5.18655 5.83333 5.41667V8.33333C5.83333 8.56345 6.01988 8.75 6.25 8.75H8.33333C8.56345 8.75 8.75 8.56345 8.75 8.33333V5.41667C8.75 5.18655 8.56345 5 8.33333 5Z" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round" stroke-linejoin="round"/>
-<path d="M3.75 6.66667H1.66667C1.43655 6.66667 1.25 6.85322 1.25 7.08334V8.33334C1.25 8.56346 1.43655 8.75001 1.66667 8.75001H3.75C3.98012 8.75001 4.16667 8.56346 4.16667 8.33334V7.08334C4.16667 6.85322 3.98012 6.66667 3.75 6.66667Z" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round" stroke-linejoin="round"/>
+export const ICON_FOLDER = `<svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M1.25 2.08333C1.25 1.85321 1.43655 1.66667 1.66667 1.66667H3.75L4.58333 2.5H8.33333C8.56345 2.5 8.75 2.68655 8.75 2.91667V7.5C8.75 7.73012 8.56345 7.91667 8.33333 7.91667H1.66667C1.43655 7.91667 1.25 7.73012 1.25 7.5V2.08333Z" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 export const ICON_CHEVRON = `<svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">

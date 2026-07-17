@@ -10,6 +10,8 @@ const STORAGE_KEY = 'assetshub:listing:ui';
 const DEFAULTS = {
   filtersOpen: false,
   viewMode: 'grid',
+  sortField: 'date',
+  sortDirection: 'desc',
 };
 
 export function getUiState() {

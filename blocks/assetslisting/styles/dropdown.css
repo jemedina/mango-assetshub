@@ -1,0 +1,21 @@
+/* ======================================================= generic dropdown === */
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + var(--ah-space-2xs));
+  right: 0;
+  z-index: 30;
+  box-sizing: border-box;
+  min-width: 180px;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-s);
+  background: var(--ah-surface);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+  list-style: none;
+}

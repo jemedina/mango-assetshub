@@ -10,6 +10,10 @@ import { navigate, getRoute } from '../../scripts/router.js';
 import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 import { DAM_ROOT } from './data.js';
 import { setUiState } from './state.js';
+import {
+  isDropdownOpen, openDropdown, closeDropdown, closeAllDropdowns,
+} from './sections/dropdown.js';
+import { SORT_FIELDS } from './shared/sort.js';
 
 /**
  * Reflects the current UI state onto the block via data attributes. The CSS
@@ -28,6 +32,36 @@ export function applyUiState(block, ui) {
   block.querySelectorAll('.assetslisting-viewtoggle-button').forEach((button) => {
     button.setAttribute('aria-pressed', String(button.dataset.viewMode === ui.viewMode));
   });
+
+  applySortState(block, ui);
+}
+
+/**
+ * Reflects the current sort field/direction onto the sort control: the
+ * trigger's label, the direction button's rotation, and which menu item is
+ * marked current.
+ * @param {Element} block
+ * @param {{ sortField: string, sortDirection: 'asc'|'desc' }} ui
+ */
+export function applySortState(block, ui) {
+  const current = SORT_FIELDS.find(({ field }) => field === ui.sortField) || SORT_FIELDS[0];
+
+  const label = block.querySelector('.assetslisting-sort-trigger .btn-label');
+  if (label) label.textContent = current.label;
+
+  const direction = block.querySelector('.assetslisting-sort-direction');
+  if (direction) {
+    direction.dataset.direction = ui.sortDirection;
+    direction.setAttribute(
+      'aria-label',
+      ui.sortDirection === 'asc' ? 'Orden ascendente' : 'Orden descendente',
+    );
+    direction.textContent = ui.sortDirection === 'asc' ? 'ASC' : 'DESC';
+  }
+
+  block.querySelectorAll('.assetslisting-sort-option').forEach((option) => {
+    option.setAttribute('aria-current', String(option.dataset.sortField === ui.sortField));
+  });
 }
 
 /**
@@ -36,14 +70,14 @@ export function applyUiState(block, ui) {
  * @param {Element} block
  * @param {{
  *   getUi: () => object, setUi: (ui: object) => void,
- *   openAsset: (path: string) => void,
+ *   openAsset: (path: string) => void, renderSorted: () => void,
  *   isSelectionMode: () => boolean, toggleSelectionMode: () => void,
  *   toggleSelect: (path: string) => void, clearSelection: () => void,
  *   closeSelection: () => void, downloadSelected: () => void
  * }} controller
  */
 export default function bindAssetsListing(block, {
-  getUi, setUi, openAsset,
+  getUi, setUi, openAsset, renderSorted,
   isSelectionMode, toggleSelectionMode, toggleSelect,
   clearSelection, closeSelection, downloadSelected,
 }) {
@@ -117,7 +151,50 @@ export default function bindAssetsListing(block, {
       const ui = setUiState({ viewMode: viewButton.dataset.viewMode });
       setUi(ui);
       applyUiState(block, ui);
+      return;
     }
+
+    const sortDirection = event.target.closest('.assetslisting-sort-direction');
+    if (sortDirection) {
+      const ui = setUiState({ sortDirection: getUi().sortDirection === 'asc' ? 'desc' : 'asc' });
+      setUi(ui);
+      applySortState(block, ui);
+      renderSorted();
+      return;
+    }
+
+    const sortOption = event.target.closest('.assetslisting-sort-option');
+    if (sortOption && sortOption.dataset.sortField) {
+      const ui = setUiState({ sortField: sortOption.dataset.sortField });
+      setUi(ui);
+      applySortState(block, ui);
+      closeAllDropdowns(block);
+      renderSorted();
+      return;
+    }
+
+    const sortTrigger = event.target.closest('.assetslisting-sort-trigger');
+    if (sortTrigger) {
+      const panel = sortTrigger.closest('.dropdown')?.querySelector('.dropdown-panel');
+      if (panel) {
+        if (isDropdownOpen(sortTrigger)) closeDropdown(sortTrigger, panel);
+        else openDropdown(sortTrigger, panel);
+      }
+      return;
+    }
+
+    // Any other click inside the block closes open dropdowns (click-outside
+    // for anything that isn't a dropdown control itself).
+    if (!event.target.closest('.dropdown')) closeAllDropdowns(block);
+  });
+
+  // Click-outside (outside the block entirely) and Escape both close open menus.
+  document.addEventListener('click', (event) => {
+    if (!block.contains(event.target)) closeAllDropdowns(block);
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeAllDropdowns(block);
   });
 
   // Keyboard activation for the focusable asset cards (role="button").
