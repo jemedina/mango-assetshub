@@ -36,6 +36,17 @@ export default function decorate(block) {
 
   const selection = createSelection(block, () => currentAssets);
 
+  // Reflects the current asset selection onto the cards; a null path clears it.
+  function markSelected(path) {
+    content.querySelectorAll('.assetslisting-card-asset[data-selected]')
+      .forEach((card) => { delete card.dataset.selected; });
+    if (!path) return;
+    const card = content.querySelector(
+      `.assetslisting-card-asset[data-asset-path="${CSS.escape(path)}"]`,
+    );
+    if (card) card.dataset.selected = 'true';
+  }
+
   // Re-sorts the already-fetched assets and re-renders — no refetch needed,
   // since sort is a pure client-side reorder of data already in memory.
   function renderSorted() {
@@ -47,17 +58,6 @@ export default function decorate(block) {
     // Cards were rebuilt: reflect any live selection back onto them.
     if (selection.isActive()) selection.refresh();
     if (detail.isOpen()) markSelected(detail.getPath());
-  }
-
-  // Reflects the current asset selection onto the cards; a null path clears it.
-  function markSelected(path) {
-    content.querySelectorAll('.assetslisting-card-asset[data-selected]')
-      .forEach((card) => { delete card.dataset.selected; });
-    if (!path) return;
-    const card = content.querySelector(
-      `.assetslisting-card-asset[data-asset-path="${CSS.escape(path)}"]`,
-    );
-    if (card) card.dataset.selected = 'true';
   }
 
   function openAsset(path) {

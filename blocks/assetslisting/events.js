@@ -16,27 +16,6 @@ import {
 import { SORT_FIELDS } from './shared/sort.js';
 
 /**
- * Reflects the current UI state onto the block via data attributes. The CSS
- * keys the layout (filters panel visibility, grid vs list) off these, and the
- * toggle controls read them back to stay in sync.
- * @param {Element} block
- * @param {{ filtersOpen: boolean, viewMode: string }} ui
- */
-export function applyUiState(block, ui) {
-  block.dataset.filtersOpen = String(ui.filtersOpen);
-  block.dataset.viewMode = ui.viewMode;
-
-  const filtersToggle = block.querySelector('.assetslisting-filters-toggle');
-  if (filtersToggle) filtersToggle.setAttribute('aria-expanded', String(ui.filtersOpen));
-
-  block.querySelectorAll('.assetslisting-viewtoggle-button').forEach((button) => {
-    button.setAttribute('aria-pressed', String(button.dataset.viewMode === ui.viewMode));
-  });
-
-  applySortState(block, ui);
-}
-
-/**
  * Reflects the current sort field/direction onto the sort control: the
  * trigger's label, the direction button's rotation, and which menu item is
  * marked current.
@@ -62,6 +41,27 @@ export function applySortState(block, ui) {
   block.querySelectorAll('.assetslisting-sort-option').forEach((option) => {
     option.setAttribute('aria-current', String(option.dataset.sortField === ui.sortField));
   });
+}
+
+/**
+ * Reflects the current UI state onto the block via data attributes. The CSS
+ * keys the layout (filters panel visibility, grid vs list) off these, and the
+ * toggle controls read them back to stay in sync.
+ * @param {Element} block
+ * @param {{ filtersOpen: boolean, viewMode: string }} ui
+ */
+export function applyUiState(block, ui) {
+  block.dataset.filtersOpen = String(ui.filtersOpen);
+  block.dataset.viewMode = ui.viewMode;
+
+  const filtersToggle = block.querySelector('.assetslisting-filters-toggle');
+  if (filtersToggle) filtersToggle.setAttribute('aria-expanded', String(ui.filtersOpen));
+
+  block.querySelectorAll('.assetslisting-viewtoggle-button').forEach((button) => {
+    button.setAttribute('aria-pressed', String(button.dataset.viewMode === ui.viewMode));
+  });
+
+  applySortState(block, ui);
 }
 
 /**
