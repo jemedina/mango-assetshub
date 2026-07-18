@@ -1,8 +1,8 @@
 /*
  * Interaction wiring for the assets listing view.
  *
- * A single delegated click handler on the block covers every control (folder
- * cards, breadcrumb links, the filters toggle and the view-mode toggle) so the
+ * A single delegated click handler on the block covers every control
+ * (breadcrumb links, the filters toggle and the view-mode toggle) so the
  * markup can be re-rendered on navigation without rebinding listeners.
  */
 
@@ -83,13 +83,6 @@ export default function bindAssetsListing(block, {
   clearSelection, closeSelection, downloadSelected,
 }) {
   block.addEventListener('click', (event) => {
-    const folderCard = event.target.closest('.assetslisting-card-folder');
-    if (folderCard && folderCard.dataset.href) {
-      // Navigating exits selection mode implicitly: the shell rebuilds per folder.
-      navigate({ view: ASSETS_LISTING_VIEW, path: folderCard.dataset.href });
-      return;
-    }
-
     const check = event.target.closest('.assetslisting-check');
     const checkCard = check && check.closest('.assetslisting-card-asset');
     if (checkCard && checkCard.dataset.assetPath) {

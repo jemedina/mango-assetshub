@@ -1,6 +1,7 @@
 /*
- * Card builders for the content grid: folder cards (navigate on click) and
- * asset cards (preview + format badge + a three-row info section).
+ * Card builder for the content grid: asset cards (preview + format badge + a
+ * three-row info section). Folders are navigated from the sidebar folder tree
+ * instead — they're never rendered here, in either grid or list view.
  *
  * List view reflows the exact same asset-card markup into a table row (see
  * cards.css): thumb, body, category, size and modified are all direct
@@ -13,34 +14,6 @@ import {
 } from '../data.js';
 import createPreview, { createBadge } from '../shared/preview.js';
 import createKeywords from '../shared/keywords.js';
-
-/**
- * Builds a folder card. The click target is the whole button; navigation is
- * wired via the delegated handler in events.js off `data-href`.
- * @param {{ path: string }} folder
- * @returns {HTMLButtonElement}
- */
-export function createFolderCard(folder) {
-  const card = document.createElement('button');
-  card.type = 'button';
-  card.className = 'assetslisting-card assetslisting-card-folder';
-  card.dataset.href = folder.path;
-
-  const thumb = document.createElement('span');
-  thumb.className = 'assetslisting-thumb assetslisting-thumb-folder';
-  thumb.setAttribute('aria-hidden', 'true');
-
-  const body = document.createElement('span');
-  body.className = 'assetslisting-body';
-
-  const name = document.createElement('span');
-  name.className = 'assetslisting-name';
-  name.textContent = displayLabel(folder);
-  body.append(name);
-
-  card.append(thumb, body);
-  return card;
-}
 
 function fact(className, text) {
   const span = document.createElement('span');

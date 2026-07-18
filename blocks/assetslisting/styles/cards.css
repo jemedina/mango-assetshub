@@ -119,19 +119,6 @@
   height: 80px;
 }
 
-.assetslisting-card-folder {
-  color: inherit;
-  cursor: pointer;
-  font: inherit;
-  transition: var(--ah-transition);
-}
-
-.assetslisting-card-folder:hover,
-.assetslisting-card-folder:focus-visible {
-  border-color: var(--ah-accent);
-  outline: none;
-}
-
 /* ================================================================== preview === */
 
 .assetslisting-thumb {
@@ -218,15 +205,10 @@
   background: var(--ah-tag-amber);
 }
 
-.assetslisting-thumb.is-empty::after,
-.assetslisting-thumb-folder::after {
+.assetslisting-thumb.is-empty::after {
   font-size: 32px;
   line-height: 1;
   content: "🖼️";
-}
-
-.assetslisting-thumb-folder::after {
-  content: "📁";
 }
 
 /* ===================================================================== info === */

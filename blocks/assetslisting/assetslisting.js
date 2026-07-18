@@ -31,7 +31,6 @@ export default function decorate(block) {
   let content = null;
   let detail = null;
   let currentAssets = [];
-  let currentFolders = [];
   let seq = 0;
 
   const selection = createSelection(block, () => currentAssets);
@@ -52,9 +51,8 @@ export default function decorate(block) {
   function renderSorted() {
     if (!content) return;
     renderContent(content, {
-      folders: currentFolders,
       assets: sortAssets(currentAssets, ui.sortField, ui.sortDirection),
-    }, ui.viewMode);
+    });
     // Cards were rebuilt: reflect any live selection back onto them.
     if (selection.isActive()) selection.refresh();
     if (detail.isOpen()) markSelected(detail.getPath());
@@ -168,7 +166,6 @@ export default function decorate(block) {
       const data = await fetchAssetsList(path);
       if (current !== seq) return;
       currentAssets = data.assets || [];
-      currentFolders = data.folders || [];
       renderSorted();
       const count = block.querySelector('.assetslisting-count');
       if (count) count.textContent = `${currentAssets.length} assets`;
