@@ -78,3 +78,9 @@
   flex-shrink: 0;
   gap: var(--ah-space-s);
 }
+
+/* the selection bar takes over the topbar while active — upload/select would
+   otherwise sit awkwardly alongside it. */
+.assetslisting[data-selection-mode="true"] .assetslisting-actions {
+  display: none;
+}

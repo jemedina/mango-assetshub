@@ -37,7 +37,14 @@ function renderIcon(thumb, format) {
   thumb.append(icon, ext);
 }
 
-function createBadge(format) {
+/**
+ * Builds the uppercase format badge chip (colored per format via CSS, keyed
+ * off `data-format`). Exported so list view can render its own soft-tinted
+ * variant next to the name instead of the solid one overlaid on the thumb.
+ * @param {string} format short format label (see formatLabel)
+ * @returns {HTMLElement}
+ */
+export function createBadge(format) {
   const badge = document.createElement('span');
   badge.className = 'assetslisting-format-badge';
   badge.dataset.format = format;

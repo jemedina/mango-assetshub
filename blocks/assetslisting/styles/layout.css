@@ -85,6 +85,13 @@
   min-width: 0;
 }
 
+/* List view is a full-bleed table per Figma (each row carries its own
+   10.5px/17.5px padding) — the hub shell's outer page padding must not add
+   extra whitespace around it the way it does for the card grid. */
+.hub-view:has(.assetslisting[data-view-mode="list"]) {
+  padding: 0;
+}
+
 /* The detail panel is fixed to the viewport (out of flow), so when open the grid
    reserves its width plus a gap on the right to keep cards clear of it. */
 .assetslisting[data-detail-open="true"] .assetslisting-content {

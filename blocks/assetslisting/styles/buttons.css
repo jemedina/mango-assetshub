@@ -56,7 +56,10 @@
   outline: none;
 }
 
+/* mirrors .assetslisting-filters-toggle's hover/active treatment (subtle
+   surface-muted tint, no border-color swap) — these buttons sit inside the
+   segmented control's own border, so they never carry one of their own. */
 .assetslisting-viewtoggle-button[aria-pressed="true"] {
-  background: var(--ah-accent);
-  color: var(--ah-on-accent);
+  background: var(--ah-surface-muted);
+  color: var(--ah-text);
 }

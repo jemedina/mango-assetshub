@@ -71,14 +71,15 @@ export function applyUiState(block, ui) {
  * @param {{
  *   getUi: () => object, setUi: (ui: object) => void,
  *   openAsset: (path: string) => void, renderSorted: () => void,
- *   isSelectionMode: () => boolean, toggleSelectionMode: () => void,
+ *   isSelectionMode: () => boolean, enterSelectionMode: () => void,
+ *   toggleSelectionMode: () => void,
  *   toggleSelect: (path: string) => void, clearSelection: () => void,
  *   closeSelection: () => void, downloadSelected: () => void
  * }} controller
  */
 export default function bindAssetsListing(block, {
   getUi, setUi, openAsset, renderSorted,
-  isSelectionMode, toggleSelectionMode, toggleSelect,
+  isSelectionMode, enterSelectionMode, toggleSelectionMode, toggleSelect,
   clearSelection, closeSelection, downloadSelected,
 }) {
   block.addEventListener('click', (event) => {
@@ -89,9 +90,22 @@ export default function bindAssetsListing(block, {
       return;
     }
 
+    const check = event.target.closest('.assetslisting-check');
+    const checkCard = check && check.closest('.assetslisting-card-asset');
+    if (checkCard && checkCard.dataset.assetPath) {
+      // The checkbox is how selection mode gets triggered in grid view (a
+      // click activates it if it wasn't already on) and always toggles that
+      // one asset's pick state. Several assets can be picked at once this
+      // way, in both grid and list view.
+      enterSelectionMode();
+      toggleSelect(checkCard.dataset.assetPath);
+      return;
+    }
+
     const assetCard = event.target.closest('.assetslisting-card-asset');
     if (assetCard && assetCard.dataset.assetPath) {
-      // In selection mode a card click only picks/unpicks; it no longer opens.
+      // In selection mode the detail panel must never open — every click on
+      // the card (not just the checkbox) picks/unpicks instead.
       if (isSelectionMode()) toggleSelect(assetCard.dataset.assetPath);
       else openAsset(assetCard.dataset.assetPath);
       return;
@@ -151,6 +165,9 @@ export default function bindAssetsListing(block, {
       const ui = setUiState({ viewMode: viewButton.dataset.viewMode });
       setUi(ui);
       applyUiState(block, ui);
+      // List view excludes folders from the rendered rows (see content.js),
+      // so switching modes needs an actual re-render, not just the CSS flip.
+      renderSorted();
       return;
     }
 

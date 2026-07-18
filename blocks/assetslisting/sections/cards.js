@@ -1,12 +1,17 @@
 /*
  * Card builders for the content grid: folder cards (navigate on click) and
  * asset cards (preview + format badge + a three-row info section).
+ *
+ * List view reflows the exact same asset-card markup into a table row (see
+ * cards.css): thumb, body, category, size and modified are all direct
+ * children of the card, mapped 1:1 onto CSS Grid columns — no wrapper
+ * elements needed, so there's nothing that can get auto-placed oddly.
  */
 
 import {
-  displayLabel, formatSizeMb, formatDate,
+  displayLabel, formatLabel, formatSizeMb, formatDate,
 } from '../data.js';
-import createPreview from '../shared/preview.js';
+import createPreview, { createBadge } from '../shared/preview.js';
 import createKeywords from '../shared/keywords.js';
 
 /**
@@ -44,17 +49,32 @@ function fact(className, text) {
   return span;
 }
 
+const NO_VALUE = '—';
+
 /**
- * The card's three-row info section: title, then size (left) and date (right),
- * then keyword chips.
+ * The card's info section: a name row (name + format badge — the badge only
+ * shows here in list view; in grid view it stays overlaid on the thumbnail),
+ * then size (left) and date (right) — grid view only, list view shows these
+ * in their own dedicated columns instead — then keyword chips.
  */
 function createInfo(asset) {
   const body = document.createElement('figcaption');
   body.className = 'assetslisting-body';
 
+  const nameRow = document.createElement('span');
+  nameRow.className = 'assetslisting-name-row';
+
   const name = document.createElement('span');
   name.className = 'assetslisting-name';
   name.textContent = displayLabel(asset);
+  nameRow.append(name);
+
+  const format = formatLabel(asset.format);
+  if (format) {
+    const badge = createBadge(format);
+    badge.classList.add('assetslisting-name-badge');
+    nameRow.append(badge);
+  }
 
   const facts = document.createElement('span');
   facts.className = 'assetslisting-facts';
@@ -63,12 +83,31 @@ function createInfo(asset) {
     fact('assetslisting-date', formatDate(asset.uploaded)),
   );
 
-  body.append(name, facts);
+  body.append(nameRow, facts);
 
   const keywords = createKeywords(asset.tags, asset.smartTags);
   if (keywords) body.append(keywords);
 
   return body;
+}
+
+/**
+ * List-view-only column cells: category (Subcarpetas) and size/date, each a
+ * standalone element — siblings of thumb/body, not nested inside them, so
+ * they map straight onto their own CSS Grid column.
+ *
+ * The listing endpoint has no dedicated "subcarpeta" field yet, so category
+ * borrows the asset's first DAM keyword tag as a best-effort stand-in — real
+ * data, just not guaranteed to mean the same thing a dedicated field
+ * eventually would.
+ * @param {Object} asset
+ * @returns {HTMLElement[]}
+ */
+function createListColumns(asset) {
+  const category = fact('assetslisting-category', asset.tags?.[0] || NO_VALUE);
+  const size = fact('assetslisting-size-cell', formatSizeMb(asset.size) || NO_VALUE);
+  const modified = fact('assetslisting-modified-cell', formatDate(asset.uploaded) || NO_VALUE);
+  return [category, size, modified];
 }
 
 /**
@@ -92,6 +131,11 @@ export function createAssetCard(asset) {
   check.className = 'assetslisting-check';
   check.setAttribute('aria-hidden', 'true');
 
-  card.append(check, createPreview(asset, { badge: true }), createInfo(asset));
+  card.append(
+    check,
+    createPreview(asset, { badge: true }),
+    createInfo(asset),
+    ...createListColumns(asset),
+  );
   return card;
 }

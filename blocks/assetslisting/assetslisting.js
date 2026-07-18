@@ -54,7 +54,7 @@ export default function decorate(block) {
     renderContent(content, {
       folders: currentFolders,
       assets: sortAssets(currentAssets, ui.sortField, ui.sortDirection),
-    });
+    }, ui.viewMode);
     // Cards were rebuilt: reflect any live selection back onto them.
     if (selection.isActive()) selection.refresh();
     if (detail.isOpen()) markSelected(detail.getPath());
@@ -68,19 +68,23 @@ export default function decorate(block) {
     markSelected(path);
   }
 
-  // Enter/leave selection mode. Entering closes the detail panel so the two
-  // "picked asset" concepts (open detail vs multi-select) never collide.
-  function toggleSelectionMode() {
-    if (selection.isActive()) {
-      selection.exit();
-      return;
-    }
+  // Enter selection mode (no-op if already active). Closes the detail panel
+  // first so the two "picked asset" concepts (open detail vs multi-select)
+  // never collide. Exposed separately from the toggle below so a checkbox
+  // click can activate selection mode without risking exiting it again.
+  function enterSelectionMode() {
+    if (selection.isActive()) return;
     if (detail.isOpen()) {
       detail.close();
       block.dataset.detailOpen = 'false';
       markSelected(null);
     }
     selection.enter();
+  }
+
+  function toggleSelectionMode() {
+    if (selection.isActive()) selection.exit();
+    else enterSelectionMode();
   }
 
   // Best-effort bulk download: one download link per selected asset, mirroring
@@ -122,6 +126,7 @@ export default function decorate(block) {
     openAsset,
     renderSorted,
     isSelectionMode: () => selection.isActive(),
+    enterSelectionMode,
     toggleSelectionMode,
     toggleSelect: (path) => selection.toggle(path),
     clearSelection: () => selection.clear(),
