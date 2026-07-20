@@ -20,15 +20,18 @@ import { formatSizeMb } from './data.js';
  *   navigation, so the controller re-resolves nodes on every apply()).
  * @param {() => Array<{ path: string, size?: number }>} getAssets Current folder
  *   assets, used to sum the selected sizes.
+ * @param {() => Array<{ path: string }>} [getFolders] Current subfolders, used to
+ *   tell folder picks apart (a folder selection always shares, never downloads).
  * @returns {{
  *   isActive: () => boolean,
  *   enter: () => void, exit: () => void,
  *   clear: () => void, reset: () => void, refresh: () => void,
  *   toggle: (path: string) => void,
  *   selectedPaths: () => string[],
+ *   hasFolderSelected: () => boolean,
  * }}
  */
-export default function createSelection(block, getAssets) {
+export default function createSelection(block, getAssets, getFolders = () => []) {
   const selected = new Set();
   let active = false;
 
@@ -38,6 +41,10 @@ export default function createSelection(block, getAssets) {
     return getAssets().reduce((sum, asset) => (
       selected.has(asset.path) && typeof asset.size === 'number' ? sum + asset.size : sum
     ), 0);
+  }
+
+  function hasFolderSelected() {
+    return getFolders().some((folder) => selected.has(folder.path));
   }
 
   // Single writer: push the whole selection state onto the block, the selection
@@ -60,12 +67,14 @@ export default function createSelection(block, getAssets) {
     const sizeLabel = q('.assetslisting-selection-size');
     if (sizeLabel) sizeLabel.textContent = `${formatSizeMb(totalBytes()) || '0 MB'} en total`;
 
-    // The primary bulk action morphs by count: a single asset downloads, but
-    // more than one shares (an anonymous link is cheaper than N download hits and
-    // is the natural multi-asset gesture). The controller reads the same rule.
+    // The primary bulk action morphs by content: a single asset downloads, but
+    // more than one — or any folder — shares (an anonymous link is cheaper than
+    // N download hits and a folder cannot download directly). The controller
+    // reads the same rule.
     const download = q('.assetslisting-selection-download');
     if (download) {
-      download.textContent = count > 1 ? `Compartir (${count})` : `Descargar (${count})`;
+      const shares = count > 1 || hasFolderSelected();
+      download.textContent = shares ? `Compartir (${count})` : `Descargar (${count})`;
       download.disabled = count === 0;
     }
 
@@ -78,6 +87,12 @@ export default function createSelection(block, getAssets) {
       else delete card.dataset.checked;
       if (active) card.setAttribute('aria-pressed', String(checked));
       else card.removeAttribute('aria-pressed');
+    });
+
+    block.querySelectorAll('.assetslisting-card-folder').forEach((card) => {
+      const checked = active && selected.has(card.dataset.href);
+      if (checked) card.dataset.checked = 'true';
+      else delete card.dataset.checked;
     });
   }
 
@@ -122,5 +137,7 @@ export default function createSelection(block, getAssets) {
     refresh: apply,
 
     selectedPaths: () => [...selected],
+
+    hasFolderSelected,
   };
 }

@@ -175,6 +175,7 @@ p.button-wrapper {
   width: 10px;
   height: 10px;
   transition: transform 0.15s ease;
+
   /* closed: pointing right */
   transform: rotate(-90deg);
 }

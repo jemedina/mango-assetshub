@@ -3,7 +3,7 @@
  * (loading / empty / error) rendered into the same region.
  */
 
-import { createAssetCard } from './cards.js';
+import { createFolderCard, createAssetCard } from './cards.js';
 
 /**
  * Builds a single-line state message (loading, empty, error).
@@ -39,22 +39,24 @@ function createListHeader() {
 }
 
 /**
- * Renders the asset grid (or the empty state) into the content region.
- * Folders are never mixed in here — they're navigated from the sidebar folder
- * tree instead, in both grid and list view.
+ * Renders the folder/asset grid (or the empty state) into the content region.
+ * Folders are listed first, then assets of every format (images preview inline,
+ * everything else shows a file-type icon), both in grid and list view.
  * @param {Element} content The `.assetslisting-content` element
- * @param {{ assets?: Array }} data
+ * @param {{ folders?: Array, assets?: Array }} data
  */
 export function renderContent(content, data) {
+  const folders = data.folders || [];
   const assets = data.assets || [];
 
-  if (!assets.length) {
+  if (!folders.length && !assets.length) {
     content.replaceChildren(createState('Esta carpeta está vacía'));
     return;
   }
 
   const grid = document.createElement('div');
   grid.className = 'assetslisting-grid';
+  folders.forEach((folder) => grid.append(createFolderCard(folder)));
   assets.forEach((asset) => grid.append(createAssetCard(asset)));
 
   content.replaceChildren(createListHeader(), grid);

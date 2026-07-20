@@ -70,6 +70,18 @@
   color: #c0392b;
 }
 
+.assetslisting-share-status.is-warning {
+  color: #b9770e;
+}
+
+/* Buttons shown when the user must provision their author account first. */
+.assetslisting-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ah-space-s);
+  margin-top: var(--ah-space-m);
+}
+
 .assetslisting-share-field {
   display: flex;
   gap: var(--ah-space-s);

@@ -26,8 +26,23 @@
   outline: none;
 }
 
+/* folder card is a <button>, so it resets the inherited button chrome */
+.assetslisting-card-folder {
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  transition: var(--ah-transition);
+}
+
+.assetslisting-card-folder:hover,
+.assetslisting-card-folder:focus-visible {
+  border-color: var(--ah-accent);
+  outline: none;
+}
+
 .assetslisting-card-asset[data-selected="true"],
-.assetslisting-card-asset[data-checked="true"] {
+.assetslisting-card-asset[data-checked="true"],
+.assetslisting-card-folder[data-checked="true"] {
   border-color: var(--ah-accent);
   box-shadow: 0 0 0 1px var(--ah-accent);
 }
@@ -52,6 +67,12 @@
   display: block;
 }
 
+.assetslisting-card-asset[data-checked="true"] .assetslisting-check,
+.assetslisting-card-folder[data-checked="true"] .assetslisting-check {
+  border-color: var(--ah-accent);
+  background: var(--ah-accent);
+}
+
 /* grid view: the checkbox is also a discovery affordance — hovering (or
    focusing) a card reveals it even before selection mode is active, so
    clicking it is how selection mode gets triggered in the first place. List
@@ -62,13 +83,9 @@
   display: block;
 }
 
-.assetslisting-card-asset[data-checked="true"] .assetslisting-check {
-  border-color: var(--ah-accent);
-  background: var(--ah-accent);
-}
-
 /* checkmark drawn as a rotated border-corner */
-.assetslisting-card-asset[data-checked="true"] .assetslisting-check::after {
+.assetslisting-card-asset[data-checked="true"] .assetslisting-check::after,
+.assetslisting-card-folder[data-checked="true"] .assetslisting-check::after {
   content: "";
   position: absolute;
   top: 2px;
@@ -94,15 +111,6 @@
 .assetslisting-card-asset:hover .assetslisting-thumb::after,
 .assetslisting-card-asset:focus-visible .assetslisting-thumb::after {
   opacity: 1;
-}
-
-.assetslisting-thumb:not(.assetslisting-thumb-file) img {
-  transition: transform 0.2s ease;
-}
-
-.assetslisting-card-asset:hover .assetslisting-thumb:not(.assetslisting-thumb-file) img,
-.assetslisting-card-asset:focus-visible .assetslisting-thumb:not(.assetslisting-thumb-file) img {
-  transform: scale(1.05);
 }
 
 /* Info section: a fixed 80px band holding the name, size/date facts and keywords. */
@@ -149,6 +157,17 @@
   width: 35px;
   height: 35px;
   object-fit: contain;
+}
+
+/* Hover zoom, non-file thumbnails only (declared after the base img rules so
+   specificity ascends — see stylelint no-descending-specificity). */
+.assetslisting-thumb:not(.assetslisting-thumb-file) img {
+  transition: transform 0.2s ease;
+}
+
+.assetslisting-card-asset:hover .assetslisting-thumb:not(.assetslisting-thumb-file) img,
+.assetslisting-card-asset:focus-visible .assetslisting-thumb:not(.assetslisting-thumb-file) img {
+  transform: scale(1.05);
 }
 
 .assetslisting-thumb-ext {
@@ -205,10 +224,15 @@
   background: var(--ah-tag-amber);
 }
 
-.assetslisting-thumb.is-empty::after {
+.assetslisting-thumb.is-empty::after,
+.assetslisting-thumb-folder::after {
   font-size: 32px;
   line-height: 1;
   content: "🖼️";
+}
+
+.assetslisting-thumb-folder::after {
+  content: "📁";
 }
 
 /* ===================================================================== info === */
@@ -328,6 +352,15 @@
   border-radius: 0;
 }
 
+/* asset row becomes a grid with the same columns as the header */
+.assetslisting[data-view-mode="list"] .assetslisting-card-asset {
+  display: grid;
+  grid-template-columns: var(--ah-list-columns);
+  align-items: center;
+  gap: 14px;
+  padding: 10.5px 17.5px;
+}
+
 /* the divider border-color above outranks the base hover/focus rule's
    specificity — list view's hover is background-only (no accent border,
    that's a grid-view affordance), so this keeps the divider color unchanged
@@ -363,8 +396,10 @@
   text-align: right;
 }
 
-/* asset row becomes a grid with the same columns as the header */
-.assetslisting[data-view-mode="list"] .assetslisting-card-asset {
+/* folder rows share the asset row's column grid so folders and assets line up
+   in list view; a folder has no category/size/date, so its trailing columns
+   stay empty (check, thumb and name fill the first three). */
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder {
   display: grid;
   grid-template-columns: var(--ah-list-columns);
   align-items: center;
@@ -372,10 +407,31 @@
   padding: 10.5px 17.5px;
 }
 
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-thumb {
+  flex: none;
+  width: 35px;
+  height: 35px;
+  border-radius: 3.5px;
+}
+
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-thumb-folder::after {
+  font-size: 20px;
+}
+
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-body {
+  height: auto;
+  min-width: 0;
+  padding: 0;
+}
+
 /* checkbox: floats over the thumbnail corner in grid view; in list view it's
    a normal grid item (column 1), its own smaller size per the Figma table.
    Unlike grid view (hidden until hover/selection mode), the table's checkbox
-   column is always visible — clicking it is what activates selection mode. */
+   column is always visible — clicking it is what activates selection mode.
+   Lower specificity than the grid-view hover rule above, but the two are
+   mutually exclusive (grid vs list view mode), so there is no real cascade
+   conflict for no-descending-specificity to catch. */
+/* stylelint-disable-next-line no-descending-specificity */
 .assetslisting[data-view-mode="list"] .assetslisting-check {
   /* relative (not static): it still needs to be the positioned ancestor for
      its own ::after checkmark, or that positions against the card instead. */

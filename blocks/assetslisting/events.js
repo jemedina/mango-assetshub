@@ -95,6 +95,16 @@ export default function bindAssetsListing(block, {
       return;
     }
 
+    const folderCard = event.target.closest('.assetslisting-card-folder');
+    if (folderCard && folderCard.dataset.href) {
+      // In selection mode a folder click picks/unpicks the whole folder (a
+      // folder selection shares it complete); outside it, it navigates — and
+      // navigating exits selection mode implicitly: the shell rebuilds per folder.
+      if (isSelectionMode()) toggleSelect(folderCard.dataset.href);
+      else navigate({ view: ASSETS_LISTING_VIEW, path: folderCard.dataset.href });
+      return;
+    }
+
     const assetCard = event.target.closest('.assetslisting-card-asset');
     if (assetCard && assetCard.dataset.assetPath) {
       // In selection mode the detail panel must never open — every click on

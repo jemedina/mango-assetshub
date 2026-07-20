@@ -14,6 +14,7 @@
   padding: 0 var(--ah-topbar-inset);
   background: var(--ah-selectionbar-bg);
   border-top: 1px solid var(--ah-border-color);
+
   /* [hidden] -> shown flips display:none to flex, which re-triggers this on
      every appearance (a plain transition can't animate out of display:none). */
   animation: assetslisting-selectionbar-in 0.2s ease-out;
