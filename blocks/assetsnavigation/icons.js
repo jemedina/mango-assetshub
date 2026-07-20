@@ -29,3 +29,8 @@ export const ICON_FOLDER = `<svg viewBox="0 0 10 10" fill="none" xmlns="http://w
 export const ICON_CHEVRON = `<svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M2.5 3.75L5 6.25L7.5 3.75" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+
+export const ICON_COLLECTIONS = `<svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M4.66667 2.33333H11.6667C12.219 2.33333 12.6667 2.78105 12.6667 3.33333V8.16667" stroke="currentColor" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3.5 4.66667H10.5C11.0523 4.66667 11.5 5.11438 11.5 5.66667V10.5C11.5 11.0523 11.0523 11.5 10.5 11.5H3.5C2.94772 11.5 2.5 11.0523 2.5 10.5V5.66667C2.5 5.11438 2.94772 4.66667 3.5 4.66667Z" stroke="currentColor" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;

@@ -100,8 +100,17 @@ export default function bindAssetsListing(block, {
       // In selection mode a folder click picks/unpicks the whole folder (a
       // folder selection shares it complete); outside it, it navigates — and
       // navigating exits selection mode implicitly: the shell rebuilds per folder.
-      if (isSelectionMode()) toggleSelect(folderCard.dataset.href);
-      else navigate({ view: ASSETS_LISTING_VIEW, path: folderCard.dataset.href });
+      if (isSelectionMode()) {
+        toggleSelect(folderCard.dataset.href);
+      } else {
+        // Inside a collection, keep the collection context so the breadcrumb
+        // stays rooted at it as the user steps into member folders.
+        const { filters } = getRoute();
+        const carry = filters.collection
+          ? { collection: filters.collection, collabel: filters.collabel }
+          : {};
+        navigate({ view: ASSETS_LISTING_VIEW, path: folderCard.dataset.href, filters: carry });
+      }
       return;
     }
 
@@ -115,8 +124,12 @@ export default function bindAssetsListing(block, {
     }
 
     const crumb = event.target.closest('.assetslisting-breadcrumb-link');
-    if (crumb && crumb.dataset.href) {
-      navigate({ view: ASSETS_LISTING_VIEW, path: crumb.dataset.href });
+    if (crumb && crumb.dataset.route) {
+      try {
+        navigate(JSON.parse(crumb.dataset.route));
+      } catch {
+        // ignore malformed route payloads
+      }
       return;
     }
 

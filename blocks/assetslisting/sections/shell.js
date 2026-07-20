@@ -13,9 +13,10 @@ import createFiltersPanel from './filters.js';
  * Builds the full listing shell.
  * @param {string} path Current DAM path
  * @param {{ filtersOpen: boolean, viewMode: string }} ui
+ * @param {{ id: string, label: string }|null} [collection] active collection context
  * @returns {{ fragment: DocumentFragment, content: Element, workspace: Element }}
  */
-export default function renderShell(path, ui) {
+export default function renderShell(path, ui, collection = null) {
   const fragment = document.createDocumentFragment();
 
   const panel = createFiltersPanel();
@@ -38,7 +39,7 @@ export default function renderShell(path, ui) {
   // selection bar sits between them and stays hidden until selection mode is on.
   const topbar = document.createElement('div');
   topbar.className = 'assetslisting-topbar';
-  topbar.append(createActionsBar(path), createSelectionBar(), createOptionsBar(ui));
+  topbar.append(createActionsBar(path, collection), createSelectionBar(), createOptionsBar(ui));
 
   main.append(topbar, workspace);
   fragment.append(panel, main);

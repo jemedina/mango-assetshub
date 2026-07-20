@@ -7,7 +7,12 @@
  * its fragment under /hub-fragments/<view>; nothing else needs to change.
  */
 
-/** View id of the assets listing — the view blocks navigate to most. */
+/**
+ * View id of the assets listing — the view blocks navigate to most. It also
+ * renders an open collection (folders + assets) when the route carries a
+ * `collection` filter; the block reuses the same grid and only swaps the data
+ * source and breadcrumb, so no separate view/fragment is needed.
+ */
 export const ASSETS_LISTING_VIEW = 'assets-listing';
 
 /** View loaded when the route has no (or an unknown) view. */
