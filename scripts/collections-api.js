@@ -20,9 +20,12 @@ const CSRF_TOKEN_ENDPOINT = '/libs/granite/csrf/token.json';
 
 /**
  * Fetches the collections the current user may see.
+ * Smart collections (saved searches) are included alongside regular ones and
+ * flagged with `smart: true`; their `count`/`thumbnail` are resolved by running
+ * the saved query on publish with the user's session.
  * @returns {Promise<{ collections: Array<{
  *   id: string, title: string, description?: string, createdBy?: string,
- *   public: boolean, count: number, thumbnail?: string }> }>}
+ *   public: boolean, smart: boolean, count: number, thumbnail?: string }> }>}
  */
 export async function fetchCollections() {
   const url = new URL(COLLECTIONS_ENDPOINT, window.location);
@@ -37,7 +40,8 @@ export async function fetchCollections() {
  * Fetches a single collection's members, in the same shape as the folder listing
  * ({@code folders} + {@code assets}), so the same card grid can paint them.
  * @param {string} id collection id (jcr:uuid or path)
- * @returns {Promise<{ id: string, title: string, public: boolean, folders: Array, assets: Array }>}
+ * @returns {Promise<{ id: string, title: string, public: boolean, smart: boolean,
+ *   folders: Array, assets: Array }>}
  */
 export async function fetchCollectionItems(id) {
   const url = new URL(COLLECTION_ITEMS_ENDPOINT, window.location);
