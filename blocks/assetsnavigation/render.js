@@ -6,7 +6,7 @@
  */
 
 import { primaryNavItems, startLogin } from './data.js';
-import { ICON_FOLDER, ICON_CHEVRON } from './icons.js';
+import { ICON_FOLDER, ICON_CHEVRON, ICON_COLLECTIONS } from './icons.js';
 
 function createButton(className, text, attributes = {}) {
   const button = document.createElement('button');
@@ -195,10 +195,119 @@ function createFolders(folders = []) {
   return section;
 }
 
+// -------------------------------------------------------------- collections
+
+/** Loading / empty state row for the collections list (shares folder-state styling). */
+function collectionState(message) {
+  const state = document.createElement('li');
+  state.className = 'assetsnavigation-folder-state';
+  state.textContent = message;
+  return state;
+}
+
+function createCollectionsToggle() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'ah-button-nav ah-button-nav-section assetsnavigation-collections-toggle';
+  button.id = 'assetsnavigation-collections-toggle';
+  // Expanded by default: the collections list is the point of the section, so it
+  // shows without a click (still collapsible, like "Carpetas").
+  button.setAttribute('aria-expanded', 'true');
+  button.setAttribute('aria-controls', 'assetsnavigation-collections-list');
+
+  const group = document.createElement('span');
+  group.className = 'ah-button-nav-group';
+
+  const icon = document.createElement('span');
+  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = ICON_COLLECTIONS;
+
+  const label = document.createElement('span');
+  label.textContent = 'Colecciones';
+
+  group.append(icon, label);
+
+  const chevron = document.createElement('span');
+  chevron.className = 'ah-button-nav-chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+  chevron.innerHTML = ICON_CHEVRON;
+
+  button.append(group, chevron);
+  return button;
+}
+
+/**
+ * One collection row: same shape as a folder row (icon + label), plus a small
+ * "Privada" badge so the private/public split the backend resolves is visible.
+ * Clicking opens the collection (wired by the delegated handler in events.js off
+ * the data-collection-* attributes).
+ * @param {{ id: string, label: string, public?: boolean }} collection
+ */
+export function createCollectionItem(collection) {
+  const item = document.createElement('li');
+  item.className = 'assetsnavigation-collection-item';
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'assetsnavigation-collection-button';
+  button.dataset.collectionId = collection.id;
+  button.dataset.collectionLabel = collection.label;
+  button.dataset.visibility = collection.public ? 'public' : 'private';
+  button.setAttribute('aria-current', 'false');
+
+  const icon = document.createElement('span');
+  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = ICON_COLLECTIONS;
+
+  const label = document.createElement('span');
+  label.className = 'assetsnavigation-collection-label';
+  label.textContent = collection.label;
+
+  const group = document.createElement('span');
+  group.className = 'ah-button-nav-group';
+  group.append(icon, label);
+  button.append(group);
+
+  if (!collection.public) {
+    const badge = document.createElement('span');
+    badge.className = 'assetsnavigation-collection-badge';
+    badge.textContent = 'Privada';
+    button.append(badge);
+  }
+
+  item.append(button);
+  return item;
+}
+
+export function renderCollectionsList(list, collections) {
+  list.replaceChildren();
+  if (!collections.length) {
+    list.append(collectionState('No hay colecciones disponibles'));
+    return;
+  }
+  collections.forEach((collection) => list.append(createCollectionItem(collection)));
+}
+
+function createCollections() {
+  const section = document.createElement('section');
+  section.className = 'assetsnavigation-collections';
+  section.setAttribute('aria-labelledby', 'assetsnavigation-collections-toggle');
+
+  const list = document.createElement('ul');
+  list.id = 'assetsnavigation-collections-list';
+  list.className = 'assetsnavigation-collection-list';
+  list.append(collectionState('Cargando colecciones...'));
+
+  section.append(createCollectionsToggle(), list);
+  return section;
+}
+
 function createContent(folders) {
   const content = document.createElement('div');
   content.className = 'assetsnavigation-content';
-  content.append(createPrimaryNav(), createFolders(folders));
+  content.append(createPrimaryNav(), createCollections(), createFolders(folders));
   return content;
 }
 

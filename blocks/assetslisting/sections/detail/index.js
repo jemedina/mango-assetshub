@@ -22,9 +22,10 @@ function stateMessage(message) {
 
 /**
  * Creates a detail-panel controller.
- * @param {{ onClose?: () => void }} [options] onClose fires when the user
- *   dismisses the panel from within (the close button), so the host can clear
- *   its selection state.
+ * @param {{ onClose?: () => void, onAddToCollection?: (asset: Object) => void }} [options]
+ *   onClose fires when the user dismisses the panel from within (the close
+ *   button), so the host can clear its selection state; onAddToCollection fires
+ *   with the open asset when the "Añadir a colección" action is used.
  * @returns {{
  *   root: HTMLElement, open: (asset: Object) => void, close: () => void,
  *   isOpen: () => boolean, getPath: () => (string|null)
@@ -140,6 +141,11 @@ export default function createDetailController(options = {}) {
         break;
       case 'detail-share':
         share();
+        break;
+      case 'detail-add-to-collection':
+        if (currentAsset && currentAsset.path && options.onAddToCollection) {
+          options.onAddToCollection(currentAsset);
+        }
         break;
       default:
         // 'detail-edit' is intentionally a no-op for now.

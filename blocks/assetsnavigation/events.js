@@ -22,7 +22,8 @@ import { navigate, subscribeRoute } from '../../scripts/router.js';
 import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 import { DAM_ROOT } from '../../scripts/assets-api.js';
 
-const NAV_SELECTOR = '.assetsnavigation-link, .assetsnavigation-folder-button';
+const NAV_SELECTOR = '.assetsnavigation-link, .assetsnavigation-folder-button, '
+  + '.assetsnavigation-collection-button';
 const MAX_REVEAL_PATHS = 64;
 
 function setActiveNav(block, activeButton) {
@@ -38,7 +39,21 @@ function findFolderButton(block, path) {
   );
 }
 
+function findCollectionButton(block, id) {
+  if (!id) return null;
+  return block.querySelector(
+    `.assetsnavigation-collection-button[data-collection-id="${CSS.escape(id)}"]`,
+  );
+}
+
 export function highlightRoute(block, route) {
+  // A collection is open (assets-listing carrying a collection filter) -> the
+  // collection is the logical root, so highlight it, not any folder.
+  if (route.view === ASSETS_LISTING_VIEW && route.filters?.collection) {
+    setActiveNav(block, findCollectionButton(block, route.filters.collection));
+    return;
+  }
+
   // assets-listing scoped to a folder -> highlight that folder if it's rendered.
   if (route.view === ASSETS_LISTING_VIEW && route.path) {
     setActiveNav(block, findFolderButton(block, route.path));
@@ -171,6 +186,27 @@ export default function bindAssetsNavigation(block) {
     const foldersToggle = event.target.closest('.assetsnavigation-folders-toggle');
     if (foldersToggle && block.contains(foldersToggle)) {
       toggleControlledGroup(foldersToggle);
+      return;
+    }
+
+    const collectionsToggle = event.target.closest('.assetsnavigation-collections-toggle');
+    if (collectionsToggle && block.contains(collectionsToggle)) {
+      toggleControlledGroup(collectionsToggle);
+      return;
+    }
+
+    // Collection -> open it in the assets-listing view (reusing the same grid),
+    // carrying a collection filter so the block swaps the data source and roots
+    // the breadcrumb at the collection.
+    const collectionButton = event.target.closest('.assetsnavigation-collection-button');
+    if (collectionButton && block.contains(collectionButton)) {
+      const { collectionId, collectionLabel } = collectionButton.dataset;
+      if (collectionId) {
+        navigate({
+          view: ASSETS_LISTING_VIEW,
+          filters: { collection: collectionId, collabel: collectionLabel || 'Colección' },
+        });
+      }
       return;
     }
 

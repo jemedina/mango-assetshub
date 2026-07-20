@@ -1,0 +1,160 @@
+/* ===================================================== add-to-collection === */
+
+/* Mirrors the share dialog chrome: a compact picker of the user's collections
+   with a client-side search box. Renders in the top layer, class-scoped. */
+.assetslisting-addcol {
+  width: min(480px, calc(100vw - 2 * var(--ah-space-l)));
+  max-height: min(70vh, 640px);
+  padding: 0;
+  border: 1px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-m);
+  background: var(--ah-surface);
+  color: var(--ah-text);
+}
+
+.assetslisting-addcol::backdrop {
+  background: rgb(0 0 0 / 45%);
+}
+
+.assetslisting-addcol-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-m);
+  padding: var(--ah-space-l) var(--ah-space-xl);
+  border-bottom: 1px solid var(--ah-border-color);
+}
+
+.assetslisting-addcol-title {
+  margin: 0;
+  font-size: var(--ah-font-xl);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+}
+
+.assetslisting-addcol-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ah-radius-s);
+  background: transparent;
+  color: var(--ah-text-muted);
+  cursor: pointer;
+  font-size: var(--ah-font-l);
+  line-height: 1;
+  transition: var(--ah-transition);
+}
+
+.assetslisting-addcol-close:hover,
+.assetslisting-addcol-close:focus-visible {
+  background: var(--ah-surface-muted);
+  color: var(--ah-text);
+  outline: none;
+}
+
+.assetslisting-addcol-body {
+  padding: var(--ah-space-l) var(--ah-space-xl) var(--ah-space-xl);
+}
+
+.assetslisting-addcol-status,
+.assetslisting-addcol-empty {
+  margin: 0;
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-s);
+}
+
+.assetslisting-addcol-status.is-error {
+  color: #c0392b;
+}
+
+.assetslisting-addcol-status.is-success {
+  color: #1e7e46;
+}
+
+.assetslisting-addcol-lead {
+  margin: 0 0 var(--ah-space-m);
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-s);
+}
+
+.assetslisting-addcol-search {
+  box-sizing: border-box;
+  width: 100%;
+  margin-bottom: var(--ah-space-m);
+  padding: 8px var(--ah-space-m);
+  border: 1px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-s);
+  background: var(--ah-surface);
+  color: var(--ah-text);
+  font-size: var(--ah-font-s);
+}
+
+.assetslisting-addcol-search:focus-visible {
+  border-color: var(--ah-accent);
+  outline: none;
+}
+
+/* the collection list — a scrollable stack of pickable rows */
+.assetslisting-addcol-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.assetslisting-addcol-empty {
+  padding: var(--ah-space-m) 0;
+}
+
+.assetslisting-addcol-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-s);
+  width: 100%;
+  padding: var(--ah-space-s) var(--ah-space-m);
+  border: 1px solid transparent;
+  border-radius: var(--ah-radius-s);
+  background: transparent;
+  color: var(--ah-text);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--ah-font-m);
+  transition: var(--ah-transition);
+}
+
+.assetslisting-addcol-item:hover,
+.assetslisting-addcol-item:focus-visible {
+  border-color: var(--ah-border-color);
+  background: var(--ah-surface-muted);
+  outline: none;
+}
+
+.assetslisting-addcol-item:disabled {
+  cursor: default;
+  opacity: 0.6;
+}
+
+.assetslisting-addcol-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.assetslisting-addcol-badge {
+  flex: none;
+  padding: 1px var(--ah-space-xs);
+  border-radius: var(--ah-radius-2xs);
+  background: var(--ah-tag-amber);
+  color: var(--ah-on-accent);
+  font-size: var(--ah-font-2xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}

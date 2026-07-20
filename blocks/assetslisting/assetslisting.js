@@ -2,7 +2,9 @@ import { getRoute, subscribeRoute } from '../../scripts/router.js';
 import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 // eslint-disable-next-line import/no-cycle
 import { isEditMode } from '../../scripts/scripts.js';
-import { fetchAssetsList, displayLabel, DAM_ROOT } from './data.js';
+import {
+  fetchAssetsList, fetchCollectionItems, displayLabel, DAM_ROOT,
+} from './data.js';
 import { renderShell, renderContent, createState } from './sections/index.js';
 import bindAssetsListing, { applyUiState } from './events.js';
 import { getUiState } from './state.js';
@@ -28,6 +30,7 @@ export default function decorate(block) {
 
   let ui = getUiState();
   let currentPath = null;
+  let currentCollectionId = null;
   let content = null;
   let detail = null;
   let currentAssets = [];
@@ -129,15 +132,22 @@ export default function decorate(block) {
     downloadSelected: shareOrDownloadSelected,
   };
 
-  // (Re)builds the whole shell for a path, then applies persisted UI state. The
-  // detail panel is rebuilt with the shell, so navigating away closes it.
-  function mountShell(path) {
-    const shell = renderShell(path, ui);
+  // (Re)builds the whole shell for a path (and optional collection context), then
+  // applies persisted UI state. The detail panel is rebuilt with the shell, so
+  // navigating away closes it.
+  function mountShell(path, collection) {
+    const shell = renderShell(path, ui, collection);
     content = shell.content;
     detail = createDetailController({
       onClose: () => {
         block.dataset.detailOpen = 'false';
         markSelected(null);
+      },
+      // Lazy-load the add-to-collection modal: only needed on demand.
+      onAddToCollection: (asset) => {
+        import('./sections/collection/collection-add.js').then(({ default: openAddToCollectionModal }) => {
+          openAddToCollectionModal(block, asset);
+        });
       },
     });
     // The detail panel docks on the right: the grid keeps the left and the panel
@@ -146,21 +156,35 @@ export default function decorate(block) {
     block.replaceChildren(shell.fragment);
     block.dataset.detailOpen = 'false';
     applyUiState(block, ui);
-    // A rebuilt shell means a new folder: selection never carries across folders.
+    // A rebuilt shell means a new folder/collection: selection never carries across.
     selection.reset();
     currentPath = path;
+    currentCollectionId = collection ? collection.id : null;
   }
 
   async function update(route) {
-    const path = route.path || DAM_ROOT;
-    if (path !== currentPath) mountShell(path);
+    // A `collection` filter turns the listing into a collection view: the same
+    // grid, but the data comes from the collection (at its root) and the
+    // breadcrumb is rooted at the collection. A path alongside it means the user
+    // stepped into a member folder, listed as a normal DAM folder.
+    const collection = route.filters.collection
+      ? { id: route.filters.collection, label: route.filters.collabel || 'Colección' }
+      : null;
+    const path = route.path || (collection ? '' : DAM_ROOT);
+    const collectionId = collection ? collection.id : null;
+
+    if (path !== currentPath || collectionId !== currentCollectionId) {
+      mountShell(path, collection);
+    }
 
     const current = seq + 1;
     seq = current;
     content.replaceChildren(createState('Cargando assets...'));
 
     try {
-      const data = await fetchAssetsList(path);
+      const data = (collection && !path)
+        ? await fetchCollectionItems(collection.id)
+        : await fetchAssetsList(path || DAM_ROOT);
       if (current !== seq) return;
       currentAssets = data.assets || [];
       currentFolders = data.folders || [];

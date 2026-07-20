@@ -76,7 +76,13 @@ function createFooter() {
   share.dataset.action = 'detail-share';
   share.textContent = 'Share';
 
-  footer.append(download, share);
+  const addToCollection = document.createElement('button');
+  addToCollection.type = 'button';
+  addToCollection.className = 'btn btn-secondary assetslisting-detail-addcol';
+  addToCollection.dataset.action = 'detail-add-to-collection';
+  addToCollection.textContent = 'Añadir a colección';
+
+  footer.append(download, share, addToCollection);
   return footer;
 }
 

@@ -10,6 +10,7 @@ import {
   displayLabel,
   DAM_ROOT,
 } from '../../scripts/assets-api.js';
+import { fetchCollections } from '../../scripts/collections-api.js';
 import { ICON_ALL_ASSETS, ICON_RECENT, ICON_RECENT_DOWNLOADS } from './icons.js';
 
 export const primaryNavItems = [
@@ -23,6 +24,21 @@ export const primaryNavItems = [
     id: 'recent-downloads', label: 'Descargas recientes', view: 'recent-downloads', icon: ICON_RECENT_DOWNLOADS,
   },
 ];
+
+/**
+ * Collections for the sidebar section, mapped to the nav item shape
+ * ({ id, label, public }). Reads the publish bridge, so it includes the private
+ * collections the current user may see.
+ * @returns {Promise<Array<{ id: string, label: string, public: boolean }>>}
+ */
+export async function fetchCollectionsNav() {
+  const data = await fetchCollections();
+  return (data.collections || []).map((collection) => ({
+    id: collection.id,
+    label: collection.title || collection.id,
+    public: Boolean(collection.public),
+  }));
+}
 
 export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';
 

@@ -7,11 +7,12 @@
 
 import bindAssetsNavigation, { revealTree, highlightRoute } from './events.js';
 import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
-import { fetchAuthStatus, userDisplay } from './data.js';
+import { fetchAuthStatus, userDisplay, fetchCollectionsNav } from './data.js';
 import renderAssetsNavigation, {
   renderUser,
   renderUserLoading,
   renderUserLogin,
+  renderCollectionsList,
 } from './render.js';
 import { getRoute } from '../../scripts/router.js';
 
@@ -20,6 +21,20 @@ async function loadFolders(block) {
   const activePath = view === ASSETS_LISTING_VIEW ? path : '';
   await revealTree(block, activePath);
   highlightRoute(block, getRoute());
+}
+
+async function loadCollections(block) {
+  const list = block.querySelector('.assetsnavigation-collection-list');
+  if (!list) return;
+  try {
+    const collections = await fetchCollectionsNav();
+    renderCollectionsList(list, collections);
+    highlightRoute(block, getRoute());
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(error);
+    renderCollectionsList(list, []);
+  }
 }
 
 async function loadUser(block) {
@@ -45,5 +60,5 @@ async function loadUser(block) {
 export default async function decorate(block) {
   block.replaceChildren(...renderAssetsNavigation());
   bindAssetsNavigation(block);
-  await Promise.all([loadFolders(block), loadUser(block)]);
+  await Promise.all([loadFolders(block), loadCollections(block), loadUser(block)]);
 }

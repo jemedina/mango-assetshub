@@ -123,6 +123,77 @@
   font-size: var(--ah-font-m);
 }
 
+/* collections section — mirrors the folders section (always shown, collapsible),
+   a flat one-level list of the collections the user can see. */
+.assetsnavigation-collections {
+  margin-top: var(--ah-space-xm);
+}
+
+.assetsnavigation-collection-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+  margin: 0;
+  margin-left: 20px;
+  padding: 0;
+  list-style: none;
+}
+
+.assetsnavigation-collection-list[hidden] {
+  display: none;
+}
+
+.assetsnavigation-collection-button {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 5.25px;
+  width: 100%;
+  padding: 3.5px var(--ah-space-xm);
+  border: 0;
+  border-radius: var(--ah-radius-2xs);
+  background: transparent;
+  color: var(--ah-text-secondary);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--ah-font-xs);
+  font-weight: var(--font-weight-medium);
+  transition: var(--ah-transition);
+}
+
+.assetsnavigation-collection-button:hover,
+.assetsnavigation-collection-button:focus-visible {
+  background: var(--ah-bg-muted);
+  outline: none;
+}
+
+.assetsnavigation-collection-button[aria-current="page"] {
+  background: var(--ah-bg-muted);
+  color: var(--ah-text-strong);
+}
+
+.assetsnavigation-collection-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* subtle marker so the private/public split is visible at a glance */
+.assetsnavigation-collection-badge {
+  flex: none;
+  padding: 0 4px;
+  border-radius: var(--ah-radius-2xs);
+  background: var(--ah-tag-amber);
+  color: var(--ah-on-accent);
+  font-size: var(--ah-font-2xs);
+  font-weight: var(--font-weight-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
 /* user */
 .assetsnavigation-user {
   display: flex;
