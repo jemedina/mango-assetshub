@@ -115,7 +115,7 @@ function createInfo(asset) {
 function createListColumns(asset) {
   const category = fact('assetslisting-category', asset.tags?.[0] || NO_VALUE);
   const size = fact('assetslisting-size-cell', formatSizeMb(asset.size) || NO_VALUE);
-  const modified = fact('assetslisting-modified-cell', formatDate(asset.uploaded) || NO_VALUE);
+  const modified = fact('assetslisting-modified-cell', formatDate(asset.modified) || NO_VALUE);
   return [category, size, modified];
 }
 

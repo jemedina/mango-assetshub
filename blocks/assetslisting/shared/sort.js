@@ -15,7 +15,9 @@ export const SORT_FIELDS = [
 
 const COMPARATORS = {
   name: (a, b) => displayLabel(a).localeCompare(displayLabel(b), 'es', { sensitivity: 'base' }),
-  date: (a, b) => new Date(a.uploaded || 0) - new Date(b.uploaded || 0),
+  // mango:authorLastModified vía `modified`; los assets sin la fecha de autor
+  // (valor vacío) se ordenan como los más antiguos.
+  date: (a, b) => new Date(a.modified || 0) - new Date(b.modified || 0),
   size: (a, b) => (a.size || 0) - (b.size || 0),
   type: (a, b) => formatLabel(a.format).localeCompare(formatLabel(b.format), 'es'),
 };

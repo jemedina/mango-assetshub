@@ -69,10 +69,13 @@ function infoTab(asset) {
   const description = stackedField('Descripción', asset.description);
   if (description) panel.append(description);
 
+  // Fechas: sólo las de autor (mango:authorCreated / mango:authorLastModified,
+  // servidas como uploaded/modified). Las OOTB de publish no se leen porque
+  // publish las regenera al importar; si el asset no las tiene, fieldList
+  // descarta la fila y no se muestra nada.
   panel.append(fieldList([
     { label: 'Modificado', value: formatDate(asset.modified) },
-    { label: 'Creado', value: formatDate(asset.created) },
-    { label: 'Subido', value: formatDate(asset.uploaded) },
+    { label: 'Creado', value: formatDate(asset.uploaded) },
     { label: 'Subido por', value: asset.createdBy },
     { label: 'Tamaño', value: formatSizeMb(asset.size) },
     { label: 'Dimensiones', value: dimensions(asset) },
