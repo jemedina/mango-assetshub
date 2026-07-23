@@ -96,7 +96,7 @@ function expandAncestors(button) {
 async function loadChildFolders(button, group) {
   if (group.dataset.loaded === 'true') return;
 
-  group.replaceChildren(createFolderState('Cargando carpetas...'));
+  group.replaceChildren(createFolderState('Cargando...'));
 
   try {
     const folders = await fetchFolders(button.dataset.folderHref);
@@ -115,20 +115,31 @@ async function loadChildFolders(button, group) {
   }
 }
 
-async function toggleControlledGroup(button) {
+/**
+ * Opens or closes the group a disclosure trigger controls.
+ * @param {Element} button the trigger (section toggle or folder row)
+ * @param {boolean} [expand] target state; omit to flip the current one
+ */
+async function setControlledGroup(button, expand) {
   const controlId = button.getAttribute('aria-controls');
   const group = controlId ? document.getElementById(controlId) : button.nextElementSibling;
   if (!group) return;
 
   const wasExpanded = button.getAttribute('aria-expanded') === 'true';
-  button.setAttribute('aria-expanded', wasExpanded ? 'false' : 'true');
-  group.hidden = wasExpanded;
+  const isExpanded = expand === undefined ? !wasExpanded : expand;
+  if (isExpanded === wasExpanded) return;
+
+  button.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+  group.hidden = !isExpanded;
 
   if (button.classList.contains('assetsnavigation-folder-button')) {
     const path = button.dataset.folderHref;
-    if (wasExpanded) removeExpanded(path);
-    else addExpanded(path);
-    if (!wasExpanded) await loadChildFolders(button, group);
+    if (isExpanded) {
+      addExpanded(path);
+      await loadChildFolders(button, group);
+    } else {
+      removeExpanded(path);
+    }
   }
 }
 
@@ -142,7 +153,7 @@ export async function revealTree(block, activePath) {
   const tree = block.querySelector('.assetsnavigation-folder-tree');
   if (!tree) return;
 
-  tree.replaceChildren(createFolderState('Cargando carpetas...'));
+  tree.replaceChildren(createFolderState('Cargando...'));
 
   // Open = active path ancestor chain (from the URL) + the user's persisted set.
   const expanded = new Set([DAM_ROOT]);
@@ -185,13 +196,13 @@ export default function bindAssetsNavigation(block) {
   block.addEventListener('click', async (event) => {
     const foldersToggle = event.target.closest('.assetsnavigation-folders-toggle');
     if (foldersToggle && block.contains(foldersToggle)) {
-      toggleControlledGroup(foldersToggle);
+      setControlledGroup(foldersToggle);
       return;
     }
 
     const collectionsToggle = event.target.closest('.assetsnavigation-collections-toggle');
     if (collectionsToggle && block.contains(collectionsToggle)) {
-      toggleControlledGroup(collectionsToggle);
+      setControlledGroup(collectionsToggle);
       return;
     }
 
@@ -221,12 +232,24 @@ export default function bindAssetsNavigation(block) {
     const folderButton = event.target.closest('.assetsnavigation-folder-button');
     if (!folderButton || !block.contains(folderButton)) return;
 
-    // Folder -> assets-listing scoped to its path, and toggle its own subtree.
+    const expandable = folderButton.classList.contains('has-children');
+
+    // The arrow is a pure disclosure control: it expands/collapses the subtree
+    // and never changes the route, so you can look inside a folder without
+    // leaving the one you're viewing.
+    if (expandable && event.target.closest('.ah-button-nav-chevron')) {
+      await setControlledGroup(folderButton);
+      return;
+    }
+
+    // The rest of the row selects the folder -> assets-listing scoped to its
+    // path. Selecting only ever opens the subtree; re-clicking the folder you
+    // are already in must not collapse it out from under you.
     const path = folderButton.dataset.folderHref;
     if (path) navigate({ view: ASSETS_LISTING_VIEW, path });
 
-    if (folderButton.classList.contains('has-children')) {
-      await toggleControlledGroup(folderButton);
+    if (expandable) {
+      await setControlledGroup(folderButton, true);
     }
   });
 

@@ -49,6 +49,7 @@ main .section.assetsnavigation-container > div {
   justify-content: center;
   padding: var(--ah-space-ml) 17.5px;
   border-bottom: 1px solid var(--ah-border-color);
+  gap: 4.25px;
 }
 
 /* authored logo */
@@ -61,14 +62,15 @@ main .section.assetsnavigation-container > div {
   display: block;
   width: auto;
   max-width: 100%;
-  max-height: 32px;
+  max-height: 18px;
 }
 
-.assetsnavigation-product {
+.assetsnavigation-product-label {
   color: var(--ah-text-placeholder);
   font-size: var(--ah-font-2xs);
   font-weight: var(--font-weight-regular);
   line-height: 15px;
+  letter-spacing: 0.5px;
   margin: 0;
 }
 
@@ -77,7 +79,11 @@ main .section.assetsnavigation-container > div {
   min-width: 0;
   min-height: 0;
   padding: 10.5px 7px;
-  overflow: hidden auto;
+
+  /* Horizontal scroll too: a deeply expanded folder tree indents 20px per level
+     and keeps each label on one line, so a deep/long branch can grow wider than
+     the sidebar. Let it scroll sideways instead of being clipped. */
+  overflow: auto;
   overscroll-behavior: contain;
 }
 
@@ -131,7 +137,11 @@ main .assetsnavigation .assetsnavigation-content {
   display: flex;
   align-items: center;
   gap: 5.25px;
-  width: 100%;
+
+  /* Fit the label (so it stays on one line and overflows the sidebar), but keep
+     the row at least full-width so the hover background spans the whole tree. */
+  width: max-content;
+  min-width: 100%;
   padding: 3.5px var(--ah-space-xm);
   border: 0;
   border-radius: var(--ah-radius-2xs);
@@ -150,8 +160,43 @@ main .assetsnavigation .assetsnavigation-content {
   outline: none;
 }
 
-.assetsnavigation-folder-button.has-children {
-  justify-content: space-between;
+/* Leading disclosure arrow (has-children) and the matching spacer on leaf rows
+   are the same width, so every folder icon lines up down the tree. Keep this in
+   step with the chevron's --ah-icon-size below. */
+.assetsnavigation-folder-spacer {
+  flex: none;
+  width: 12px;
+}
+
+/* Folder rows run larger than the section toggles: 12px arrow, 14px folder. */
+.assetsnavigation-folder-button .ah-icon-folder {
+  --ah-icon-size: 14px;
+}
+
+/* An expanded folder swaps to the open-folder glyph (same geometry, so it does
+   not shift). The "currently viewed" state is deliberately not a third glyph:
+   it differs only by a darker stroke, which the [aria-current] color rule above
+   already produces through currentColor — so the two states compose (a current,
+   expanded folder reads as the open glyph in the strong color). */
+.assetsnavigation-folder-button[aria-expanded="true"] .ah-icon-folder {
+  --ah-icon: url('/icons/nav/folder-opened.png');
+}
+
+/* The arrow is its own control (expand/collapse without selecting the folder),
+   so it needs a hit area you can actually hit — the glyph is only 12px. The
+   overlay is a pseudo-element so the row layout stays untouched. Insets are set
+   to reach a 22x20 target; widen the glyph and they must shrink to match, or
+   the overlay starts eating clicks meant for the rows above and below. */
+.assetsnavigation-folder-button > .ah-button-nav-chevron {
+  --ah-icon-size: 12px;
+
+  position: relative;
+}
+
+.assetsnavigation-folder-button > .ah-button-nav-chevron::after {
+  content: '';
+  position: absolute;
+  inset: -5px -4px;
 }
 
 .assetsnavigation-folder-label {
@@ -162,11 +207,13 @@ main .assetsnavigation .assetsnavigation-content {
   white-space: nowrap;
 }
 
-/* folder loading / empty states */
+/* Folder loading / empty states. Sized to match the folder rows they stand in
+   for — at --ah-font-m these read larger than the actual tree content and wrap
+   onto a second line in the sidebar's width. */
 .assetsnavigation-folder-state {
   padding: var(--ah-space-s) var(--ah-space-m);
   color: var(--ah-text-muted);
-  font-size: var(--ah-font-m);
+  font-size: var(--ah-font-xs);
 }
 
 /* collections section — mirrors the folders section (always shown, collapsible),

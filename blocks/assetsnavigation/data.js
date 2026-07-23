@@ -11,17 +11,18 @@ import {
   DAM_ROOT,
 } from '../../scripts/assets-api.js';
 import { fetchCollections } from '../../scripts/collections-api.js';
-import { ICON_ALL_ASSETS, ICON_RECENT, ICON_RECENT_DOWNLOADS } from './icons.js';
 
+// Icons come from the project-wide `.ah-icon` system (styles/icons.css): each
+// item names an icon class, the renderer builds `<span class="ah-icon {class}">`.
 export const primaryNavItems = [
   {
-    id: 'all-assets', label: 'Todos los assets', view: 'assets-listing', icon: ICON_ALL_ASSETS,
+    id: 'all-assets', label: 'Todos los assets', view: 'assets-listing', iconClass: 'ah-icon-all-assets',
   },
   {
-    id: 'recent', label: 'Recientes', view: 'recents', icon: ICON_RECENT,
+    id: 'recent', label: 'Recientes', view: 'recents', iconClass: 'ah-icon-recent',
   },
   {
-    id: 'recent-downloads', label: 'Descargas recientes', view: 'recent-downloads', icon: ICON_RECENT_DOWNLOADS,
+    id: 'recent-downloads', label: 'Descargas recientes', view: 'recent-downloads', iconClass: 'ah-icon-recent-downloads',
   },
 ];
 

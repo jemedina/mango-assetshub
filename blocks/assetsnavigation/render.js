@@ -6,7 +6,6 @@
  */
 
 import { primaryNavItems, startLogin } from './data.js';
-import { ICON_FOLDER, ICON_CHEVRON, ICON_COLLECTIONS } from './icons.js';
 
 function createButton(className, text, attributes = {}) {
   const button = document.createElement('button');
@@ -17,6 +16,19 @@ function createButton(className, text, attributes = {}) {
     button.setAttribute(name, value);
   });
   return button;
+}
+
+/**
+ * Disclosure arrow used by every expandable trigger (section toggles, folder
+ * rows). One shared icon (nav-arrow.png via `.ah-icon-arrow`) rotated by CSS off
+ * the container's aria-expanded — see `.ah-button-nav-chevron` in buttons.css.
+ * @returns {HTMLSpanElement}
+ */
+function createChevron() {
+  const chevron = document.createElement('span');
+  chevron.className = 'ah-icon ah-icon-arrow ah-button-nav-chevron';
+  chevron.setAttribute('aria-hidden', 'true');
+  return chevron;
 }
 
 /**
@@ -37,10 +49,10 @@ function createHeader({ logo, label } = {}) {
   }
 
   if (label) {
-    const product = document.createElement('p');
-    product.className = 'assetsnavigation-product';
-    product.textContent = label;
-    header.append(product);
+    const productLabel = document.createElement('p');
+    productLabel.className = 'assetsnavigation-product-label';
+    productLabel.textContent = label;
+    header.append(productLabel);
   }
 
   return header;
@@ -55,9 +67,8 @@ function createPrimaryNavItem(item) {
   button.setAttribute('aria-current', 'false');
 
   const icon = document.createElement('span');
-  icon.className = 'ah-button-nav-icon';
+  icon.className = `ah-icon ${item.iconClass}`;
   icon.setAttribute('aria-hidden', 'true');
-  icon.innerHTML = item.icon;
 
   const label = document.createElement('span');
   label.textContent = item.label;
@@ -98,28 +109,26 @@ export function createFolderNode(folder, level = 0) {
   label.className = 'assetsnavigation-folder-label';
   label.textContent = folder.label;
 
-  // Every folder looks the same: icon + label, grouped together (same pattern
-  // as the "Carpetas" toggle) so an expandable one's trailing chevron can be
-  // pushed to the far edge via space-between without spreading icon from label.
   const icon = document.createElement('span');
-  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
+  icon.className = 'ah-icon ah-icon-folder';
   icon.setAttribute('aria-hidden', 'true');
-  icon.innerHTML = ICON_FOLDER;
 
   const labelGroup = document.createElement('span');
   labelGroup.className = 'ah-button-nav-group';
   labelGroup.append(icon, label);
-  button.append(labelGroup);
 
+  // Expandable folders get a leading disclosure arrow (to the LEFT of the folder
+  // icon, like a file tree); leaves get a same-width spacer so every folder icon
+  // stays vertically aligned regardless of whether the row expands.
   if (hasChildren) {
     button.classList.add('has-children');
     button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-
-    const chevron = document.createElement('span');
-    chevron.className = 'ah-button-nav-chevron';
-    chevron.setAttribute('aria-hidden', 'true');
-    chevron.innerHTML = ICON_CHEVRON;
-    button.append(chevron);
+    button.append(createChevron(), labelGroup);
+  } else {
+    const spacer = document.createElement('span');
+    spacer.className = 'assetsnavigation-folder-spacer';
+    spacer.setAttribute('aria-hidden', 'true');
+    button.append(spacer, labelGroup);
   }
 
   item.append(button);
@@ -169,21 +178,15 @@ function createFoldersToggle() {
   group.className = 'ah-button-nav-group';
 
   const icon = document.createElement('span');
-  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
+  icon.className = 'ah-icon ah-icon-sm ah-icon-folders-main';
   icon.setAttribute('aria-hidden', 'true');
-  icon.innerHTML = ICON_FOLDER;
 
   const label = document.createElement('span');
   label.textContent = 'Carpetas';
 
   group.append(icon, label);
 
-  const chevron = document.createElement('span');
-  chevron.className = 'ah-button-nav-chevron';
-  chevron.setAttribute('aria-hidden', 'true');
-  chevron.innerHTML = ICON_CHEVRON;
-
-  button.append(group, chevron);
+  button.append(group, createChevron());
   return button;
 }
 
@@ -236,21 +239,15 @@ function createCollectionsToggle() {
   group.className = 'ah-button-nav-group';
 
   const icon = document.createElement('span');
-  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
+  icon.className = 'ah-icon ah-icon-sm ah-icon-collections';
   icon.setAttribute('aria-hidden', 'true');
-  icon.innerHTML = ICON_COLLECTIONS;
 
   const label = document.createElement('span');
   label.textContent = 'Colecciones';
 
   group.append(icon, label);
 
-  const chevron = document.createElement('span');
-  chevron.className = 'ah-button-nav-chevron';
-  chevron.setAttribute('aria-hidden', 'true');
-  chevron.innerHTML = ICON_CHEVRON;
-
-  button.append(group, chevron);
+  button.append(group, createChevron());
   return button;
 }
 
@@ -274,9 +271,8 @@ export function createCollectionItem(collection) {
   button.setAttribute('aria-current', 'false');
 
   const icon = document.createElement('span');
-  icon.className = 'ah-button-nav-icon ah-button-nav-icon-sm';
+  icon.className = 'ah-icon ah-icon-lg ah-icon-collection';
   icon.setAttribute('aria-hidden', 'true');
-  icon.innerHTML = ICON_COLLECTIONS;
 
   const label = document.createElement('span');
   label.className = 'assetsnavigation-collection-label';

@@ -131,18 +131,6 @@ p.button-wrapper {
   color: var(--ah-text-strong);
 }
 
-.ah-button-nav-icon {
-  display: flex;
-  flex: none;
-  width: 14px;
-  height: 14px;
-}
-
-.ah-button-nav-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
 /* section-header variant, e.g. the "Colecciones" folders toggle */
 .ah-button-nav-section {
   justify-content: space-between;
@@ -164,25 +152,16 @@ p.button-wrapper {
   gap: 5.25px;
 }
 
-.ah-button-nav-icon-sm {
-  width: 10px;
-  height: 10px;
-}
-
+/* The disclosure arrow. Combine with `.ah-icon .ah-icon-arrow` on the element:
+   the shared nav-arrow.png (points down at rest) is the mask, and we rotate the
+   box per state. One image, rotated — same glyph everywhere an arrow appears. */
 .ah-button-nav-chevron {
-  display: flex;
-  flex: none;
-  width: 10px;
-  height: 10px;
+  --ah-icon-size: 10px;
+
   transition: transform 0.15s ease;
 
   /* closed: pointing right */
   transform: rotate(-90deg);
-}
-
-.ah-button-nav-chevron svg {
-  width: 100%;
-  height: 100%;
 }
 
 /* open: pointing down. Generic on [aria-expanded] so it covers any trigger

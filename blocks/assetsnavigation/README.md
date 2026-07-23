@@ -50,7 +50,11 @@ listing keep the tree revealed and highlighted. View ids come from
 | `events.js` | Delegated click handler + route subscription (expand/collapse, lazy child loading, reveal + highlight) |
 | `data.js` | Primary nav registry, auth status / login flow, folder fetches mapped to the nav shape |
 | `state.js` | Persisted set of expanded folder paths in localStorage |
-| `icons.js` | Inline SVG icons (inlined so `currentColor` follows the CSS state) |
+
+Icons come from the shared `.ah-icon` system in `styles/icons.css` (monochrome
+PNGs used as CSS masks, so they tint with `currentColor`). The folder glyph
+swaps to the open variant via `[aria-expanded="true"]`; the "currently viewed"
+folder is the `[aria-current="page"]` color change, not a separate glyph.
 
 ## Key behaviours
 

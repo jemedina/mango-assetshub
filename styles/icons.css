@@ -1,0 +1,52 @@
+/*
+ * Project-wide icon system. Monochrome PNG glyphs used as CSS masks: the mask
+ * takes only the glyph's alpha (its shape) and fills it with `background-color:
+ * currentcolor`, so an icon inherits the active/hover/dark color of whatever it
+ * sits in — the same theming the old inline `stroke="currentColor"` SVGs gave —
+ * while staying crisp as raster. One PNG per icon, one class per icon.
+ *
+ * Usage:  <span class="ah-icon ah-icon-recent" aria-hidden="true"></span>
+ * Size:   default 14px; override with the size modifier or --ah-icon-size:
+ *           <span class="ah-icon ah-icon-sm ah-icon-recent"></span>   (10px)
+ *           <span class="ah-icon ah-icon-recent" style="--ah-icon-size: 20px">
+ *
+ * Sources live in /icons/nav/ as 48x48 transparent PNGs, each trimmed to its
+ * glyph and re-padded to a uniform size so every icon reads at the same optical
+ * weight regardless of how the source was drawn. Add a new icon by dropping a
+ * PNG there and adding one `--ah-icon` line below.
+ *
+ * Masks only carry alpha, so the source color is irrelevant — icons must be a
+ * single flat color on transparency. A genuinely multi-color icon can't use
+ * this system; render it as a plain <img> (and it won't recolor on state).
+ */
+
+.ah-icon {
+  display: inline-flex;
+  flex: none;
+  width: var(--ah-icon-size, 14px);
+  height: var(--ah-icon-size, 14px);
+  background-color: currentcolor;
+  mask: var(--ah-icon) center / contain no-repeat;
+}
+
+/* size modifiers */
+.ah-icon-sm { --ah-icon-size: 10px; }
+.ah-icon-lg { --ah-icon-size: 20px; }
+
+/* icon registry — one line per glyph */
+.ah-icon-all-assets { --ah-icon: url('/icons/nav/all-assets.png'); }
+.ah-icon-recent { --ah-icon: url('/icons/nav/recent.png'); }
+.ah-icon-recent-downloads { --ah-icon: url('/icons/nav/recent-downloads.png'); }
+.ah-icon-collections { --ah-icon: url('/icons/nav/collections-list.png'); }
+.ah-icon-collection { --ah-icon: url('/icons/nav/collection.png'); }
+.ah-icon-filters { --ah-icon: url('/icons/nav/filters-icon.png'); }
+.ah-icon-folders-main { --ah-icon: url('/icons/nav/folders-main.png'); }
+
+/* Default folder glyph (closed). The expanded variant is swapped in by the
+   component that owns the state — see the assetsnavigation block. There is no
+   separate "current folder" glyph: that state is only a darker stroke, which
+   currentColor already gives us from the row's [aria-current] color. */
+.ah-icon-folder { --ah-icon: url('/icons/nav/folder-closed.png'); }
+
+/* nav-arrow points down at rest; rotate it per direction (see .ah-button-nav-chevron) */
+.ah-icon-arrow { --ah-icon: url('/icons/nav/nav-arrow.png'); }
