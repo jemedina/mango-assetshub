@@ -645,7 +645,84 @@ Este montaje está sobre un **programa Sandbox** (`47002`). Para llevarlo a prod
 
 ---
 
-## 18. Mantenimiento
+## 18. Recuperación: solo se borró el CONTENIDO (el entorno sigue vivo)
+
+Escenario distinto al §17. Aquí **no se pierde el entorno de AEM** — solo desaparece el site
+`/content/<site>`. Es lo más común en un **RDE** (un `aem rde reset` o una limpieza borra el
+contenido desplegado, pero la instancia sigue viva), y el caso más barato de arreglar:
+**no se toca ni el repo, ni BYOG, ni el webhook, ni Cloud Manager.**
+
+> **Aviso RDE:** el Author de este montaje (`author-p47002-e2179869`) es un **RDE**, y los RDE son
+> efímeros por diseño. Cuenta con que esto se repita. En cuanto haya contenido real authoreado, haz
+> un **paquete de `/content/eds-mango-assets-hub-ans`** en Package Manager como backup — es lo único
+> que no se puede recuperar desde el repo. A medio plazo, valora apuntar EDS a un Author **no-RDE**.
+
+### 18.1 Diagnóstico: ¿entorno vivo (este caso) o entorno borrado (§17)?
+
+No te fíes de un "se borró AEM" a secas. Sondéalo primero:
+
+| Sonda | Entorno VIVO → este caso | Entorno BORRADO → §17 |
+|---|---|---|
+| `curl -so /dev/null -w '%{http_code}' https://<author>/bin/franklin.delivery/<org>/<site>/main/index.html` | **401** (responde → vivo) | fallo de DNS / timeout |
+| Author UI → `/ui#/aem/sites.html/content` | abre; **solo falta tu site** | el host no resuelve |
+| `curl .../aem.live/` | **200** (caché vieja) | **200** (caché vieja) → **no discrimina** |
+
+La sonda que manda es **`franklin.delivery`**: un **401** significa que la instancia está arriba
+(es la respuesta normal sin auth); un fallo de DNS/timeout significa que el entorno ya no existe.
+`aem.page`/`aem.live` siguen en 200 en ambos casos porque el content bus sirve la última versión
+publicada aunque el origen desaparezca — **ese 200 no prueba nada.**
+
+### 18.2 Qué NO hay que tocar
+
+Todo lo de "Lo que NO hay que rehacer" del §17, y además **todo el lado AEM salvo el site**:
+el entorno, la cuenta técnica, la config de EDS (si no se borró también su `/conf`), los pipelines
+y el backend desplegado. `fstab.yaml` y `paths.json` **siguen siendo correctos** (mismo entorno,
+mismo site name) → cero cambios en el repo.
+
+### 18.3 Pasos (todo en el Author, ~5 min)
+
+1. **Sites → Create → Site from template.** Si la plantilla xwalk sigue en el entorno, aparece en
+   la lista (no re-importes el `.zip`). Si no, re-impórtala (Fase 8, pasos 1-3).
+2. Rellena con el **Site name EXACTO** `eds-mango-assets-hub-ans` → regenera `/content/<site>`
+   **con la home de muestra incluida** (justo lo que se borró). Project URL = la `.aem.page`.
+   > Si no coincide el Site name con `paths.json` → **404 permanente**. Es el único error que puede
+   > colarse aquí.
+3. **Verifica la config de EDS** (Fase 9): *Tools → Cloud Services → Edge Delivery Services
+   Configuration* debe existir para el site, y la cuenta técnica debe seguir con rol **Config Admin**
+   en aem.live. Como el entorno vive, la cuenta técnica **no cambió** — pero si al borrar el site se
+   llevó también su `/conf`, recréala y reconfirma el rol.
+4. Abre el `index` del site → **Edit** → **Publish → Live** (NO Preview → "no agent found", §14).
+
+### 18.4 Verificar (la verdad está en los timestamps, no en el 200)
+
+El content bus devuelve 200 con la caché vieja aunque no hayas republicado. Lo que confirma el
+republish es que **cambie la fecha**:
+
+```bash
+BASE="https://main--eds-mango-assets-hub-ans--anseris-products"
+
+# query-index CON cache-bust — sin ?ck= ves la copia cacheada y te engaña
+curl -s "$BASE.aem.live/query-index.json?ck=$(date +%s)"    # lastModified debe ser de HOY
+
+# last-modified de la home: preview y live deben ser de HOY y COINCIDIR
+curl -sD - -o /dev/null "$BASE.aem.page/?ck=$(date +%s)" | grep -i last-modified
+curl -sD - -o /dev/null "$BASE.aem.live/?ck=$(date +%s)"  | grep -i last-modified
+
+# fuente de verdad (requiere auth_token, §10.2): da lastModifiedBy = cuenta técnica
+curl -s -H "x-auth-token: $AUTH" \
+  https://admin.hlx.page/status/anseris-products/eds-mango-assets-hub-ans/main/index
+```
+
+Está bien cuando el `lastModified` del query-index es ≈ ahora y los `last-modified` de preview y
+live son **de hoy y coinciden** (EDS publica preview+live en la misma operación).
+
+> **Trampa real (nos costó 10 min):** el `query-index.json` se **cachea en el CDN**. Sin `?ck=`
+> puedes leer un `lastModified` viejo y concluir que no se publicó, cuando sí se hizo. Cache-bustea
+> siempre — y para confirmar de verdad, mira `last-modified` de la home o el `status` del Admin API.
+
+---
+
+## 19. Mantenimiento
 
 > Para saber **dónde recuperar o rotar** cada credencial, ver la **sección 2.1**.
 > Esta tabla solo cubre los vencimientos y riesgos.
@@ -674,7 +751,7 @@ del servicio los sobrescribe:
 
 ---
 
-## 19. Desarrollo local
+## 20. Desarrollo local
 
 ```bash
 npm install -g @adobe/aem-cli
@@ -690,7 +767,7 @@ Al hacer `git push origin main`, el webhook propaga automáticamente a:
 
 ---
 
-## 20. Referencias
+## 21. Referencias
 
 - [Set Up AEM Sites as a Content Source (aem.live)](https://www.aem.live/developer/ue-tutorial)
 - [Bring Your Own Git (aem.live)](https://www.aem.live/developer/byo-git)
