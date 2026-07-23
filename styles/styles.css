@@ -55,8 +55,13 @@ body.appear:has(.leftnav) {
 }
 
 body.appear > main {
-  grid-column: 2;
   min-width: 0;
+}
+
+/* Second column only when the sidebar is there — the /leftnav fragment page
+   renders without it and must not be pushed into an implicit column. */
+body.appear:has(.leftnav) > main {
+  grid-column: 2;
 }
 
 .hub-view {
@@ -85,7 +90,7 @@ body.appear > main {
     height: auto;
   }
 
-  body.appear > main {
+  body.appear:has(.leftnav) > main {
     grid-column: auto;
   }
 }

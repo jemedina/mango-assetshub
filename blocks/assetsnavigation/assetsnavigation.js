@@ -54,11 +54,27 @@ async function loadUser(block) {
 }
 
 /**
+ * Reads the authored header content. The block is authored in the `/leftnav`
+ * fragment with two fields — logo (reference) and label (plain text) — so the
+ * rows arrive in that order. Both are optional: an author may fill only one,
+ * or neither while the page is being set up.
+ * @param {Element} block The assetsnavigation block element
+ * @returns {{ logo: Element|null, label: string }}
+ */
+function readBranding(block) {
+  const [logoRow, labelRow] = block.children;
+  return {
+    logo: logoRow ? logoRow.querySelector('picture, img') : null,
+    label: labelRow ? labelRow.textContent.trim() : '',
+  };
+}
+
+/**
  * Loads and decorates the assetsnavigation block.
  * @param {Element} block The assetsnavigation block element
  */
 export default async function decorate(block) {
-  block.replaceChildren(...renderAssetsNavigation());
+  block.replaceChildren(...renderAssetsNavigation(readBranding(block)));
   bindAssetsNavigation(block);
   await Promise.all([loadFolders(block), loadCollections(block), loadUser(block)]);
 }

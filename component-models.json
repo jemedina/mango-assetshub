@@ -157,11 +157,18 @@
     "id": "assetsnavigation",
     "fields": [
       {
-        "component": "richtext",
-        "name": "text",
+        "component": "reference",
+        "valueType": "string",
+        "name": "logo",
+        "label": "Logo",
+        "multi": false
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "label",
         "value": "",
-        "label": "Text",
-        "valueType": "string"
+        "label": "Label"
       }
     ]
   },

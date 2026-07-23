@@ -3,6 +3,35 @@
 The app's left sidebar: primary navigation between SPA views, a lazy-loaded DAM
 folder tree, and the user footer (profile or login).
 
+## Where it is authored
+
+The block lives on its own page, `/leftnav`, which every page pulls in as a
+fragment (`mountLeftNav` in `scripts/scripts.js`) and mounts in the `<aside
+class="leftnav">` before `<main>`. Authors edit the sidebar once, there.
+
+The block takes two optional fields:
+
+| Field | Component | Renders as |
+|-------|-----------|-----------|
+| `logo` | reference | The image at the top of the header |
+| `label` | text | The line under the logo |
+
+Each renders only when authored — there is no hardcoded wordmark or product
+name standing in, so an empty header reads as unauthored instead of as a
+deliberate design.
+
+**There is no fallback.** If `/leftnav` is missing, unpublished or holds no
+`assetsnavigation` block, no sidebar is mounted: the page renders full width
+and `mountLeftNav` logs why. That is on purpose — a sidebar synthesized in code
+would look correct while the site is misconfigured, which makes a broken deploy
+indistinguishable from a working one. Do not reintroduce one.
+
+Opening `/leftnav` itself does **not** mount the sidebar: the block would be
+nested inside itself. There the authored content stays in `<main>` and the
+SPA/router is off, exactly as in Universal Editor, so the page can be edited
+and previewed. Keep that guard (`isLeftNavPage`) in mind when touching the
+page-load sequence.
+
 ## How it fits in the SPA
 
 Clicking a nav item or folder calls `navigate()` from `scripts/router.js`,

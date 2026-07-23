@@ -19,13 +19,30 @@ function createButton(className, text, attributes = {}) {
   return button;
 }
 
-function createHeader() {
+/**
+ * Header of the sidebar: the branding authored in the `/leftnav` fragment (a
+ * logo reference and a plain-text label). Each field renders only when the
+ * author filled it — no hardcoded wordmark or product name standing in, so an
+ * empty header reads as unauthored rather than as a deliberate design.
+ * @param {{ logo?: Element, label?: string }} branding authored header content
+ * @returns {Element} the header element
+ */
+function createHeader({ logo, label } = {}) {
   const header = document.createElement('div');
   header.className = 'assetsnavigation-header';
-  header.innerHTML = `
-    <p class="assetsnavigation-app">MANGO</p>
-    <p class="assetsnavigation-product">Digital Asset Management</p>
-  `;
+
+  if (logo) {
+    logo.className = 'assetsnavigation-logo';
+    header.append(logo);
+  }
+
+  if (label) {
+    const product = document.createElement('p');
+    product.className = 'assetsnavigation-product';
+    product.textContent = label;
+    header.append(product);
+  }
+
   return header;
 }
 
@@ -371,6 +388,6 @@ export function renderFolderTree(tree, folders) {
   folders.forEach((folder) => tree.append(createFolderNode(folder)));
 }
 
-export default function renderAssetsNavigation(folders = []) {
-  return [createHeader(), createContent(folders), createUser()];
+export default function renderAssetsNavigation(branding = {}, folders = []) {
+  return [createHeader(branding), createContent(folders), createUser()];
 }

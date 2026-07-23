@@ -7,6 +7,14 @@
   color: var(--ah-text);
 }
 
+/* Standalone: on the /leftnav fragment page (and in Universal Editor) the block
+   is authored inside <main> instead of the fixed sidebar, so give it the same
+   footprint it has in the app rather than letting it stretch. */
+main .assetsnavigation {
+  width: var(--leftnav-width);
+  height: 100vh;
+}
+
 /* header */
 .assetsnavigation-header {
   display: flex;
@@ -16,12 +24,17 @@
   border-bottom: 1px solid var(--ah-border-color);
 }
 
-.assetsnavigation-app {
-  margin: 0;
-  font-family: var(--heading-font-family);
-  font-size: var(--ah-font-xl);
-  font-weight: var(--font-weight-bold);
-  line-height: 100%;
+/* authored logo */
+.assetsnavigation-logo {
+  display: block;
+  max-width: 100%;
+}
+
+.assetsnavigation-logo img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 32px;
 }
 
 .assetsnavigation-product {

@@ -1,5 +1,4 @@
 import {
-  loadLeftNav,
   decorateIcons,
   decorateSections,
   decorateBlocks,
@@ -12,7 +11,16 @@ import {
 
 // eslint-disable-next-line import/no-cycle
 import { initHub } from './hub.js';
+// eslint-disable-next-line import/no-cycle
+import { loadFragment } from '../blocks/fragment/fragment.js';
 import restoreLoginReturn from './login-return.js';
+
+/**
+ * Page holding the authored left navigation (the assetsnavigation block with
+ * its editable logo and label). Every page pulls it in as a fragment so the
+ * sidebar is edited in one place.
+ */
+const LEFTNAV_FRAGMENT = '/leftnav';
 
 /**
  * Detects whether the page is rendered inside Universal Editor (authoring mode).
@@ -160,19 +168,63 @@ async function loadEager(doc) {
 }
 
 /**
+ * Detects whether the page being rendered IS the left nav fragment. It is an
+ * ordinary page so authors can open and edit it, which means the sidebar must
+ * not be mounted there — the block would end up nested inside itself.
+ * @returns {boolean}
+ */
+function isLeftNavPage() {
+  const path = window.location.pathname.replace(/\.html$/, '').replace(/\/+$/, '');
+  return path === LEFTNAV_FRAGMENT;
+}
+
+/**
+ * Mounts the authored left navigation in an <aside> before <main>.
+ *
+ * The fragment is the only source: there is deliberately no synthetic
+ * fallback. A sidebar built from code would render fine while the fragment is
+ * missing, unpublished or broken, making a misconfigured site indistinguishable
+ * from a working one. Without it the page renders full width and the console
+ * says why — obvious, and diagnosable in one look.
+ * @param {Element} main The page main element
+ */
+async function mountLeftNav(main) {
+  let fragment = null;
+  try {
+    fragment = await loadFragment(LEFTNAV_FRAGMENT);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Left nav: ${LEFTNAV_FRAGMENT} failed to load`, error);
+  }
+
+  // Only the block is kept: the fragment's section wrappers would break the
+  // full-height sidebar layout.
+  const nav = fragment && fragment.querySelector('.assetsnavigation');
+  if (!nav) {
+    // eslint-disable-next-line no-console
+    console.error(`Left nav: no assetsnavigation block in ${LEFTNAV_FRAGMENT} — create and publish that page.`);
+    return;
+  }
+
+  const leftNav = document.querySelector('.leftnav') || document.createElement('aside');
+  leftNav.classList.add('leftnav');
+  main.before(leftNav);
+  leftNav.replaceChildren(nav);
+}
+
+/**
  * Loads everything that doesn't need to be delayed.
  * @param {Element} doc The container element
  */
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
-  const leftNav = doc.querySelector('.leftnav') || document.createElement('aside');
-  leftNav.classList.add('leftnav');
-  main.before(leftNav);
-  await loadLeftNav(leftNav);
+  const leftNavPage = isLeftNavPage();
 
-  if (isEditMode()) {
-    // Authoring: keep the authored content in <main> so Universal Editor can
-    // manage it. The SPA/router stays off.
+  if (!leftNavPage) await mountLeftNav(main);
+
+  if (leftNavPage || isEditMode()) {
+    // The fragment page and Universal Editor both keep the authored content in
+    // <main> so it can be seen and edited. The SPA/router stays off.
     await loadSections(main);
   } else {
     // Runtime: the hub takes over <main> and renders SPA views via the router.
