@@ -24,6 +24,19 @@ main .assetsnavigation {
   grid-template-rows: auto auto auto;
 }
 
+/* Collapse the section chrome around it. The generic section layout is a wide
+   centred column with side padding, which leaves a 210px sidebar adrift in a
+   full-width box — and since the editor anchors its selection outline to those
+   wrappers rather than to the block, selecting the sidebar highlighted the
+   whole frame. Sized to the block, the outline hugs what you actually clicked. */
+main .section.assetsnavigation-container,
+main .section.assetsnavigation-container > div {
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 /* header */
 .assetsnavigation-header {
   display: flex;
