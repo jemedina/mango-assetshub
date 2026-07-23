@@ -218,11 +218,16 @@ async function mountLeftNav(main) {
  */
 async function loadLazy(doc) {
   const main = doc.querySelector('main');
+  const editMode = isEditMode();
   const leftNavPage = isLeftNavPage();
 
-  if (!leftNavPage) await mountLeftNav(main);
+  // The sidebar is global chrome, not part of the page being edited. Universal
+  // Editor never gets it: on /leftnav it would duplicate the very block being
+  // authored (the editor does not serve the page from that path, so
+  // isLeftNavPage cannot catch it), and everywhere else it only steals width.
+  if (!editMode && !leftNavPage) await mountLeftNav(main);
 
-  if (leftNavPage || isEditMode()) {
+  if (editMode || leftNavPage) {
     // The fragment page and Universal Editor both keep the authored content in
     // <main> so it can be seen and edited. The SPA/router stays off.
     await loadSections(main);
