@@ -8,31 +8,36 @@
 }
 
 /* Standalone: on the /leftnav fragment page and in Universal Editor the block
-   is authored inside <main> instead of the fixed sidebar. Keep its width so it
-   still reads as a sidebar, but size the height to its content.
+   is authored inside <main> instead of the fixed sidebar.
 
-   No viewport units here, deliberately. The editor hosts the page in an iframe
-   that resizes to fit its content, so a 100vh box feeds its own height back in:
+   It deliberately spans the full width here rather than mimicking the 210px
+   sidebar. Constrained to sidebar width it sat inside far wider section
+   wrappers, and the editor anchors its selection outline to those wrappers, so
+   clicking the block highlighted the whole frame. Full width makes block,
+   wrapper and section the same box, so there is nothing left to mismatch — and
+   this surface exists only to edit two fields on one page, not to preview the
+   app's layout.
+
+   No viewport units here either. The editor hosts the page in an iframe that
+   resizes to fit its content, so a 100vh box feeds its own height back in:
    iframe grows -> vh grows -> box grows, and the page scrolls away forever. */
 main .assetsnavigation {
-  width: var(--leftnav-width);
+  width: 100%;
   height: auto;
 
   /* Also clears the min-height: 100vh the >=900px rule sets for the real
      sidebar — leaving it is what makes the editor grow without bound. */
   min-height: auto;
   grid-template-rows: auto auto auto;
+
+  /* The sidebar's right edge; at full width it reads as a stray vertical rule. */
+  border-right: 0;
 }
 
-/* Collapse the section chrome around it. The generic section layout is a wide
-   centred column with side padding, which leaves a 210px sidebar adrift in a
-   full-width box — and since the editor anchors its selection outline to those
-   wrappers rather than to the block, selecting the sidebar highlighted the
-   whole frame. Sized to the block, the outline hugs what you actually clicked. */
+/* Let the section span too, so every box the editor can outline lines up. */
 main .section.assetsnavigation-container,
 main .section.assetsnavigation-container > div {
-  width: fit-content;
-  max-width: 100%;
+  max-width: none;
   margin: 0;
   padding: 0;
 }
