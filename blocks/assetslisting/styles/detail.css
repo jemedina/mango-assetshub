@@ -6,11 +6,14 @@
  * stays perfectly static while the card grid scrolls beneath it — full
  * available height, never drifting. Its body scrolls internally while the
  * header, preview, tabs and footer stay put.
+ *
+ * Its width (--ah-detail-width) is fixed, but the grid's reserved space
+ * (`.assetslisting-content`'s padding-right, in layout.css) is read off
+ * --ah-detail-actual-width instead — a CSS var the controller measures off
+ * the panel's real rendered box and keeps in sync (see assetslisting.js) —
+ * so the two never drift out of sync if the width ever changes again.
  */
 .assetslisting-detail {
-  --ah-detail-header-height: 46.5px;
-  --ah-detail-image-height: 200px;
-
   box-sizing: border-box;
   display: flex;
   flex: none;
@@ -24,43 +27,104 @@
 
   /* Borderless: a soft shadow on the left edge separates it from the grid. */
   box-shadow: -1px 0 0 var(--ah-border-subtle), -8px 0 16px rgb(0 0 0 / 3%);
+
+  /* [hidden] -> shown flips display:none to flex, which re-triggers this on
+     every appearance (a plain transition can't animate out of display:none). */
+  animation: assetslisting-detail-in 0.25s ease-out;
+}
+
+/* Closing plays the reverse slide before the controller actually hides the
+   panel ([hidden] can't be animated out of, so it waits for `animationend` —
+   see index.js's close()). */
+.assetslisting-detail[data-closing="true"] {
+  animation: assetslisting-detail-out 0.25s ease-in forwards;
+}
+
+@keyframes assetslisting-detail-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes assetslisting-detail-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Selection mode adds the selection bar to the fixed topbar, so the panel
+   must sit lower and shrink to match (mirrors .assetslisting-main's
+   padding-top for the same reason). */
+.assetslisting[data-selection-mode="true"] .assetslisting-detail {
+  inset: calc(var(--ah-topbar-height) + var(--ah-selectionbar-height)) 0 0 auto;
 }
 
 .assetslisting-detail[hidden] {
   display: none;
 }
 
-/* header — "Detalles" and the edit / close controls */
+/* header — icon + "Detalles" title on the left, edit / close on the right */
 .assetslisting-detail-header {
   display: flex;
   flex: none;
   align-items: center;
   justify-content: space-between;
   box-sizing: border-box;
-  height: var(--ah-detail-header-height);
-  padding: 0 var(--ah-space-m);
-  border-bottom: 1px solid var(--ah-border-color);
+  padding: 10.5px 14px;
+  border-bottom: 1px solid var(--ah-overlay-subtle);
+}
+
+.assetslisting-detail-header-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.assetslisting-detail-header-icon {
+  display: flex;
+  flex: none;
+  width: 14px;
+  height: 14px;
+}
+
+.assetslisting-detail-header-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .assetslisting-detail-title {
-  font-size: var(--ah-font-l);
+  color: var(--ah-text-strong);
+  font-size: var(--ah-font-s);
   font-weight: var(--font-weight-semibold);
+  line-height: 19.5px;
 }
 
 .assetslisting-detail-header-actions {
   display: flex;
-  gap: var(--ah-space-2xs);
+  flex: none;
+  gap: 3.5px;
 }
 
 .assetslisting-detail-iconbutton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
+  padding: 5.25px;
   border: 0;
-  border-radius: var(--ah-radius-s);
+  border-radius: 3.5px;
   background: transparent;
   color: var(--ah-text-muted);
   cursor: pointer;
@@ -68,8 +132,13 @@
 }
 
 .assetslisting-detail-iconbutton svg {
-  width: 17px;
-  height: 17px;
+  width: 13px;
+  height: 13px;
+}
+
+.assetslisting-detail-close svg {
+  width: 14px;
+  height: 14px;
 }
 
 .assetslisting-detail-iconbutton:hover,
@@ -79,17 +148,25 @@
   outline: none;
 }
 
-/* preview image */
+/* preview image: an inset padded band holding a muted, rounded box */
 .assetslisting-detail-image {
   flex: none;
-  height: var(--ah-detail-image-height);
+  padding: 10.5px 14px 7px;
 }
 
-.assetslisting-detail-image .assetslisting-thumb {
+.assetslisting-detail-image-box {
+  overflow: hidden;
+  height: 188.25px;
+  border-radius: var(--ah-radius-xs);
+  background: #ebebeb;
+}
+
+.assetslisting-detail-image-box .assetslisting-thumb {
+  width: 100%;
   height: 100%;
 }
 
-.assetslisting-detail-image .assetslisting-thumb img {
+.assetslisting-detail-image-box .assetslisting-thumb img {
   object-fit: contain;
 }
 
@@ -101,33 +178,34 @@
 .assetslisting-detail-tabs {
   display: flex;
   flex: none;
-  gap: var(--ah-space-s);
-  padding: 0 var(--ah-space-m);
-  border-bottom: 1px solid var(--ah-border-color);
+  height: 33.5px;
+  border-bottom: 1px solid var(--ah-overlay-subtle);
 }
 
 .assetslisting-detail-tab {
-  padding: var(--ah-space-s) 0;
+  padding: 7px 10.5px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  color: var(--ah-text-muted);
+  color: var(--ah-text-placeholder);
   cursor: pointer;
   font: inherit;
-  font-size: var(--ah-font-s);
-  font-weight: var(--font-weight-medium);
+  font-size: 11px;
+  font-weight: var(--font-weight-regular);
+  line-height: 16.5px;
   transition: var(--ah-transition);
 }
 
 .assetslisting-detail-tab:hover,
 .assetslisting-detail-tab:focus-visible {
-  color: var(--ah-text);
+  color: var(--ah-text-strong);
   outline: none;
 }
 
 .assetslisting-detail-tab[aria-selected="true"] {
-  border-bottom-color: var(--ah-accent);
-  color: var(--ah-text);
+  border-bottom-color: var(--ah-text-strong);
+  color: var(--ah-text-strong);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* scrollable body */
@@ -135,7 +213,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: var(--ah-space-l) var(--ah-space-m);
+  padding: 10.5px 14px;
 }
 
 .assetslisting-detail-panel[hidden] {
@@ -148,26 +226,108 @@
   font-size: var(--ah-font-s);
 }
 
-/* stacked (label over value) fields — used by the Info tab header block */
+/* stacked (label over value) fields — Nombre, Descripción, Colección */
 .assetslisting-field-stacked {
   display: flex;
   flex-direction: column;
-  gap: var(--ah-space-2xs);
-  margin-bottom: var(--ah-space-m);
+  gap: 3.5px;
+  margin-bottom: 10.5px;
 }
 
 .assetslisting-field-label {
-  color: var(--ah-text-muted);
-  font-size: var(--ah-font-xs);
+  color: var(--ah-text-placeholder);
+  font-size: var(--ah-font-2xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.09em;
+  line-height: 15px;
+  text-transform: uppercase;
 }
 
 .assetslisting-field-value {
-  color: var(--ah-text);
-  font-size: var(--ah-font-m);
+  color: var(--ah-text-strong);
+  font-size: var(--ah-font-s);
+  font-weight: var(--font-weight-medium);
+  line-height: 19.5px;
   overflow-wrap: break-word;
 }
 
-/* side-by-side label/value rows — used by Info (data) and Metadatos */
+/* Descripción reads smaller and regular-weight, unlike Nombre above it */
+.assetslisting-field-value-body {
+  font-size: var(--ah-font-xs);
+  font-weight: var(--font-weight-regular);
+  line-height: 19.2px;
+}
+
+.assetslisting-collection-row {
+  display: flex;
+  align-items: center;
+  gap: 5.25px;
+  color: var(--ah-text-strong);
+  font-size: var(--ah-font-xs);
+  line-height: 18px;
+}
+
+.assetslisting-collection-icon {
+  display: flex;
+  flex: none;
+  width: 12px;
+  height: 12px;
+}
+
+.assetslisting-collection-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* icon + label (left) / value (right) rows — Modificado, Creado, Tamaño... */
+.assetslisting-meta-rows {
+  padding-top: 7px;
+  border-top: 1px solid var(--ah-overlay-subtle);
+}
+
+.assetslisting-meta-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-s);
+  padding: 5.25px 0;
+  border-bottom: 1px solid rgb(0 0 0 / 4%);
+}
+
+.assetslisting-meta-row:last-child {
+  border-bottom: 0;
+}
+
+.assetslisting-meta-row-label {
+  display: flex;
+  align-items: center;
+  gap: 5.25px;
+  color: var(--ah-text-placeholder);
+  font-size: 11px;
+  line-height: 16.5px;
+}
+
+.assetslisting-meta-row-icon {
+  display: flex;
+  flex: none;
+  width: 10px;
+  height: 10px;
+}
+
+.assetslisting-meta-row-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.assetslisting-meta-row-value {
+  flex: none;
+  color: var(--ah-text-strong);
+  font-size: 11px;
+  line-height: 16.5px;
+  text-align: right;
+}
+
+/* side-by-side label/value rows — used by Metadatos */
 .assetslisting-fields {
   display: grid;
   grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
@@ -236,18 +396,30 @@
   letter-spacing: 0.05em;
 }
 
-/* footer actions */
+/* footer actions: Descargar fills the row, Share hugs its content, Añadir a
+   colección (no Figma spec — a real feature this mock doesn't show) fills
+   the remaining space like Descargar. */
 .assetslisting-detail-footer {
   display: flex;
   flex: none;
-  gap: var(--ah-space-s);
-  padding: var(--ah-space-m);
-  border-top: 1px solid var(--ah-border-color);
+  align-items: stretch;
+  gap: 7px;
+  height: 34px;
+  padding: 10.5px 14px;
+  border-top: 1px solid var(--ah-overlay-subtle);
 }
 
 .assetslisting-detail-footer .btn {
   flex: 1;
-  height: 38px;
+  height: auto;
+  border-radius: var(--ah-radius-xs);
+}
+
+/* extra class chain to outrank `.assetslisting-detail-footer .btn` above,
+   which would otherwise win the flex tie and stretch this like Descargar. */
+.assetslisting-detail-footer .btn.assetslisting-detail-share {
+  flex: none;
+  padding: 7px 10.5px;
 }
 
 /* ============================================================== responsive === */
@@ -259,7 +431,8 @@
     flex-direction: column;
   }
 
-  .assetslisting-detail {
+  .assetslisting-detail,
+  .assetslisting[data-selection-mode="true"] .assetslisting-detail {
     position: static;
     inset: auto;
     width: 100%;

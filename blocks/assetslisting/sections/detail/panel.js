@@ -5,10 +5,11 @@
  * the `data-action` / `data-tab` attributes set here.
  */
 
+import { createIconButton } from '../dom.js';
 import TABS from './tabs.js';
-
-const EDIT_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
-const CLOSE_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M18.3 5.71 12 12l6.3 6.29-1.42 1.42L10.59 13.4 4.29 19.7 2.88 18.3 9.17 12 2.88 5.71 4.29 4.29l6.3 6.3 6.29-6.3z"/></svg>';
+import {
+  ICON_ASSET, ICON_EDIT, ICON_CLOSE, ICON_DOWNLOAD, ICON_SHARE,
+} from './icons.js';
 
 function iconButton(className, label, action, svg) {
   const button = document.createElement('button');
@@ -25,18 +26,28 @@ function createHeader() {
   const header = document.createElement('div');
   header.className = 'assetslisting-detail-header';
 
+  const left = document.createElement('div');
+  left.className = 'assetslisting-detail-header-left';
+
+  const icon = document.createElement('span');
+  icon.className = 'assetslisting-detail-header-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = ICON_ASSET;
+
   const title = document.createElement('span');
   title.className = 'assetslisting-detail-title';
   title.textContent = 'Detalles';
 
+  left.append(icon, title);
+
   const actions = document.createElement('div');
   actions.className = 'assetslisting-detail-header-actions';
   actions.append(
-    iconButton('assetslisting-detail-edit', 'Editar', 'detail-edit', EDIT_ICON),
-    iconButton('assetslisting-detail-close', 'Cerrar', 'detail-close', CLOSE_ICON),
+    iconButton('assetslisting-detail-edit', 'Editar', 'detail-edit', ICON_EDIT),
+    iconButton('assetslisting-detail-close', 'Cerrar', 'detail-close', ICON_CLOSE),
   );
 
-  header.append(title, actions);
+  header.append(left, actions);
   return header;
 }
 
@@ -64,17 +75,19 @@ function createFooter() {
   const footer = document.createElement('div');
   footer.className = 'assetslisting-detail-footer';
 
-  const download = document.createElement('button');
-  download.type = 'button';
-  download.className = 'btn btn-primary assetslisting-detail-download';
-  download.dataset.action = 'detail-download';
-  download.textContent = 'Descargar';
+  const download = createIconButton(
+    'btn btn-primary assetslisting-detail-download',
+    'Descargar',
+    ICON_DOWNLOAD,
+    { 'data-action': 'detail-download' },
+  );
 
-  const share = document.createElement('button');
-  share.type = 'button';
-  share.className = 'btn btn-secondary assetslisting-detail-share';
-  share.dataset.action = 'detail-share';
-  share.textContent = 'Share';
+  const share = createIconButton(
+    'btn btn-secondary assetslisting-detail-share',
+    'Share',
+    ICON_SHARE,
+    { 'data-action': 'detail-share' },
+  );
 
   const addToCollection = document.createElement('button');
   addToCollection.type = 'button';
@@ -99,8 +112,15 @@ export default function createDetailPanel() {
   root.setAttribute('aria-label', 'Detalles del asset');
 
   const header = createHeader();
+
+  // `imageWrap` carries the panel's inset padding; `image` is the muted,
+  // rounded box the preview drops into — it's the handle the controller
+  // (index.js) appends the preview into, so it must stay a stable reference.
+  const imageWrap = document.createElement('div');
+  imageWrap.className = 'assetslisting-detail-image';
   const image = document.createElement('div');
-  image.className = 'assetslisting-detail-image';
+  image.className = 'assetslisting-detail-image-box';
+  imageWrap.append(image);
 
   const { nav, tabButtons } = createTabsNav();
 
@@ -109,7 +129,7 @@ export default function createDetailPanel() {
 
   const footer = createFooter();
 
-  root.append(header, image, nav, body, footer);
+  root.append(header, imageWrap, nav, body, footer);
   return {
     root, image, nav, body, tabButtons,
   };

@@ -53,6 +53,12 @@ export default function createDetailController(options = {}) {
   function renderTabs(detail) {
     const panels = document.createDocumentFragment();
     TABS.forEach((tab) => {
+      const button = panel.tabButtons.get(tab.id);
+      if (button) {
+        const count = tab.count ? tab.count(detail) : null;
+        button.textContent = count ? `${tab.label} (${count})` : tab.label;
+      }
+
       const section = document.createElement('div');
       section.className = 'assetslisting-detail-panel';
       section.dataset.tab = tab.id;
@@ -69,6 +75,9 @@ export default function createDetailController(options = {}) {
     currentPath = asset.path;
     currentAsset = asset;
     activeTab = DEFAULT_TAB;
+    // Reopening mid-close (data-closing still set) must not leave the panel
+    // stuck showing the exit animation's end state.
+    delete root.dataset.closing;
     root.hidden = false;
 
     image.replaceChildren(createPreview(asset, { variant: 'detail' }));
@@ -95,19 +104,28 @@ export default function createDetailController(options = {}) {
     seq += 1;
     currentPath = null;
     currentAsset = null;
-    root.hidden = true;
-    image.replaceChildren();
-    body.replaceChildren();
+    // [hidden] can't be transitioned out of, so the exit slide (data-closing,
+    // see detail.css) plays first and this waits for it to finish before
+    // actually hiding the panel and clearing its content.
+    if (root.hidden) return;
+    root.dataset.closing = 'true';
+    root.addEventListener('animationend', () => {
+      delete root.dataset.closing;
+      root.hidden = true;
+      image.replaceChildren();
+      body.replaceChildren();
+    }, { once: true });
   }
 
   function flashShare(message) {
     const button = root.querySelector('.assetslisting-detail-share');
-    if (!button) return;
-    const original = button.textContent;
-    button.textContent = message;
+    const label = button && button.querySelector('.btn-label');
+    if (!button || !label) return;
+    const original = label.textContent;
+    label.textContent = message;
     button.disabled = true;
     window.setTimeout(() => {
-      button.textContent = original;
+      label.textContent = original;
       button.disabled = false;
     }, 1500);
   }

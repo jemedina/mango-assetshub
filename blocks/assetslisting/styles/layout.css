@@ -10,7 +10,7 @@
      cards per row as fit rather than stretching them to fill the row. */
   --ah-card-width: 208.92px;
   --ah-card-height: 235.78px;
-  --ah-detail-width: 340px;
+  --ah-detail-width: 353px;
 
   display: grid;
   grid-template-columns: minmax(0, 1fr);
@@ -83,6 +83,7 @@
 
 .assetslisting-content {
   min-width: 0;
+  transition: padding-right 0.25s ease;
 }
 
 /* List view is a full-bleed table per Figma (each row carries its own
@@ -92,10 +93,13 @@
   padding: 0;
 }
 
-/* The detail panel is fixed to the viewport (out of flow), so when open the grid
-   reserves its width plus a gap on the right to keep cards clear of it. */
+/* The detail panel is fixed to the viewport (out of flow), so when open the
+   grid reserves its actual rendered width (--ah-detail-actual-width, measured
+   and kept in sync by the controller — see assetslisting.js), to keep cards
+   clear of it instead of hiding behind it. The transition above animates the
+   reflow alongside the panel's own slide-in (see detail.css). */
 .assetslisting[data-detail-open="true"] .assetslisting-content {
-  padding-right: calc(var(--ah-detail-width) + var(--ah-space-xl));
+  padding-right: var(--ah-detail-actual-width);
 }
 
 /* ============================================================== responsive === */

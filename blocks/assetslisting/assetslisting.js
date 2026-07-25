@@ -39,6 +39,14 @@ export default function decorate(block) {
 
   const selection = createSelection(block, () => currentAssets, () => currentFolders);
 
+  // The detail panel is fixed (out of flow) with a content-driven width, so
+  // it can't reserve its own space in the grid's flow — this keeps
+  // --ah-detail-actual-width (read by .assetslisting-content's padding-right
+  // in layout.css) in sync with however wide the panel actually renders.
+  const detailWidthObserver = new ResizeObserver(([entry]) => {
+    block.style.setProperty('--ah-detail-actual-width', `${entry.contentRect.width}px`);
+  });
+
   // Reflects the current asset selection onto the cards; a null path clears it.
   function markSelected(path) {
     content.querySelectorAll('.assetslisting-card-asset[data-selected]')
@@ -158,6 +166,8 @@ export default function decorate(block) {
     // The detail panel docks on the right: the grid keeps the left and the panel
     // takes a fixed track after it.
     shell.workspace.append(detail.root);
+    detailWidthObserver.disconnect();
+    detailWidthObserver.observe(detail.root);
     block.replaceChildren(shell.fragment);
     block.dataset.detailOpen = 'false';
     applyUiState(block, ui);

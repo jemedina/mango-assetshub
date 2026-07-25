@@ -88,13 +88,15 @@ function createInfo(asset) {
   const facts = document.createElement('span');
   facts.className = 'assetslisting-facts';
   facts.append(
-    fact('assetslisting-size', formatSizeMb(asset.size)),
-    fact('assetslisting-date', formatDate(asset.uploaded)),
+    fact('assetslisting-size', formatSizeMb(asset.size) || NO_VALUE),
+    fact('assetslisting-date', formatDate(asset.uploaded) || NO_VALUE),
   );
 
   body.append(nameRow, facts);
 
-  const keywords = createKeywords(asset.tags, asset.smartTags);
+  // The cap only bites in grid view (CSS shows everything unclipped in list
+  // view instead) — see the `assetslisting-keyword-overflow` rules in cards.css.
+  const keywords = createKeywords(asset.tags, asset.smartTags, { limit: 3 });
   if (keywords) body.append(keywords);
 
   return body;
