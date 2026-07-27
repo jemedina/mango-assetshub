@@ -211,7 +211,24 @@ function createFolders(folders = []) {
     tree.append(empty);
   }
 
-  section.append(toggle, tree);
+  // Stand-in for the tree's horizontal scrollbar. The native bar sits on the
+  // tree's bottom edge, which a tall tree pushes below the sidebar viewport —
+  // so sideways overflow was invisible until you scrolled all the way down.
+  // This proxy sticks to the bottom of the visible content area instead,
+  // spanning the sidebar's full width; the inner spacer is sized so both max
+  // scrollLefts are equal and both scroll positions are mirrored by
+  // bindTreeScrollbar in events.js. Mouse-only affordance (keyboard and
+  // trackpad act on the tree itself), hence aria-hidden.
+  const scrollbar = document.createElement('div');
+  scrollbar.className = 'assetsnavigation-tree-scrollbar';
+  scrollbar.hidden = true;
+  scrollbar.setAttribute('aria-hidden', 'true');
+  scrollbar.tabIndex = -1;
+  const spacer = document.createElement('div');
+  spacer.className = 'assetsnavigation-tree-scrollbar-spacer';
+  scrollbar.append(spacer);
+
+  section.append(toggle, tree, scrollbar);
   return section;
 }
 

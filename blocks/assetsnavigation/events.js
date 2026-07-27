@@ -12,12 +12,6 @@ import {
   createFolderState,
   renderFolderTree,
 } from './render.js';
-import {
-  getExpanded,
-  setExpanded,
-  addExpanded,
-  removeExpanded,
-} from './state.js';
 import { navigate, subscribeRoute } from '../../scripts/router.js';
 import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 import { DAM_ROOT } from '../../scripts/assets-api.js';
@@ -25,6 +19,13 @@ import { DAM_ROOT } from '../../scripts/assets-api.js';
 const NAV_SELECTOR = '.assetsnavigation-link, .assetsnavigation-folder-button, '
   + '.assetsnavigation-collection-button';
 const MAX_REVEAL_PATHS = 64;
+
+// Expanded folder paths, in memory only. Deliberately NOT persisted: after a
+// reload the tree restores just the folder being viewed and its ancestors
+// (derived from the route in revealTree), so past exploration doesn't pile up
+// across sessions. Within a session this keeps manual expansions alive when
+// the tree is rebuilt from scratch (deep links via handleRouteChange).
+const expandedPaths = new Set();
 
 function setActiveNav(block, activeButton) {
   block.querySelectorAll(NAV_SELECTOR).forEach((button) => {
@@ -85,7 +86,7 @@ function expandAncestors(button) {
     const controller = group.previousElementSibling;
     if (controller && controller.classList.contains('assetsnavigation-folder-button')) {
       controller.setAttribute('aria-expanded', 'true');
-      addExpanded(controller.dataset.folderHref);
+      if (controller.dataset.folderHref) expandedPaths.add(controller.dataset.folderHref);
     }
     group = group.parentElement
       ? group.parentElement.closest('.assetsnavigation-folder-group')
@@ -135,12 +136,32 @@ async function setControlledGroup(button, expand) {
   if (button.classList.contains('assetsnavigation-folder-button')) {
     const path = button.dataset.folderHref;
     if (isExpanded) {
-      addExpanded(path);
+      if (path) expandedPaths.add(path);
       await loadChildFolders(button, group);
     } else {
-      removeExpanded(path);
+      expandedPaths.delete(path);
     }
   }
+}
+
+/**
+ * Scrolls a folder row into view once it actually has layout. The sidebar is
+ * mounted from the /leftnav fragment: the block is decorated — revealTree
+ * included — while the fragment is still DETACHED (loadFragment builds it
+ * off-DOM; scripts.js attaches the finished nav afterwards), and
+ * scrollIntoView without layout is a silent no-op. So wait, frame by frame,
+ * until the node is connected and rendered; bail after ~2s (frames only fire
+ * on a visible page, and the editor never routes into a folder anyway).
+ * @param {Element} button the folder row to reveal
+ * @param {number} [framesLeft] retry budget in animation frames
+ */
+function scrollFolderIntoView(button, framesLeft = 120) {
+  if (framesLeft <= 0) return;
+  if (!button.isConnected || !button.offsetParent) {
+    window.requestAnimationFrame(() => scrollFolderIntoView(button, framesLeft - 1));
+    return;
+  }
+  button.scrollIntoView({ block: 'center', inline: 'nearest' });
 }
 
 /**
@@ -155,10 +176,15 @@ export async function revealTree(block, activePath) {
 
   tree.replaceChildren(createFolderState('Cargando...'));
 
-  // Open = active path ancestor chain (from the URL) + the user's persisted set.
+  // Open = the folder being viewed (you are inside it, so it comes back open)
+  // with its ancestor chain, plus whatever was expanded earlier this session.
+  // Route chain first: under MAX_REVEAL_PATHS it must win over stale extras.
   const expanded = new Set([DAM_ROOT]);
-  if (activePath) ancestorPaths(activePath).forEach((path) => expanded.add(path));
-  getExpanded().forEach((path) => expanded.add(path));
+  if (activePath) {
+    ancestorPaths(activePath).forEach((path) => expanded.add(path));
+    expanded.add(activePath);
+  }
+  expandedPaths.forEach((path) => expanded.add(path));
 
   const paths = [...expanded].slice(0, MAX_REVEAL_PATHS);
 
@@ -166,10 +192,23 @@ export async function revealTree(block, activePath) {
     const levels = await fetchFoldersReveal(paths);
     renderFolderTree(tree, buildFolderNodes(levels, expanded, DAM_ROOT));
 
-    // Self-heal persisted state: keep only paths that still resolve.
-    setExpanded(new Set([...expanded].filter((path) => path !== DAM_ROOT && levels[path])));
+    // Self-heal the session set: keep only paths that still resolve.
+    expandedPaths.clear();
+    [...expanded]
+      .filter((path) => path !== DAM_ROOT && levels[path])
+      .forEach((path) => expandedPaths.add(path));
 
-    if (activePath && activePath !== DAM_ROOT) openFoldersSection(block);
+    if (activePath && activePath !== DAM_ROOT) {
+      openFoldersSection(block);
+
+      // Bring the restored folder into view: after a refresh (or a deep link
+      // that rebuilt the tree) it may sit far down or — deeply indented —
+      // past the right edge. Centering scrolls the -content scroller; inline
+      // 'nearest' nudges the tree's horizontal scroll only when needed (the
+      // proxy bar follows through its scroll listener).
+      const active = findFolderButton(block, activePath);
+      if (active) scrollFolderIntoView(active);
+    }
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(error);
@@ -192,7 +231,61 @@ async function handleRouteChange(block, route) {
   highlightRoute(block, route);
 }
 
+/**
+ * Wires the sticky proxy scrollbar (created in render.js) to the folder tree.
+ * The tree's own horizontal bar is hidden in CSS; this keeps the proxy's
+ * spacer sized to the tree's scrollWidth, mirrors scroll positions both ways,
+ * and shows the proxy only while the tree actually overflows sideways. Bound
+ * once: the tree and proxy elements persist across re-renders (revealTree
+ * replaces the tree's children, never the tree itself).
+ * @param {Element} block the assetsnavigation block
+ */
+function bindTreeScrollbar(block) {
+  const tree = block.querySelector('.assetsnavigation-folder-tree');
+  const bar = block.querySelector('.assetsnavigation-tree-scrollbar');
+  if (!tree || !bar) return;
+  const spacer = bar.firstElementChild;
+
+  // Assigning an equal scrollLeft fires no scroll event, so mirroring settles
+  // instead of ping-ponging between the two listeners.
+  const mirror = (from, to) => {
+    if (to.scrollLeft !== from.scrollLeft) to.scrollLeft = from.scrollLeft;
+  };
+
+  const update = () => {
+    const overflowing = !tree.hidden && tree.scrollWidth > tree.clientWidth;
+    bar.hidden = !overflowing;
+    if (overflowing) {
+      // The bar spans the full sidebar width, so its scrollport is wider than
+      // the tree's. Sizing the spacer to the tree's overflow PLUS the bar's own
+      // width makes both max scrollLefts equal, keeping the mirroring 1:1.
+      // Read clientWidth after unhiding, or it measures 0.
+      spacer.style.width = `${tree.scrollWidth - tree.clientWidth + bar.clientWidth}px`;
+      mirror(tree, bar);
+    }
+  };
+
+  tree.addEventListener('scroll', () => mirror(tree, bar), { passive: true });
+  bar.addEventListener('scroll', () => mirror(bar, tree), { passive: true });
+
+  // Anything that changes the tree's overflow: expand/collapse (hidden flips on
+  // groups and on the tree itself), lazy-loaded children, re-renders.
+  new MutationObserver(update).observe(tree, {
+    subtree: true,
+    childList: true,
+    attributes: true,
+    attributeFilter: ['hidden'],
+  });
+
+  // Container-driven width changes (viewport resize past the 900px breakpoint).
+  new ResizeObserver(update).observe(tree);
+
+  update();
+}
+
 export default function bindAssetsNavigation(block) {
+  bindTreeScrollbar(block);
+
   block.addEventListener('click', async (event) => {
     const foldersToggle = event.target.closest('.assetsnavigation-folders-toggle');
     if (foldersToggle && block.contains(foldersToggle)) {

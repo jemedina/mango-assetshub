@@ -49,7 +49,6 @@ listing keep the tree revealed and highlighted. View ids come from
 | `render.js` | DOM builders: header, primary nav, recursive folder nodes, user footer states |
 | `events.js` | Delegated click handler + route subscription (expand/collapse, lazy child loading, reveal + highlight) |
 | `data.js` | Primary nav registry, auth status / login flow, folder fetches mapped to the nav shape |
-| `state.js` | Persisted set of expanded folder paths in localStorage |
 
 Icons come from the shared `.ah-icon` system in `styles/icons.css` (monochrome
 PNGs used as CSS masks, so they tint with `currentColor`). The folder glyph
@@ -60,11 +59,13 @@ folder is the `[aria-current="page"]` color change, not a separate glyph.
 
 - **Lazy tree**: each folder level is fetched on first expand; a `reveal`
   request (see `fetchFoldersReveal`) loads several levels in one round-trip
-  when restoring a deep link or persisted expansions.
+  when restoring a deep link.
 - **Login**: `startLogin()` stores the current location (including the hash)
   in a cookie and navigates to the protected `/bin/assetshub/auth/login`
   route, which triggers the AEM/IMS login and redirects back (see
   `LoginServlet` in the assetshub bundle). Do not add redirect hops in front
   of it — that broke the IMS round-trip.
-- Only UI state (expanded paths) is persisted — never listing content, which
-  is permission-sensitive.
+- Nothing is persisted across reloads: the tree reopens only the folder being
+  viewed and its ancestors, derived from the route. Expansions beyond that
+  live in memory for the session (and never include listing content, which is
+  permission-sensitive).

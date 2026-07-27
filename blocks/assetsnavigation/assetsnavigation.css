@@ -1,5 +1,13 @@
 .assetsnavigation {
   display: grid;
+
+  /* minmax(0) column: with the default auto column, any row that is not a
+     scroll container (the user footer) contributes its min-content width to
+     the track, so one long unbreakable value — e.g. a long user name, which
+     is nowrap — widens EVERY row past the fixed sidebar and the name's own
+     ellipsis never engages. Capping the track at the container width keeps
+     rows at sidebar width so their inner truncation rules can do their job. */
+  grid-template-columns: minmax(0, 1fr);
   grid-template-rows: auto minmax(160px, 40vh) auto;
   height: 100%;
   background: var(--ah-surface);
@@ -80,15 +88,77 @@ main .section.assetsnavigation-container > div {
   min-height: 0;
   padding: 10.5px 7px;
 
-  /* Horizontal scroll too: a deeply expanded folder tree indents 20px per level
-     and keeps each label on one line, so a deep/long branch can grow wider than
-     the sidebar. Let it scroll sideways instead of being clipped. */
-  overflow: auto;
+  /* Vertical only. Horizontal overflow (a deeply expanded folder tree) scrolls
+     on .assetsnavigation-folder-tree instead: when this column was the sideways
+     scroller too, its horizontal bar rendered at the bottom of the whole
+     sidebar — hundreds of px below a short tree, floating over empty space —
+     so the clipped rows read as a bug, not as scrollable content. */
+  overflow: hidden auto;
   overscroll-behavior: contain;
+
+  /* Chromium fails to paint the custom vertical scrollbar (below) on the
+     INITIAL render when the scroller sits inside the fixed sidebar and its
+     content is populated by script — the bar only appears after the first
+     real scroll. Promoting the scroller to its own compositing layer makes
+     the scrollbar paint from the start. `will-change: scroll-position` is
+     not enough — only actual layerization (transform) fixes it; verified
+     against a fresh load, control vs fix. */
+  will-change: transform;
+}
+
+/* Force a persistent, VISIBLE scrollbar. Left to the OS default, macOS draws an
+   overlay bar that stays transparent until you actively scroll — so the overflow
+   reads as clipped rather than scrollable.
+
+   Chromium/WebKit only draw a classic always-on bar via the ::-webkit-scrollbar
+   pseudo-elements below. The catch: setting the *standard* `scrollbar-width` or
+   `scrollbar-color` makes Blink IGNORE those pseudo-elements and fall back to the
+   standard bar, which on macOS is the auto-hiding overlay again — which is why an
+   earlier `scrollbar-width: thin` here left the bar invisible. So the standard
+   props are scoped to engines WITHOUT ::-webkit-scrollbar support (Firefox) only.
+   Thumb uses the placeholder grey, not the border grey (#e5e5e5) which is so
+   close to the sidebar surface the bar renders yet reads as invisible. */
+.assetsnavigation-content::-webkit-scrollbar,
+.assetsnavigation-tree-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.assetsnavigation-content::-webkit-scrollbar-thumb,
+.assetsnavigation-tree-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: var(--ah-text-placeholder);
+}
+
+.assetsnavigation-content::-webkit-scrollbar-track,
+.assetsnavigation-tree-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* The tree's own bar would sit on its bottom edge — below the viewport when
+   the tree is tall — which is exactly what the sticky proxy replaces. The tree
+   only ever scrolls horizontally (vertical scrolling lives on -content), so
+   hiding its scrollbars wholesale is safe. */
+.assetsnavigation-folder-tree::-webkit-scrollbar {
+  display: none;
+}
+
+@supports not selector(::-webkit-scrollbar) {
+  .assetsnavigation-content,
+  .assetsnavigation-tree-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: var(--ah-text-placeholder) transparent;
+  }
+
+  .assetsnavigation-folder-tree {
+    scrollbar-width: none;
+  }
 }
 
 /* Standalone (see above): with the block sized to its content, this inner
-   scroller would only add a second, competing scrollbar in the editor. */
+   scroller would only add a second, competing scrollbar in the editor. The
+   folder tree's own scroller gets the same treatment below, after its base
+   rules. */
 main .assetsnavigation .assetsnavigation-content {
   overflow: visible;
 }
@@ -121,8 +191,63 @@ main .assetsnavigation .assetsnavigation-content {
   list-style: none;
 }
 
+/* The root list is the horizontal scroller: it indents 20px per level and keeps
+   each label on one line, so a deep/long branch grows wider than the sidebar.
+   Scrolling here (not on .assetsnavigation-content) keeps sideways overflow a
+   folders-only concern. Its native scrollbar is hidden (see the scrollbar
+   rules above) — the sticky proxy below renders the visible bar. */
+.assetsnavigation-folder-tree {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+
 .assetsnavigation-folder-tree[hidden],
 .assetsnavigation-folder-group[hidden] {
+  display: none;
+}
+
+/* Sticky stand-in for the tree's horizontal scrollbar (built in render.js,
+   synced in events.js). The native bar lives on the tree's bottom edge, which
+   a tall tree pushes below the sidebar viewport; sticking the proxy to the
+   bottom of the -content scrollport keeps it visible whenever the tree is,
+   however far down its real edge sits. It spans the full visible width — its
+   scrollport is wider than the tree's, so the two scroll ranges are equalized
+   by the spacer sizing in events.js rather than by matching widths here. Same
+   will-change rationale as the content scroller above: without a compositing
+   layer Chromium skips painting the custom bar until the first real scroll. */
+.assetsnavigation-tree-scrollbar {
+  position: sticky;
+
+  /* Negative insets cancel the scroller's own padding (10.5px bottom, 7px
+     sides on -content) so the bar rides the true bottom edge of the sidebar,
+     edge to edge — flush, the same way the native vertical bar rides the
+     right edge. The negative margin-bottom covers the end of the scroll: the
+     sticky inset only ever shifts the bar UP from its in-flow position, so at
+     full vertical scroll the bar would come to rest above the padding and
+     detach from the edge; shrinking the flow by the same 10.5px lands its
+     resting position exactly on the edge too. Keep all three in step with the
+     -content padding. */
+  bottom: -10.5px;
+  margin: 0 -7px -10.5px;
+  overflow: auto hidden;
+
+  /* Masks the rows that scroll beneath it while stuck. */
+  background: var(--ah-surface);
+  will-change: transform;
+}
+
+/* Only purpose is to be wider than the proxy so it can scroll. */
+.assetsnavigation-tree-scrollbar-spacer {
+  height: 1px;
+}
+
+/* Standalone (see the header comment): in the editor the block is full width,
+   so this scroller would only clip or add a stray bar. */
+main .assetsnavigation .assetsnavigation-folder-tree {
+  overflow: visible;
+}
+
+main .assetsnavigation .assetsnavigation-tree-scrollbar {
   display: none;
 }
 
@@ -227,7 +352,6 @@ main .assetsnavigation .assetsnavigation-content {
   flex-direction: column;
   gap: var(--ah-space-2xs);
   margin: 0;
-  margin-left: 20px;
   padding: 0;
   list-style: none;
 }

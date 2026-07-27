@@ -2,7 +2,7 @@
  * Entry point for the assetsnavigation block — the app's left sidebar. It owns
  * the primary nav (views), the collapsible DAM folder tree and the user footer
  * (profile or login). Rendering lives in render.js, interaction wiring in
- * events.js, API access in data.js and the persisted tree expansion in state.js.
+ * events.js and API access in data.js.
  */
 
 import bindAssetsNavigation, { revealTree, highlightRoute } from './events.js';
