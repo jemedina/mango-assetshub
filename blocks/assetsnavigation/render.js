@@ -283,13 +283,6 @@ export function createCollectionItem(collection) {
   group.append(icon, label);
   button.append(group);
 
-  if (!collection.public) {
-    const badge = document.createElement('span');
-    badge.className = 'assetsnavigation-collection-badge';
-    badge.textContent = 'Privada';
-    button.append(badge);
-  }
-
   item.append(button);
   return item;
 }

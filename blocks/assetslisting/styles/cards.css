@@ -572,6 +572,8 @@
   height: auto;
 }
 
+/* stylelint-disable-next-line no-descending-specificity -- grid/list view modes
+   are mutually exclusive, so this never actually competes with the grid rule above */
 .assetslisting[data-view-mode="list"] .assetslisting-keyword {
   padding: 0;
   background: transparent;
