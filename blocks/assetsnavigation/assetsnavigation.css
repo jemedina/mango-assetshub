@@ -296,11 +296,12 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   width: max-content;
   min-width: 100%;
 
-  /* Depth as padding, not position: 20px base (the tree's offset under
-     "Carpetas") + 20px per level, so the box — and its background — always
-     starts at the tree's left edge, however deep the folder. */
+  /* Depth as padding, not position: the base lines the level-0 disclosure arrow
+     up with the "Carpetas" toggle's own content (both sit --ah-space-xm in from
+     the section's left edge), then +20px per level. The box — and its
+     background — always starts at the tree's left edge, however deep the folder. */
   padding: 3.5px var(--ah-space-xm) 3.5px
-    calc(20px + var(--ah-space-xm) + (var(--ah-folder-level, 0) * 20px));
+    calc(var(--ah-space-xm) + (var(--ah-folder-level, 0) * 20px));
   border: 0;
   border-radius: var(--ah-radius-2xs);
   background: transparent;
@@ -371,7 +372,7 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
    --ah-folder-level is inherited from the group (set in render.js). */
 .assetsnavigation-folder-state {
   padding: var(--ah-space-s) var(--ah-space-m) var(--ah-space-s)
-    calc(20px + var(--ah-space-m) + (var(--ah-folder-level, 0) * 20px));
+    calc(var(--ah-space-m) + (var(--ah-folder-level, 0) * 20px));
   color: var(--ah-text-muted);
   font-size: var(--ah-font-xs);
 }
