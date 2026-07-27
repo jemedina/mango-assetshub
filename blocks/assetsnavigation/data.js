@@ -63,28 +63,26 @@ export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
   return response.json();
 }
 
-// The auth status endpoint has no role/title field yet (only profile, groups,
-// permissions) — placeholder until the backend surfaces something to map to
-// a display role. Swap this for a real value (e.g. derived from `groups`)
-// once it does.
-const PLACEHOLDER_ROLE = 'Miembro';
-
 /**
- * Display name + avatar initials + role for the user footer, built from the
- * auth profile. Falls back gracefully when given/family name aren't populated
- * yet (e.g. an identity provider that only sends userId) so the avatar layout
- * still renders correctly — just with a single-letter initial — until the
- * backend fills in the full profile.
- * @param {{ userId: string, profile?: { givenName?: string, familyName?: string } }} status
- * @returns {{ name: string, initials: string, role: string }}
+ * Display name + avatar initials for the user footer, built from the auth
+ * profile. Falls back gracefully when given/family name aren't populated yet
+ * (e.g. an identity provider that only sends userId) so the avatar layout still
+ * renders correctly — just with a single-letter initial — until the backend
+ * fills in the full profile.
+ * When the profile carries a synced avatar (`photo`, a data URI from the auth
+ * status servlet) it's passed through so the footer can render the real
+ * thumbnail; otherwise the initials stand in.
+ * @param {{ userId: string, profile?: {
+ *   givenName?: string, familyName?: string, photo?: string } }} status
+ * @returns {{ name: string, initials: string, photo: string|null }}
  */
 export function userDisplay(status) {
-  const { givenName, familyName } = status.profile || {};
+  const { givenName, familyName, photo } = status.profile || {};
   const name = givenName ? `${givenName} ${familyName || ''}`.trim() : status.userId;
   const initials = givenName && familyName
     ? `${givenName[0]}${familyName[0]}`
     : (givenName || status.userId || '?')[0];
-  return { name, initials: initials.toUpperCase(), role: PLACEHOLDER_ROLE };
+  return { name, initials: initials.toUpperCase(), photo: photo || null };
 }
 
 /**

@@ -72,6 +72,15 @@ function openFoldersSection(block) {
   if (tree) tree.hidden = false;
 }
 
+/* Mirror of openFoldersSection: both sections start collapsed and only the one
+   the URL points into opens itself (initial route emit + deep links). */
+function openCollectionsSection(block) {
+  const toggle = block.querySelector('.assetsnavigation-collections-toggle');
+  const list = block.querySelector('.assetsnavigation-collection-list');
+  if (toggle) toggle.setAttribute('aria-expanded', 'true');
+  if (list) list.hidden = false;
+}
+
 /**
  * Unhides every ancestor group of the button (and marks its controlling folder
  * expanded + persisted), so a nested folder becomes visible.
@@ -161,7 +170,12 @@ function scrollFolderIntoView(button, framesLeft = 120) {
     window.requestAnimationFrame(() => scrollFolderIntoView(button, framesLeft - 1));
     return;
   }
-  button.scrollIntoView({ block: 'center', inline: 'nearest' });
+
+  // Aim at the icon + label group, not the button: rows are full-bleed (their
+  // box always starts at the tree's left edge), so the button itself never
+  // reads as horizontally out of view — only its indented content does.
+  const target = button.querySelector('.ah-button-nav-group') || button;
+  target.scrollIntoView({ block: 'center', inline: 'nearest' });
 }
 
 /**
@@ -217,6 +231,12 @@ export async function revealTree(block, activePath) {
 }
 
 async function handleRouteChange(block, route) {
+  // The URL points inside a collection -> make sure the section is open (the
+  // list itself was rendered by loadCollections; this only reveals it).
+  if (route.view === ASSETS_LISTING_VIEW && route.filters?.collection) {
+    openCollectionsSection(block);
+  }
+
   if (route.view === ASSETS_LISTING_VIEW && route.path && route.path !== DAM_ROOT) {
     const button = findFolderButton(block, route.path);
     if (button) {
@@ -241,9 +261,10 @@ async function handleRouteChange(block, route) {
  * @param {Element} block the assetsnavigation block
  */
 function bindTreeScrollbar(block) {
+  const scroller = block.querySelector('.assetsnavigation-tree-scroll');
   const tree = block.querySelector('.assetsnavigation-folder-tree');
   const bar = block.querySelector('.assetsnavigation-tree-scrollbar');
-  if (!tree || !bar) return;
+  if (!scroller || !tree || !bar) return;
   const spacer = bar.firstElementChild;
 
   // Assigning an equal scrollLeft fires no scroll event, so mirroring settles
@@ -253,24 +274,24 @@ function bindTreeScrollbar(block) {
   };
 
   const update = () => {
-    const overflowing = !tree.hidden && tree.scrollWidth > tree.clientWidth;
+    const overflowing = !tree.hidden && scroller.scrollWidth > scroller.clientWidth;
     bar.hidden = !overflowing;
     if (overflowing) {
       // The bar spans the full sidebar width, so its scrollport is wider than
-      // the tree's. Sizing the spacer to the tree's overflow PLUS the bar's own
+      // the scroller's. Sizing the spacer to the overflow PLUS the bar's own
       // width makes both max scrollLefts equal, keeping the mirroring 1:1.
       // Read clientWidth after unhiding, or it measures 0.
-      spacer.style.width = `${tree.scrollWidth - tree.clientWidth + bar.clientWidth}px`;
-      mirror(tree, bar);
+      spacer.style.width = `${scroller.scrollWidth - scroller.clientWidth + bar.clientWidth}px`;
+      mirror(scroller, bar);
     }
   };
 
-  tree.addEventListener('scroll', () => mirror(tree, bar), { passive: true });
-  bar.addEventListener('scroll', () => mirror(bar, tree), { passive: true });
+  scroller.addEventListener('scroll', () => mirror(scroller, bar), { passive: true });
+  bar.addEventListener('scroll', () => mirror(bar, scroller), { passive: true });
 
   // Anything that changes the tree's overflow: expand/collapse (hidden flips on
   // groups and on the tree itself), lazy-loaded children, re-renders.
-  new MutationObserver(update).observe(tree, {
+  new MutationObserver(update).observe(scroller, {
     subtree: true,
     childList: true,
     attributes: true,
@@ -278,7 +299,7 @@ function bindTreeScrollbar(block) {
   });
 
   // Container-driven width changes (viewport resize past the 900px breakpoint).
-  new ResizeObserver(update).observe(tree);
+  new ResizeObserver(update).observe(scroller);
 
   update();
 }

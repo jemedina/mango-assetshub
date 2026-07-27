@@ -103,6 +103,10 @@ export function createFolderNode(folder, level = 0) {
   button.dataset.folderId = folder.id;
   button.dataset.folderHref = folder.href || '';
   button.dataset.level = level;
+  // Depth as a custom property: rows are full-bleed (their background starts
+  // at the tree's left edge) and indent through their own padding-left, which
+  // the CSS derives from this value. Nested lists carry no margins.
+  button.style.setProperty('--ah-folder-level', level);
   button.setAttribute('aria-current', 'false');
 
   const label = document.createElement('span');
@@ -137,6 +141,9 @@ export function createFolderNode(folder, level = 0) {
     const group = document.createElement('ul');
     group.className = 'assetsnavigation-folder-group';
     group.dataset.loaded = hasAuthoredChildren ? 'true' : 'false';
+    // Children's depth, inherited by rows without one of their own (the
+    // loading / empty state lis), so they line up with the folder rows.
+    group.style.setProperty('--ah-folder-level', level + 1);
     group.hidden = !expanded;
     if (hasAuthoredChildren) {
       folder.children.forEach((child) => group.append(createFolderNode(child, level + 1)));
@@ -197,10 +204,18 @@ function createFolders(folders = []) {
 
   const toggle = createFoldersToggle();
 
+  // The scroller wraps the tree instead of BEING the tree: with the ul sized
+  // max-content inside it, every row stretches to the widest branch, so a
+  // selected/hovered row's background spans the full scrollable width instead
+  // of hugging its own icon + label.
+  const scroller = document.createElement('div');
+  scroller.className = 'assetsnavigation-tree-scroll';
+
   const tree = document.createElement('ul');
   tree.id = 'assetsnavigation-folder-tree';
   tree.className = 'assetsnavigation-folder-tree';
   tree.hidden = true;
+  scroller.append(tree);
 
   if (folders.length) {
     folders.forEach((folder) => tree.append(createFolderNode(folder)));
@@ -228,7 +243,7 @@ function createFolders(folders = []) {
   spacer.className = 'assetsnavigation-tree-scrollbar-spacer';
   scrollbar.append(spacer);
 
-  section.append(toggle, tree, scrollbar);
+  section.append(toggle, scroller, scrollbar);
   return section;
 }
 
@@ -247,9 +262,10 @@ function createCollectionsToggle() {
   button.type = 'button';
   button.className = 'ah-button-nav ah-button-nav-section assetsnavigation-collections-toggle';
   button.id = 'assetsnavigation-collections-toggle';
-  // Expanded by default: the collections list is the point of the section, so it
-  // shows without a click (still collapsible, like "Carpetas").
-  button.setAttribute('aria-expanded', 'true');
+  // Collapsed by default, like "Carpetas": each section only opens on its own
+  // when the URL points inside it (see handleRouteChange), so landing in a
+  // folder shows collections collapsed and vice versa.
+  button.setAttribute('aria-expanded', 'false');
   button.setAttribute('aria-controls', 'assetsnavigation-collections-list');
 
   const group = document.createElement('span');
@@ -321,6 +337,7 @@ function createCollections() {
   const list = document.createElement('ul');
   list.id = 'assetsnavigation-collections-list';
   list.className = 'assetsnavigation-collection-list';
+  list.hidden = true;
   list.append(collectionState('Cargando colecciones...'));
 
   section.append(createCollectionsToggle(), list);
@@ -347,11 +364,23 @@ export function renderUserLoading(footer) {
   footer.replaceChildren(state);
 }
 
-export function renderUser(footer, { name, initials, role }) {
+export function renderUser(footer, { name, initials, photo }) {
   const avatar = document.createElement('span');
   avatar.className = 'assetsnavigation-user-avatar';
   avatar.setAttribute('aria-hidden', 'true');
-  avatar.textContent = initials;
+  if (photo) {
+    const img = document.createElement('img');
+    img.className = 'assetsnavigation-user-avatar-img';
+    img.src = photo;
+    img.alt = '';
+    // Fall back to initials if the inlined avatar fails to decode.
+    img.addEventListener('error', () => {
+      avatar.textContent = initials;
+    });
+    avatar.append(img);
+  } else {
+    avatar.textContent = initials;
+  }
 
   const details = document.createElement('div');
   details.className = 'assetsnavigation-user-details';
@@ -360,11 +389,7 @@ export function renderUser(footer, { name, initials, role }) {
   nameEl.className = 'assetsnavigation-user-name';
   nameEl.textContent = name;
 
-  const roleEl = document.createElement('p');
-  roleEl.className = 'assetsnavigation-user-role';
-  roleEl.textContent = role;
-
-  details.append(nameEl, roleEl);
+  details.append(nameEl);
   footer.replaceChildren(avatar, details);
 }
 

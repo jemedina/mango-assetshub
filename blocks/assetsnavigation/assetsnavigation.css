@@ -84,6 +84,8 @@ main .section.assetsnavigation-container > div {
 
 /* content */
 .assetsnavigation-content {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   min-height: 0;
   padding: 10.5px 7px;
@@ -135,11 +137,11 @@ main .section.assetsnavigation-container > div {
   background: transparent;
 }
 
-/* The tree's own bar would sit on its bottom edge — below the viewport when
-   the tree is tall — which is exactly what the sticky proxy replaces. The tree
+/* The scroller's own bar would sit on its bottom edge — below the viewport
+   when the tree is tall — which is exactly what the sticky proxy replaces. It
    only ever scrolls horizontally (vertical scrolling lives on -content), so
    hiding its scrollbars wholesale is safe. */
-.assetsnavigation-folder-tree::-webkit-scrollbar {
+.assetsnavigation-tree-scroll::-webkit-scrollbar {
   display: none;
 }
 
@@ -150,7 +152,7 @@ main .section.assetsnavigation-container > div {
     scrollbar-color: var(--ah-text-placeholder) transparent;
   }
 
-  .assetsnavigation-folder-tree {
+  .assetsnavigation-tree-scroll {
     scrollbar-width: none;
   }
 }
@@ -165,11 +167,20 @@ main .assetsnavigation .assetsnavigation-content {
 
 .assetsnavigation-primary {
   display: flex;
+  flex: none;
   flex-direction: column;
   gap: var(--ah-space-xs);
 }
 
+/* Grows to fill the space left below the primary nav + collections so the
+   sticky horizontal scrollbar (last child) always rides the bottom edge of the
+   sidebar — not just when a tall tree pushes it there. A short tree used to
+   leave the bar floating mid-column at its in-flow position. The section is a
+   flex column so its inner scroller can take that grown space (below). */
 .assetsnavigation-folders {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
   margin-top: var(--ah-space-xm);
 }
 
@@ -178,27 +189,44 @@ main .assetsnavigation .assetsnavigation-content {
   color: var(--ah-text-strong);
 }
 
-/* folder tree — indented 20px from "Carpetas" (root list) and from each
-   parent folder (nested groups), so depth is visible regardless of level. */
+/* folder tree — no structural indentation here: depth is drawn by each row's
+   own padding-left (20px per level off --ah-folder-level, set in render.js),
+   so every row box spans the tree's full width and its hover/selection
+   background bleeds from the very left edge, file-explorer style. */
 .assetsnavigation-folder-tree,
 .assetsnavigation-folder-group {
   display: flex;
   flex-direction: column;
   gap: var(--ah-space-2xs);
   margin: 0;
-  margin-left: 20px;
   padding: 0;
   list-style: none;
 }
 
-/* The root list is the horizontal scroller: it indents 20px per level and keeps
-   each label on one line, so a deep/long branch grows wider than the sidebar.
-   Scrolling here (not on .assetsnavigation-content) keeps sideways overflow a
-   folders-only concern. Its native scrollbar is hidden (see the scrollbar
-   rules above) — the sticky proxy below renders the visible bar. */
-.assetsnavigation-folder-tree {
+/* The horizontal scroller around the root list: the tree indents 20px per
+   level and keeps each label on one line, so a deep/long branch grows wider
+   than the sidebar. Scrolling here (not on .assetsnavigation-content) keeps
+   sideways overflow a folders-only concern. Its native scrollbar is hidden
+   (see the scrollbar rules above) — the sticky proxy below renders the
+   visible bar. */
+.assetsnavigation-tree-scroll {
+  /* Fills the grown folders section (a short tree just leaves empty space
+     below its rows) so the sticky scrollbar proxy that follows lands on the
+     sidebar's bottom edge. A tall tree overflows -content and scrolls there as
+     before; min-height: 0 lets this item exceed the flex line for that. */
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-x: auto;
   overscroll-behavior-x: contain;
+}
+
+/* Sized to its widest branch (not the scrollport) so rows stretch to the full
+   scrollable width: a block child fills its parent, never the parent's
+   overflow, so with the ul at scrollport width a selected/hovered row's
+   background would hug its own icon + label once the tree overflows. */
+.assetsnavigation-folder-tree {
+  width: max-content;
+  min-width: 100%;
 }
 
 .assetsnavigation-folder-tree[hidden],
@@ -243,7 +271,7 @@ main .assetsnavigation .assetsnavigation-content {
 
 /* Standalone (see the header comment): in the editor the block is full width,
    so this scroller would only clip or add a stray bar. */
-main .assetsnavigation .assetsnavigation-folder-tree {
+main .assetsnavigation .assetsnavigation-tree-scroll {
   overflow: visible;
 }
 
@@ -267,7 +295,12 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
      the row at least full-width so the hover background spans the whole tree. */
   width: max-content;
   min-width: 100%;
-  padding: 3.5px var(--ah-space-xm);
+
+  /* Depth as padding, not position: 20px base (the tree's offset under
+     "Carpetas") + 20px per level, so the box — and its background — always
+     starts at the tree's left edge, however deep the folder. */
+  padding: 3.5px var(--ah-space-xm) 3.5px
+    calc(20px + var(--ah-space-xm) + (var(--ah-folder-level, 0) * 20px));
   border: 0;
   border-radius: var(--ah-radius-2xs);
   background: transparent;
@@ -334,9 +367,11 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
 
 /* Folder loading / empty states. Sized to match the folder rows they stand in
    for — at --ah-font-m these read larger than the actual tree content and wrap
-   onto a second line in the sidebar's width. */
+   onto a second line in the sidebar's width. Indented like those rows too:
+   --ah-folder-level is inherited from the group (set in render.js). */
 .assetsnavigation-folder-state {
-  padding: var(--ah-space-s) var(--ah-space-m);
+  padding: var(--ah-space-s) var(--ah-space-m) var(--ah-space-s)
+    calc(20px + var(--ah-space-m) + (var(--ah-folder-level, 0) * 20px));
   color: var(--ah-text-muted);
   font-size: var(--ah-font-xs);
 }
@@ -344,6 +379,7 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
 /* collections section — mirrors the folders section (always shown, collapsible),
    a flat one-level list of the collections the user can see. */
 .assetsnavigation-collections {
+  flex: none;
   margin-top: var(--ah-space-xm);
 }
 
@@ -421,7 +457,7 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   background: var(--ah-surface);
 }
 
-/* initials avatar — a stand-in until every profile has a real photo */
+/* avatar — real synced photo when present, initials as a stand-in otherwise */
 .assetsnavigation-user-avatar {
   display: flex;
   flex: none;
@@ -436,6 +472,13 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   font-weight: var(--font-weight-bold);
   line-height: 15px;
   text-transform: uppercase;
+  overflow: hidden;
+}
+
+.assetsnavigation-user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .assetsnavigation-user-details {
@@ -452,17 +495,6 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   font-size: var(--ah-font-xs);
   font-weight: var(--font-weight-medium);
   line-height: 18px;
-  text-overflow: ellipsis;
-  text-transform: capitalize;
-  white-space: nowrap;
-}
-
-.assetsnavigation-user-role {
-  margin: 0;
-  overflow: hidden;
-  color: var(--ah-text-placeholder);
-  font-size: 11px;
-  line-height: 16.5px;
   text-overflow: ellipsis;
   text-transform: capitalize;
   white-space: nowrap;
