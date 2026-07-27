@@ -144,6 +144,23 @@ p.button-wrapper {
   text-transform: uppercase;
 }
 
+/* These headers signal hover by DARKENING their label (#888 -> #111), not by
+   filling a background like the rest of .ah-button-nav — so override the base
+   hover here. The disclosure chevron is a currentColor-filled mask (see
+   .ah-icon), so it darkens along with the text for free — no second glyph. */
+.ah-button-nav-section:hover,
+.ah-button-nav-section:focus-visible {
+  background: transparent;
+  color: var(--ah-text-strong);
+}
+
+/* The leading glyph in a section header (folders / collections) — 12px, sized
+   here rather than with an .ah-icon-* class so the two toggles share one value.
+   Scoped to the group so it never touches the trailing disclosure chevron. */
+.ah-button-nav-section .ah-button-nav-group .ah-icon {
+  --ah-icon-size: 12px;
+}
+
 .ah-button-nav-group {
   display: flex;
   flex: 1;

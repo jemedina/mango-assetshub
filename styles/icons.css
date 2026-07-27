@@ -23,8 +23,8 @@
 .ah-icon {
   display: inline-flex;
   flex: none;
-  width: var(--ah-icon-size, 14px);
-  height: var(--ah-icon-size, 14px);
+  width: var(--ah-icon-size, 15px);
+  height: var(--ah-icon-size, 15px);
   background-color: currentcolor;
   mask: var(--ah-icon) center / contain no-repeat;
 }

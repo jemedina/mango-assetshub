@@ -112,6 +112,9 @@ export function createFolderNode(folder, level = 0) {
   const label = document.createElement('span');
   label.className = 'assetsnavigation-folder-label';
   label.textContent = folder.label;
+  // Native tooltip with the full name: folder rows truncate hard in the narrow
+  // sidebar, so hovering reveals what the ellipsis cut off.
+  if (folder.label) label.title = folder.label;
 
   const icon = document.createElement('span');
   icon.className = 'ah-icon ah-icon-folder';
@@ -185,7 +188,7 @@ function createFoldersToggle() {
   group.className = 'ah-button-nav-group';
 
   const icon = document.createElement('span');
-  icon.className = 'ah-icon ah-icon-sm ah-icon-folders-main';
+  icon.className = 'ah-icon ah-icon-folders-main';
   icon.setAttribute('aria-hidden', 'true');
 
   const label = document.createElement('span');
@@ -204,18 +207,14 @@ function createFolders(folders = []) {
 
   const toggle = createFoldersToggle();
 
-  // The scroller wraps the tree instead of BEING the tree: with the ul sized
-  // max-content inside it, every row stretches to the widest branch, so a
-  // selected/hovered row's background spans the full scrollable width instead
-  // of hugging its own icon + label.
-  const scroller = document.createElement('div');
-  scroller.className = 'assetsnavigation-tree-scroll';
-
+  // Rows fill the sidebar width and truncate their own label (see the
+  // folder-button rules in CSS), so the tree never overflows sideways — no
+  // horizontal scroller or scrollbar proxy is needed. The tree mounts straight
+  // into the section; vertical overflow scrolls on .assetsnavigation-content.
   const tree = document.createElement('ul');
   tree.id = 'assetsnavigation-folder-tree';
   tree.className = 'assetsnavigation-folder-tree';
   tree.hidden = true;
-  scroller.append(tree);
 
   if (folders.length) {
     folders.forEach((folder) => tree.append(createFolderNode(folder)));
@@ -226,24 +225,7 @@ function createFolders(folders = []) {
     tree.append(empty);
   }
 
-  // Stand-in for the tree's horizontal scrollbar. The native bar sits on the
-  // tree's bottom edge, which a tall tree pushes below the sidebar viewport —
-  // so sideways overflow was invisible until you scrolled all the way down.
-  // This proxy sticks to the bottom of the visible content area instead,
-  // spanning the sidebar's full width; the inner spacer is sized so both max
-  // scrollLefts are equal and both scroll positions are mirrored by
-  // bindTreeScrollbar in events.js. Mouse-only affordance (keyboard and
-  // trackpad act on the tree itself), hence aria-hidden.
-  const scrollbar = document.createElement('div');
-  scrollbar.className = 'assetsnavigation-tree-scrollbar';
-  scrollbar.hidden = true;
-  scrollbar.setAttribute('aria-hidden', 'true');
-  scrollbar.tabIndex = -1;
-  const spacer = document.createElement('div');
-  spacer.className = 'assetsnavigation-tree-scrollbar-spacer';
-  scrollbar.append(spacer);
-
-  section.append(toggle, scroller, scrollbar);
+  section.append(toggle, tree);
   return section;
 }
 
@@ -272,7 +254,7 @@ function createCollectionsToggle() {
   group.className = 'ah-button-nav-group';
 
   const icon = document.createElement('span');
-  icon.className = 'ah-icon ah-icon-sm ah-icon-collections';
+  icon.className = 'ah-icon ah-icon-collections';
   icon.setAttribute('aria-hidden', 'true');
 
   const label = document.createElement('span');
@@ -285,10 +267,11 @@ function createCollectionsToggle() {
 }
 
 /**
- * One collection row: same shape as a folder row (icon + label), plus a small
- * "Privada" badge so the private/public split the backend resolves is visible.
- * Clicking opens the collection (wired by the delegated handler in events.js off
- * the data-collection-* attributes).
+ * One collection row: same shape as a folder row (icon + label). Kept at
+ * `--ah-folder-level: 0` so its content lines up flush-left with the group row
+ * and the "Colecciones" section toggle — every row in the section shares one
+ * left edge (no per-level indentation here). Clicking opens the collection
+ * (wired by the delegated handler in events.js off the data-collection-* attributes).
  * @param {{ id: string, label: string, public?: boolean }} collection
  */
 export function createCollectionItem(collection) {
@@ -301,6 +284,7 @@ export function createCollectionItem(collection) {
   button.dataset.collectionId = collection.id;
   button.dataset.collectionLabel = collection.label;
   button.dataset.visibility = collection.public ? 'public' : 'private';
+  button.style.setProperty('--ah-folder-level', 0);
   button.setAttribute('aria-current', 'false');
 
   const icon = document.createElement('span');
@@ -320,13 +304,61 @@ export function createCollectionItem(collection) {
   return item;
 }
 
-export function renderCollectionsList(list, collections) {
+/**
+ * One group node: an expandable row (leading disclosure arrow + label) whose
+ * nested list holds the group's collection rows — the single extra level of the
+ * two-level tree. Mirrors an expandable folder node (chevron toggles the group
+ * without navigating anywhere); the collection rows inside are the leaves.
+ * @param {{ label: string, collections: Array }} group
+ */
+export function createCollectionGroupNode(group) {
+  const item = document.createElement('li');
+  item.className = 'assetsnavigation-collection-group';
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'assetsnavigation-collection-group-button';
+  button.dataset.groupLabel = group.label;
+  button.style.setProperty('--ah-folder-level', 0);
+  // Collapsed by default; the group holding the open collection is expanded by
+  // the route handler (mirrors how the active folder's ancestors open).
+  button.setAttribute('aria-expanded', 'false');
+
+  const label = document.createElement('span');
+  label.className = 'assetsnavigation-collection-group-label';
+  label.textContent = group.label;
+
+  const labelGroup = document.createElement('span');
+  labelGroup.className = 'ah-button-nav-group';
+  labelGroup.append(label);
+
+  // Label on the left, trailing disclosure arrow on the right — same layout as
+  // the section headers ("Colecciones" / "Carpetas"); no item count (per business).
+  button.append(labelGroup, createChevron());
+
+  const list = document.createElement('ul');
+  list.className = 'assetsnavigation-collection-group-list';
+  list.style.setProperty('--ah-folder-level', 0);
+  list.hidden = true;
+  group.collections.forEach((collection) => list.append(createCollectionItem(collection)));
+
+  item.append(button, list);
+  return item;
+}
+
+/**
+ * Paints the grouped collections tree (groups -> collections). Each group renders
+ * as an expandable node; an empty result shows the shared empty state.
+ * @param {Element} list the collections list container
+ * @param {Array<{ label: string, collections: Array }>} groups
+ */
+export function renderCollectionsList(list, groups) {
   list.replaceChildren();
-  if (!collections.length) {
+  if (!groups.length) {
     list.append(collectionState('No hay colecciones disponibles'));
     return;
   }
-  collections.forEach((collection) => list.append(createCollectionItem(collection)));
+  groups.forEach((group) => list.append(createCollectionGroupNode(group)));
 }
 
 function createCollections() {

@@ -47,24 +47,6 @@ function findCollectionButton(block, id) {
   );
 }
 
-export function highlightRoute(block, route) {
-  // A collection is open (assets-listing carrying a collection filter) -> the
-  // collection is the logical root, so highlight it, not any folder.
-  if (route.view === ASSETS_LISTING_VIEW && route.filters?.collection) {
-    setActiveNav(block, findCollectionButton(block, route.filters.collection));
-    return;
-  }
-
-  // assets-listing scoped to a folder -> highlight that folder if it's rendered.
-  if (route.view === ASSETS_LISTING_VIEW && route.path) {
-    setActiveNav(block, findFolderButton(block, route.path));
-    return;
-  }
-
-  const link = block.querySelector(`.assetsnavigation-link[data-view="${route.view}"]`);
-  setActiveNav(block, link);
-}
-
 function openFoldersSection(block) {
   const toggle = block.querySelector('.assetsnavigation-folders-toggle');
   const tree = block.querySelector('.assetsnavigation-folder-tree');
@@ -79,6 +61,42 @@ function openCollectionsSection(block) {
   const list = block.querySelector('.assetsnavigation-collection-list');
   if (toggle) toggle.setAttribute('aria-expanded', 'true');
   if (list) list.hidden = false;
+}
+
+/**
+ * Reveals the group node a collection row sits in and marks its group button
+ * expanded, so the active collection becomes visible in the two-level tree.
+ */
+function expandCollectionGroup(block, id) {
+  const button = findCollectionButton(block, id);
+  const list = button ? button.closest('.assetsnavigation-collection-group-list') : null;
+  if (!list) return;
+  list.hidden = false;
+  const groupButton = list.previousElementSibling;
+  if (groupButton && groupButton.classList.contains('assetsnavigation-collection-group-button')) {
+    groupButton.setAttribute('aria-expanded', 'true');
+  }
+}
+
+export function highlightRoute(block, route) {
+  // A collection is open (assets-listing carrying a collection filter) -> the
+  // collection is the logical root, so highlight it, not any folder. Its section
+  // and containing group open so the highlighted row is actually on screen.
+  if (route.view === ASSETS_LISTING_VIEW && route.filters?.collection) {
+    openCollectionsSection(block);
+    expandCollectionGroup(block, route.filters.collection);
+    setActiveNav(block, findCollectionButton(block, route.filters.collection));
+    return;
+  }
+
+  // assets-listing scoped to a folder -> highlight that folder if it's rendered.
+  if (route.view === ASSETS_LISTING_VIEW && route.path) {
+    setActiveNav(block, findFolderButton(block, route.path));
+    return;
+  }
+
+  const link = block.querySelector(`.assetsnavigation-link[data-view="${route.view}"]`);
+  setActiveNav(block, link);
 }
 
 /**
@@ -171,11 +189,9 @@ function scrollFolderIntoView(button, framesLeft = 120) {
     return;
   }
 
-  // Aim at the icon + label group, not the button: rows are full-bleed (their
-  // box always starts at the tree's left edge), so the button itself never
-  // reads as horizontally out of view — only its indented content does.
-  const target = button.querySelector('.ah-button-nav-group') || button;
-  target.scrollIntoView({ block: 'center', inline: 'nearest' });
+  // Vertical only: rows truncate to the sidebar width instead of overflowing
+  // sideways, so there is nothing to bring into view horizontally.
+  button.scrollIntoView({ block: 'center' });
 }
 
 /**
@@ -216,10 +232,9 @@ export async function revealTree(block, activePath) {
       openFoldersSection(block);
 
       // Bring the restored folder into view: after a refresh (or a deep link
-      // that rebuilt the tree) it may sit far down or — deeply indented —
-      // past the right edge. Centering scrolls the -content scroller; inline
-      // 'nearest' nudges the tree's horizontal scroll only when needed (the
-      // proxy bar follows through its scroll listener).
+      // that rebuilt the tree) it may sit far down. Centering scrolls the
+      // -content scroller vertically; rows truncate rather than overflow
+      // sideways, so there is no horizontal scroll to adjust.
       const active = findFolderButton(block, activePath);
       if (active) scrollFolderIntoView(active);
     }
@@ -231,12 +246,9 @@ export async function revealTree(block, activePath) {
 }
 
 async function handleRouteChange(block, route) {
-  // The URL points inside a collection -> make sure the section is open (the
-  // list itself was rendered by loadCollections; this only reveals it).
-  if (route.view === ASSETS_LISTING_VIEW && route.filters?.collection) {
-    openCollectionsSection(block);
-  }
-
+  // A URL inside a collection opens the section and its containing group — but
+  // that is handled by highlightRoute below, so both the initial load path
+  // (loadCollections -> highlightRoute) and route changes reveal it the same way.
   if (route.view === ASSETS_LISTING_VIEW && route.path && route.path !== DAM_ROOT) {
     const button = findFolderButton(block, route.path);
     if (button) {
@@ -251,62 +263,7 @@ async function handleRouteChange(block, route) {
   highlightRoute(block, route);
 }
 
-/**
- * Wires the sticky proxy scrollbar (created in render.js) to the folder tree.
- * The tree's own horizontal bar is hidden in CSS; this keeps the proxy's
- * spacer sized to the tree's scrollWidth, mirrors scroll positions both ways,
- * and shows the proxy only while the tree actually overflows sideways. Bound
- * once: the tree and proxy elements persist across re-renders (revealTree
- * replaces the tree's children, never the tree itself).
- * @param {Element} block the assetsnavigation block
- */
-function bindTreeScrollbar(block) {
-  const scroller = block.querySelector('.assetsnavigation-tree-scroll');
-  const tree = block.querySelector('.assetsnavigation-folder-tree');
-  const bar = block.querySelector('.assetsnavigation-tree-scrollbar');
-  if (!scroller || !tree || !bar) return;
-  const spacer = bar.firstElementChild;
-
-  // Assigning an equal scrollLeft fires no scroll event, so mirroring settles
-  // instead of ping-ponging between the two listeners.
-  const mirror = (from, to) => {
-    if (to.scrollLeft !== from.scrollLeft) to.scrollLeft = from.scrollLeft;
-  };
-
-  const update = () => {
-    const overflowing = !tree.hidden && scroller.scrollWidth > scroller.clientWidth;
-    bar.hidden = !overflowing;
-    if (overflowing) {
-      // The bar spans the full sidebar width, so its scrollport is wider than
-      // the scroller's. Sizing the spacer to the overflow PLUS the bar's own
-      // width makes both max scrollLefts equal, keeping the mirroring 1:1.
-      // Read clientWidth after unhiding, or it measures 0.
-      spacer.style.width = `${scroller.scrollWidth - scroller.clientWidth + bar.clientWidth}px`;
-      mirror(scroller, bar);
-    }
-  };
-
-  scroller.addEventListener('scroll', () => mirror(scroller, bar), { passive: true });
-  bar.addEventListener('scroll', () => mirror(bar, scroller), { passive: true });
-
-  // Anything that changes the tree's overflow: expand/collapse (hidden flips on
-  // groups and on the tree itself), lazy-loaded children, re-renders.
-  new MutationObserver(update).observe(scroller, {
-    subtree: true,
-    childList: true,
-    attributes: true,
-    attributeFilter: ['hidden'],
-  });
-
-  // Container-driven width changes (viewport resize past the 900px breakpoint).
-  new ResizeObserver(update).observe(scroller);
-
-  update();
-}
-
 export default function bindAssetsNavigation(block) {
-  bindTreeScrollbar(block);
-
   block.addEventListener('click', async (event) => {
     const foldersToggle = event.target.closest('.assetsnavigation-folders-toggle');
     if (foldersToggle && block.contains(foldersToggle)) {
@@ -317,6 +274,15 @@ export default function bindAssetsNavigation(block) {
     const collectionsToggle = event.target.closest('.assetsnavigation-collections-toggle');
     if (collectionsToggle && block.contains(collectionsToggle)) {
       setControlledGroup(collectionsToggle);
+      return;
+    }
+
+    // A group node (the extra level): the whole row is a pure disclosure control
+    // — it opens/closes its collection list and never navigates. Its sibling list
+    // is toggled generically (no folder-specific loading involved).
+    const groupButton = event.target.closest('.assetsnavigation-collection-group-button');
+    if (groupButton && block.contains(groupButton)) {
+      setControlledGroup(groupButton);
       return;
     }
 

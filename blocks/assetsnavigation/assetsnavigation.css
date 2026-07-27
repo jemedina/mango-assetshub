@@ -70,7 +70,7 @@ main .section.assetsnavigation-container > div {
   display: block;
   width: auto;
   max-width: 100%;
-  max-height: 18px;
+  max-height: 15px;
 }
 
 .assetsnavigation-product-label {
@@ -90,11 +90,8 @@ main .section.assetsnavigation-container > div {
   min-height: 0;
   padding: 10.5px 7px;
 
-  /* Vertical only. Horizontal overflow (a deeply expanded folder tree) scrolls
-     on .assetsnavigation-folder-tree instead: when this column was the sideways
-     scroller too, its horizontal bar rendered at the bottom of the whole
-     sidebar — hundreds of px below a short tree, floating over empty space —
-     so the clipped rows read as a bug, not as scrollable content. */
+  /* Vertical only. There is no horizontal overflow to scroll: folder rows fill
+     the sidebar width and truncate their labels rather than growing past it. */
   overflow: hidden auto;
   overscroll-behavior: contain;
 
@@ -120,40 +117,24 @@ main .section.assetsnavigation-container > div {
    props are scoped to engines WITHOUT ::-webkit-scrollbar support (Firefox) only.
    Thumb uses the placeholder grey, not the border grey (#e5e5e5) which is so
    close to the sidebar surface the bar renders yet reads as invisible. */
-.assetsnavigation-content::-webkit-scrollbar,
-.assetsnavigation-tree-scrollbar::-webkit-scrollbar {
+.assetsnavigation-content::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
-.assetsnavigation-content::-webkit-scrollbar-thumb,
-.assetsnavigation-tree-scrollbar::-webkit-scrollbar-thumb {
+.assetsnavigation-content::-webkit-scrollbar-thumb {
   border-radius: 4px;
   background: var(--ah-text-placeholder);
 }
 
-.assetsnavigation-content::-webkit-scrollbar-track,
-.assetsnavigation-tree-scrollbar::-webkit-scrollbar-track {
+.assetsnavigation-content::-webkit-scrollbar-track {
   background: transparent;
 }
 
-/* The scroller's own bar would sit on its bottom edge — below the viewport
-   when the tree is tall — which is exactly what the sticky proxy replaces. It
-   only ever scrolls horizontally (vertical scrolling lives on -content), so
-   hiding its scrollbars wholesale is safe. */
-.assetsnavigation-tree-scroll::-webkit-scrollbar {
-  display: none;
-}
-
 @supports not selector(::-webkit-scrollbar) {
-  .assetsnavigation-content,
-  .assetsnavigation-tree-scrollbar {
+  .assetsnavigation-content {
     scrollbar-width: thin;
     scrollbar-color: var(--ah-text-placeholder) transparent;
-  }
-
-  .assetsnavigation-tree-scroll {
-    scrollbar-width: none;
   }
 }
 
@@ -172,14 +153,9 @@ main .assetsnavigation .assetsnavigation-content {
   gap: var(--ah-space-xs);
 }
 
-/* Grows to fill the space left below the primary nav + collections so the
-   sticky horizontal scrollbar (last child) always rides the bottom edge of the
-   sidebar — not just when a tall tree pushes it there. A short tree used to
-   leave the bar floating mid-column at its in-flow position. The section is a
-   flex column so its inner scroller can take that grown space (below). */
 .assetsnavigation-folders {
   display: flex;
-  flex: 1 0 auto;
+  flex: none;
   flex-direction: column;
   margin-top: var(--ah-space-xm);
 }
@@ -203,79 +179,8 @@ main .assetsnavigation .assetsnavigation-content {
   list-style: none;
 }
 
-/* The horizontal scroller around the root list: the tree indents 20px per
-   level and keeps each label on one line, so a deep/long branch grows wider
-   than the sidebar. Scrolling here (not on .assetsnavigation-content) keeps
-   sideways overflow a folders-only concern. Its native scrollbar is hidden
-   (see the scrollbar rules above) — the sticky proxy below renders the
-   visible bar. */
-.assetsnavigation-tree-scroll {
-  /* Fills the grown folders section (a short tree just leaves empty space
-     below its rows) so the sticky scrollbar proxy that follows lands on the
-     sidebar's bottom edge. A tall tree overflows -content and scrolls there as
-     before; min-height: 0 lets this item exceed the flex line for that. */
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-}
-
-/* Sized to its widest branch (not the scrollport) so rows stretch to the full
-   scrollable width: a block child fills its parent, never the parent's
-   overflow, so with the ul at scrollport width a selected/hovered row's
-   background would hug its own icon + label once the tree overflows. */
-.assetsnavigation-folder-tree {
-  width: max-content;
-  min-width: 100%;
-}
-
 .assetsnavigation-folder-tree[hidden],
 .assetsnavigation-folder-group[hidden] {
-  display: none;
-}
-
-/* Sticky stand-in for the tree's horizontal scrollbar (built in render.js,
-   synced in events.js). The native bar lives on the tree's bottom edge, which
-   a tall tree pushes below the sidebar viewport; sticking the proxy to the
-   bottom of the -content scrollport keeps it visible whenever the tree is,
-   however far down its real edge sits. It spans the full visible width — its
-   scrollport is wider than the tree's, so the two scroll ranges are equalized
-   by the spacer sizing in events.js rather than by matching widths here. Same
-   will-change rationale as the content scroller above: without a compositing
-   layer Chromium skips painting the custom bar until the first real scroll. */
-.assetsnavigation-tree-scrollbar {
-  position: sticky;
-
-  /* Negative insets cancel the scroller's own padding (10.5px bottom, 7px
-     sides on -content) so the bar rides the true bottom edge of the sidebar,
-     edge to edge — flush, the same way the native vertical bar rides the
-     right edge. The negative margin-bottom covers the end of the scroll: the
-     sticky inset only ever shifts the bar UP from its in-flow position, so at
-     full vertical scroll the bar would come to rest above the padding and
-     detach from the edge; shrinking the flow by the same 10.5px lands its
-     resting position exactly on the edge too. Keep all three in step with the
-     -content padding. */
-  bottom: -10.5px;
-  margin: 0 -7px -10.5px;
-  overflow: auto hidden;
-
-  /* Masks the rows that scroll beneath it while stuck. */
-  background: var(--ah-surface);
-  will-change: transform;
-}
-
-/* Only purpose is to be wider than the proxy so it can scroll. */
-.assetsnavigation-tree-scrollbar-spacer {
-  height: 1px;
-}
-
-/* Standalone (see the header comment): in the editor the block is full width,
-   so this scroller would only clip or add a stray bar. */
-main .assetsnavigation .assetsnavigation-tree-scroll {
-  overflow: visible;
-}
-
-main .assetsnavigation .assetsnavigation-tree-scrollbar {
   display: none;
 }
 
@@ -291,17 +196,22 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   align-items: center;
   gap: 5.25px;
 
-  /* Fit the label (so it stays on one line and overflows the sidebar), but keep
-     the row at least full-width so the hover background spans the whole tree. */
-  width: max-content;
-  min-width: 100%;
+  /* Fill the sidebar width — never wider: the label truncates with an ellipsis
+     (see .assetsnavigation-folder-label) instead of pushing the row past the
+     edge, so the tree never scrolls sideways. Full width also lets the hover
+     background span the whole row. */
+  width: 100%;
+  min-width: 0;
 
   /* Depth as padding, not position: the base lines the level-0 disclosure arrow
      up with the "Carpetas" toggle's own content (both sit --ah-space-xm in from
-     the section's left edge), then +20px per level. The box — and its
-     background — always starts at the tree's left edge, however deep the folder. */
+     the section's left edge), then +14px per level — the folder icon's own width.
+     That staircases the rows: since every row carries the same chevron+gap before
+     its icon, a step of one icon-width lands a child's icon left edge exactly
+     where its parent's icon ends. The box — and its background — always starts at
+     the tree's left edge, however deep the folder. */
   padding: 3.5px var(--ah-space-xm) 3.5px
-    calc(var(--ah-space-xm) + (var(--ah-folder-level, 0) * 20px));
+    calc(var(--ah-space-xm) + (var(--ah-folder-level, 0) * 14px));
   border: 0;
   border-radius: var(--ah-radius-2xs);
   background: transparent;
@@ -350,6 +260,12 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   --ah-icon-size: 12px;
 
   position: relative;
+
+  /* The chevron keeps its own muted grey (#888) instead of following the row's
+     text colour (currentColor). Set on the chevron itself, it wins over the
+     row's hover/selected darkening, so the disclosure arrow stays greyish in
+     every state while the folder label still darkens. */
+  color: var(--ah-text-placeholder);
 }
 
 .assetsnavigation-folder-button > .ah-button-nav-chevron::after {
@@ -372,13 +288,14 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
    --ah-folder-level is inherited from the group (set in render.js). */
 .assetsnavigation-folder-state {
   padding: var(--ah-space-s) var(--ah-space-m) var(--ah-space-s)
-    calc(var(--ah-space-m) + (var(--ah-folder-level, 0) * 20px));
+    calc(var(--ah-space-m) + (var(--ah-folder-level, 0) * 14px));
   color: var(--ah-text-muted);
   font-size: var(--ah-font-xs);
 }
 
-/* collections section — mirrors the folders section (always shown, collapsible),
-   a flat one-level list of the collections the user can see. */
+/* collections section — mirrors the folders section (always shown, collapsible).
+   Two levels deep: group nodes (level 0) that expand to their collection rows
+   (level 1). Depth-as-padding uses the same --ah-folder-level as the folder tree. */
 .assetsnavigation-collections {
   flex: none;
   margin-top: var(--ah-space-xm);
@@ -393,8 +310,81 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   list-style: none;
 }
 
-.assetsnavigation-collection-list[hidden] {
+.assetsnavigation-collection-list[hidden],
+.assetsnavigation-collection-group-list[hidden] {
   display: none;
+}
+
+/* group node (the extra level): an expandable row like a folder, with a leading
+   disclosure arrow and a trailing count. */
+.assetsnavigation-collection-group {
+  list-style: none;
+}
+
+.assetsnavigation-collection-group-button {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 5.25px;
+  width: 100%;
+  min-width: 0;
+  padding: 5px var(--ah-space-xm) 5px
+    calc(var(--ah-space-xm) + (var(--ah-folder-level, 0) * 20px));
+  border: 0;
+  border-radius: var(--ah-radius-2xs);
+  background: transparent;
+  color: var(--ah-text-placeholder);
+  cursor: pointer;
+  text-align: left;
+  font-size: var(--ah-font-xs);
+  font-weight: var(--font-weight-medium);
+  transition: var(--ah-transition);
+}
+
+/* Signals hover like a section header (folders / collections toggle): darkens the
+   label (#888 -> #111) instead of filling a background. The chevron is a
+   currentColor mask, so it darkens along with the text — no second glyph. */
+.assetsnavigation-collection-group-button:hover,
+.assetsnavigation-collection-group-button:focus-visible {
+  background: transparent;
+  color: var(--ah-text-strong);
+  outline: none;
+}
+
+/* Trailing disclosure arrow, sized down to sit quietly at the right edge. */
+.assetsnavigation-collection-group-button > .ah-button-nav-chevron {
+  --ah-icon-size: 9px;
+}
+
+.assetsnavigation-collection-group-button .ah-button-nav-group {
+  flex: 1;
+  min-width: 0;
+}
+
+.assetsnavigation-collection-group-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  /* Typography from Figma: Inter (the global --body-font-family) Semi Bold. */
+  font-weight: var(--font-weight-semibold);
+  font-size: 11px;
+  line-height: 16.5px;
+  letter-spacing: 0;
+}
+
+.assetsnavigation-collection-group-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+  margin: var(--ah-space-2xs) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.assetsnavigation-collection-item {
+  list-style: none;
 }
 
 .assetsnavigation-collection-button {
@@ -404,7 +394,8 @@ main .assetsnavigation .assetsnavigation-tree-scrollbar {
   justify-content: space-between;
   gap: 5.25px;
   width: 100%;
-  padding: 3.5px var(--ah-space-xm);
+  padding: 3.5px var(--ah-space-xm) 3.5px
+    calc(var(--ah-space-xm) + (var(--ah-folder-level, 0) * 20px));
   border: 0;
   border-radius: var(--ah-radius-2xs);
   background: transparent;

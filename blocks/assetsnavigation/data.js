@@ -26,19 +26,45 @@ export const primaryNavItems = [
   },
 ];
 
+/** Group label used when the backend sends no group (older payloads / fallback). */
+export const FALLBACK_COLLECTION_GROUP = 'Otras colecciones';
+
 /**
- * Collections for the sidebar section, mapped to the nav item shape
- * ({ id, label, public }). Reads the publish bridge, so it includes the private
- * collections the current user may see.
- * @returns {Promise<Array<{ id: string, label: string, public: boolean }>>}
+ * Collections for the sidebar, bucketed into the single-level groups the backend
+ * assigns (by a "starts with" match on the title, configured in OSGi). Returns an
+ * ordered list of groups — the order comes from the backend's `groups` array
+ * (configured rule order, fallback last), and each group carries the collections
+ * that landed in it, in the order the backend listed them.
+ *
+ * Reads the publish bridge, so it includes the private collections the current
+ * user may see. Empty groups are never returned.
+ * @returns {Promise<Array<{ label: string, collections:
+ *   Array<{ id: string, label: string, public: boolean }> }>>}
  */
 export async function fetchCollectionsNav() {
   const data = await fetchCollections();
-  return (data.collections || []).map((collection) => ({
+  const collections = (data.collections || []).map((collection) => ({
     id: collection.id,
     label: collection.title || collection.id,
     public: Boolean(collection.public),
+    group: collection.group || FALLBACK_COLLECTION_GROUP,
   }));
+
+  // Group order: the backend's ordered `groups` when present, else the order the
+  // collections first appear in. Bucket keeps the backend's per-group order.
+  const order = Array.isArray(data.groups) && data.groups.length
+    ? data.groups.map((group) => group.label)
+    : [...new Set(collections.map((collection) => collection.group))];
+
+  const buckets = new Map(order.map((label) => [label, []]));
+  collections.forEach((collection) => {
+    if (!buckets.has(collection.group)) buckets.set(collection.group, []);
+    buckets.get(collection.group).push(collection);
+  });
+
+  return [...buckets.entries()]
+    .filter(([, items]) => items.length)
+    .map(([label, items]) => ({ label, collections: items }));
 }
 
 export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';
