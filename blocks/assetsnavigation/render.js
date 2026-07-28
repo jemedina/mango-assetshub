@@ -288,7 +288,7 @@ export function createCollectionItem(collection) {
   button.setAttribute('aria-current', 'false');
 
   const icon = document.createElement('span');
-  icon.className = 'ah-icon ah-icon-lg ah-icon-collection';
+  icon.className = 'ah-icon ah-icon-collection';
   icon.setAttribute('aria-hidden', 'true');
 
   const label = document.createElement('span');

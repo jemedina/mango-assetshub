@@ -135,7 +135,7 @@ p.button-wrapper {
 .ah-button-nav-section {
   justify-content: space-between;
   gap: 0;
-  padding: 3.5px 10.5px;
+  padding: 5px 10.5px;
   color: var(--ah-text-placeholder);
   font-size: var(--ah-font-2xs);
   font-weight: var(--font-weight-bold);
@@ -161,6 +161,7 @@ p.button-wrapper {
   --ah-icon-size: 12px;
 }
 
+
 .ah-button-nav-group {
   display: flex;
   flex: 1;
@@ -168,6 +169,11 @@ p.button-wrapper {
   align-items: center;
   gap: 5.25px;
 }
+
+.ah-button-nav-group .ah-icon-collection {
+  --ah-icon-size: 13px;
+}
+
 
 /* The disclosure arrow. Combine with `.ah-icon .ah-icon-arrow` on the element:
    the shared nav-arrow.png (points down at rest) is the mask, and we rotate the

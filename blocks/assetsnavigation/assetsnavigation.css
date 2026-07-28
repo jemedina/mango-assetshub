@@ -57,7 +57,7 @@ main .section.assetsnavigation-container > div {
   justify-content: center;
   padding: var(--ah-space-ml) 17.5px;
   border-bottom: 1px solid var(--ah-border-color);
-  gap: 4.25px;
+  gap: 5px;
 }
 
 /* authored logo */
