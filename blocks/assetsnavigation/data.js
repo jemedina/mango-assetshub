@@ -1,7 +1,8 @@
 /*
- * Data helpers for the navigation block: the primary nav registry, the auth
- * status / login flow, and folder-tree fetches mapped to the shape the
- * renderers expect ({ id, label, href, hasChildren }).
+ * Data helpers for the navigation block: the primary nav registry and
+ * folder-tree fetches mapped to the shape the renderers expect
+ * ({ id, label, href, hasChildren }). The session/login flow lives in the
+ * app-wide scripts/auth.js.
  */
 
 import {
@@ -67,28 +68,6 @@ export async function fetchCollectionsNav() {
     .map(([label, items]) => ({ label, collections: items }));
 }
 
-export const AUTH_STATUS_PATH = '/bin/assetshub/auth/status';
-
-// Protected login servlet (LoginServlet). Navigating STRAIGHT to it — a
-// protected route — triggers the AEM/IMS login, and once authenticated AEM
-// replays the request so the servlet redirects the user back to the saved
-// target. Going directly, with no intermediate redirect, mirrors the flow that
-// reliably completes the IMS login (an extra redirect hop in front of it broke
-// the round-trip).
-export const LOGIN_PATH = '/bin/assetshub/auth/login';
-
-const REDIRECT_COOKIE = 'mango-login-redirect';
-
-export async function fetchAuthStatus(path = AUTH_STATUS_PATH) {
-  const url = new URL(path, window.location);
-  const response = await fetch(url.pathname);
-  if (!response.ok) {
-    throw new Error(`Unable to load auth status: ${response.status}`);
-  }
-
-  return response.json();
-}
-
 /**
  * Display name + avatar initials for the user footer, built from the auth
  * profile. Falls back gracefully when given/family name aren't populated yet
@@ -109,23 +88,6 @@ export function userDisplay(status) {
     ? `${givenName[0]}${familyName[0]}`
     : (givenName || status.userId || '?')[0];
   return { name, initials: initials.toUpperCase(), photo: photo || null };
-}
-
-/**
- * Starts login. Remembers the current location — path, query and hash, so the
- * hash-based SPA view (see scripts/router.js) is restored — in a cookie the
- * login servlet reads, then navigates straight to the protected login route to
- * trigger the AEM/IMS login. On return the servlet (or, as a fallback, the EDS
- * client-side restore in scripts/login-return.js) sends the user back here.
- */
-export function startLogin() {
-  const {
-    pathname, search, hash, protocol,
-  } = window.location;
-  const returnTo = `${pathname}${search}${hash}`;
-  const secure = protocol === 'https:' ? '; Secure' : '';
-  document.cookie = `${REDIRECT_COOKIE}=${encodeURIComponent(returnTo)}; Path=/; Max-Age=1800; SameSite=Lax${secure}`;
-  window.location.assign(LOGIN_PATH);
 }
 
 function toFolder(folder) {

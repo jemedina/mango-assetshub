@@ -5,18 +5,7 @@
  * on the data-view / data-folder-href attributes set here.
  */
 
-import { primaryNavItems, startLogin } from './data.js';
-
-function createButton(className, text, attributes = {}) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = className;
-  button.textContent = text;
-  Object.entries(attributes).forEach(([name, value]) => {
-    button.setAttribute(name, value);
-  });
-  return button;
-}
+import { primaryNavItems } from './data.js';
 
 /**
  * Disclosure arrow used by every expandable trigger (section toggles, folder
@@ -423,14 +412,6 @@ export function renderUser(footer, { name, initials, photo }) {
 
   details.append(nameEl);
   footer.replaceChildren(avatar, details);
-}
-
-export function renderUserLogin(footer) {
-  const button = createButton('btn btn-primary assetsnavigation-login', 'Login');
-  button.addEventListener('click', () => {
-    startLogin();
-  });
-  footer.replaceChildren(button);
 }
 
 export function createFolderState(message) {

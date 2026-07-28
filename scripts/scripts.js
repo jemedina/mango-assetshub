@@ -14,6 +14,7 @@ import { initHub } from './hub.js';
 // eslint-disable-next-line import/no-cycle
 import { loadFragment } from '../blocks/fragment/fragment.js';
 import restoreLoginReturn from './login-return.js';
+import { ensureSession } from './auth.js';
 
 /**
  * Page holding the authored left navigation (the assetsnavigation block with
@@ -258,6 +259,10 @@ async function loadPage() {
   // Restore the pre-login view (hash) before the router reads the URL. If it
   // triggers a full navigation the document is unloading, so stop here.
   if (restoreLoginReturn()) return;
+  // App-wide session guard: signed-out users are redirected to login. Fired
+  // (not awaited) so it runs in parallel with rendering; if there's no session
+  // the redirect interrupts the page before anything signed-out is shown.
+  ensureSession();
   await loadEager(document);
   await loadLazy(document);
   loadDelayed();

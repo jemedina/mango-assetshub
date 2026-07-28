@@ -499,14 +499,6 @@ main .assetsnavigation .assetsnavigation-content {
   line-height: 1.3;
 }
 
-/* login CTA — appearance from .btn.btn--primary, only layout here */
-.assetsnavigation-login {
-  min-height: var(--ah-control-min-height);
-  padding: 9px var(--ah-space-l);
-  font-size: var(--ah-font-m);
-  font-weight: var(--font-weight-bold);
-}
-
 @media (width >= 900px) {
   .assetsnavigation {
     grid-template-rows: auto minmax(0, 1fr) auto;

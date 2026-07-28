@@ -12,7 +12,7 @@
  * render. The cookie is only ever a same-origin path, re-validated here.
  */
 
-const REDIRECT_COOKIE = 'mango-login-redirect';
+import { REDIRECT_COOKIE } from './auth.js';
 
 function readCookie(name) {
   const prefix = `${name}=`;

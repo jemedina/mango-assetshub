@@ -7,14 +7,14 @@
 
 import bindAssetsNavigation, { revealTree, highlightRoute } from './events.js';
 import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
-import { fetchAuthStatus, userDisplay, fetchCollectionsNav } from './data.js';
+import { userDisplay, fetchCollectionsNav } from './data.js';
 import renderAssetsNavigation, {
   renderUser,
   renderUserLoading,
-  renderUserLogin,
   renderCollectionsList,
 } from './render.js';
 import { getRoute } from '../../scripts/router.js';
+import { ensureSession } from '../../scripts/auth.js';
 
 async function loadFolders(block) {
   const { view, path } = getRoute();
@@ -43,14 +43,11 @@ async function loadUser(block) {
 
   renderUserLoading(footer);
 
-  try {
-    const status = await fetchAuthStatus();
-    renderUser(footer, userDisplay(status));
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(error);
-    renderUserLogin(footer);
-  }
+  // Signed-out users never reach here: ensureSession() (also kicked off globally
+  // in scripts.js) redirects them to login, so this only ever resolves with a
+  // live session and the footer just renders the profile.
+  const status = await ensureSession();
+  renderUser(footer, userDisplay(status));
 }
 
 /**
