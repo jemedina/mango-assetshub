@@ -133,6 +133,11 @@ export default function bindAssetsListing(block, {
       return;
     }
 
+    if (event.target.closest('[data-action="view-all"]')) {
+      navigate({ view: ASSETS_LISTING_VIEW, path: DAM_ROOT });
+      return;
+    }
+
     if (event.target.closest('[data-action="select"]')) {
       toggleSelectionMode();
       return;
@@ -181,8 +186,10 @@ export default function bindAssetsListing(block, {
       const ui = setUiState({ viewMode: viewButton.dataset.viewMode });
       setUi(ui);
       applyUiState(block, ui);
-      // List view excludes folders from the rendered rows (see content.js),
-      // so switching modes needs an actual re-render, not just the CSS flip.
+      // Grid and list view build different markup (see content.js: list is
+      // one flat table, grid splits into labeled Subcarpetas/Archivos
+      // sections), so switching modes needs an actual re-render, not just a
+      // CSS flip.
       renderSorted();
       return;
     }

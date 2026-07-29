@@ -15,41 +15,7 @@ import {
 } from '../data.js';
 import createPreview, { createBadge } from '../shared/preview.js';
 import createKeywords from '../shared/keywords.js';
-
-/**
- * Builds a folder card. The click target is the whole button; navigation is
- * wired via the delegated handler in events.js off `data-href`.
- * @param {{ path: string }} folder
- * @returns {HTMLButtonElement}
- */
-export function createFolderCard(folder) {
-  const card = document.createElement('button');
-  card.type = 'button';
-  card.className = 'assetslisting-card assetslisting-card-folder';
-  card.dataset.href = folder.path;
-
-  // Same decorative selection checkbox as asset cards: folders are selectable
-  // too (a folder selection shares the whole folder), keyed off `data-checked`.
-  const check = document.createElement('span');
-  check.className = 'assetslisting-check';
-  check.setAttribute('aria-hidden', 'true');
-  card.append(check);
-
-  const thumb = document.createElement('span');
-  thumb.className = 'assetslisting-thumb assetslisting-thumb-folder';
-  thumb.setAttribute('aria-hidden', 'true');
-
-  const body = document.createElement('span');
-  body.className = 'assetslisting-body';
-
-  const name = document.createElement('span');
-  name.className = 'assetslisting-name';
-  name.textContent = displayLabel(folder);
-  body.append(name);
-
-  card.append(thumb, body);
-  return card;
-}
+import { ICON_FOLDER } from '../shared/icons.js';
 
 function fact(className, text) {
   const span = document.createElement('span');
@@ -59,6 +25,86 @@ function fact(className, text) {
 }
 
 const NO_VALUE = '—';
+
+/** "0 assets", "1 asset", "2 assets"... */
+function assetCountLabel(count) {
+  return count === 1 ? '1 asset' : `${count} assets`;
+}
+
+/**
+ * Builds a folder card: a gray folder glyph over the thumbnail, then a name
+ * row and a count/date facts row below it (Figma: node 1:4328, "FolderCard").
+ *
+ * Grid and list view diverge here (unlike the asset card, which reuses one
+ * markup for both): grid shows a small folder icon next to the name and the
+ * facts row inline in the body; list view instead shows a "CARPETA" badge
+ * next to the name (reusing the same format-badge look/class asset rows use)
+ * and moves count/date into their own list-column cells so folder rows line
+ * up with asset rows. Both variants ship in the DOM always — CSS toggles
+ * which shows per `data-view-mode`, same pattern as the asset card's name
+ * badge — so there's no view-mode branching here.
+ *
+ * `assetCount` is the folder's own direct count (annotated by
+ * `withFolderAssetCounts` in data.js — the listing endpoint doesn't return it
+ * itself), always a real number (0, not a placeholder, for a folder that only
+ * holds sub-folders). `modified` has no such backfill yet, so it still falls
+ * back to `NO_VALUE`. There's no "subcarpetas" equivalent for a folder, so
+ * that list column is always `NO_VALUE`.
+ * @param {{ path: string, assetCount?: number, modified?: string }} folder
+ * @returns {HTMLButtonElement}
+ */
+export function createFolderCard(folder) {
+  const card = document.createElement('button');
+  card.type = 'button';
+  card.className = 'assetslisting-card assetslisting-card-folder';
+  card.dataset.href = folder.path;
+
+  // Same decorative selection checkbox slot as asset cards, but folders never
+  // show a checkbox in list view (see cards.css) — kept in the DOM anyway so
+  // the row's column count/alignment doesn't shift.
+  const check = document.createElement('span');
+  check.className = 'assetslisting-check';
+  check.setAttribute('aria-hidden', 'true');
+  card.append(check);
+
+  const thumb = document.createElement('span');
+  thumb.className = 'assetslisting-thumb assetslisting-thumb-folder';
+  thumb.setAttribute('aria-hidden', 'true');
+  thumb.innerHTML = ICON_FOLDER;
+
+  const body = document.createElement('span');
+  body.className = 'assetslisting-body';
+
+  const nameRow = document.createElement('span');
+  nameRow.className = 'assetslisting-name-row';
+  const nameIcon = document.createElement('span');
+  nameIcon.className = 'assetslisting-folder-name-icon';
+  nameIcon.setAttribute('aria-hidden', 'true');
+  nameIcon.innerHTML = ICON_FOLDER;
+  const name = document.createElement('span');
+  name.className = 'assetslisting-name';
+  name.textContent = displayLabel(folder);
+  const badge = createBadge('carpeta');
+  badge.classList.add('assetslisting-name-badge');
+  nameRow.append(nameIcon, name, badge);
+
+  const assetCount = folder.assetCount ?? 0;
+  const facts = document.createElement('span');
+  facts.className = 'assetslisting-facts';
+  facts.append(
+    fact('assetslisting-size', assetCountLabel(assetCount)),
+    fact('assetslisting-date', formatDate(folder.modified) || NO_VALUE),
+  );
+
+  body.append(nameRow, facts);
+
+  const category = fact('assetslisting-category', NO_VALUE);
+  const sizeCell = fact('assetslisting-size-cell', assetCountLabel(assetCount));
+  const modifiedCell = fact('assetslisting-modified-cell', formatDate(folder.modified) || NO_VALUE);
+
+  card.append(thumb, body, category, sizeCell, modifiedCell);
+  return card;
+}
 
 /**
  * The card's info section: a name row (name + format badge — the badge only

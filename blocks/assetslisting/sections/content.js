@@ -4,9 +4,10 @@
  */
 
 import { createFolderCard, createAssetCard } from './cards.js';
+import { ICON_INBOX } from '../shared/icons.js';
 
 /**
- * Builds a single-line state message (loading, empty, error).
+ * Builds a single-line state message (loading, error).
  * @param {string} message
  * @returns {HTMLParagraphElement}
  */
@@ -14,6 +15,38 @@ export function createState(message) {
   const state = document.createElement('p');
   state.className = 'assetslisting-state';
   state.textContent = message;
+  return state;
+}
+
+/**
+ * Builds the empty-folder state: an inbox icon, title, subtitle and a button
+ * back to "Todos los assets" (Figma: empty-state mock).
+ * @returns {HTMLElement}
+ */
+function createEmptyState() {
+  const state = document.createElement('div');
+  state.className = 'assetslisting-empty';
+
+  const icon = document.createElement('span');
+  icon.className = 'assetslisting-empty-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.innerHTML = ICON_INBOX;
+
+  const title = document.createElement('p');
+  title.className = 'assetslisting-empty-title';
+  title.textContent = 'Carpeta vacía';
+
+  const subtitle = document.createElement('p');
+  subtitle.className = 'assetslisting-empty-subtitle';
+  subtitle.textContent = 'No hay assets en esta ubicación.';
+
+  const action = document.createElement('button');
+  action.type = 'button';
+  action.className = 'btn btn-primary assetslisting-empty-action';
+  action.dataset.action = 'view-all';
+  action.textContent = 'Ver todos los assets';
+
+  state.append(icon, title, subtitle, action);
   return state;
 }
 
@@ -39,25 +72,66 @@ function createListHeader() {
 }
 
 /**
+ * "SUBCARPETAS — 3" / "ARCHIVOS — 3" — the small caption above each grid-view
+ * section (Figma: grid-view empty/section mock).
+ * @param {string} label
+ * @param {number} count
+ * @returns {HTMLElement}
+ */
+function createSectionLabel(label, count) {
+  const el = document.createElement('p');
+  el.className = 'assetslisting-section-label';
+  el.textContent = `${label} — ${count}`;
+  return el;
+}
+
+function createGrid(items, build) {
+  const grid = document.createElement('div');
+  grid.className = 'assetslisting-grid';
+  items.forEach((item) => grid.append(build(item)));
+  return grid;
+}
+
+/**
  * Renders the folder/asset grid (or the empty state) into the content region.
- * Folders are listed first, then assets of every format (images preview inline,
- * everything else shows a file-type icon), both in grid and list view.
+ *
+ * List view is one continuous table: folders and assets share a single grid
+ * (rows tell them apart via the "CARPETA" badge), under one column header.
+ * Grid view instead splits them into two labeled sections — "Subcarpetas"
+ * then "Archivos" — each its own card grid, per the Figma mock.
  * @param {Element} content The `.assetslisting-content` element
  * @param {{ folders?: Array, assets?: Array }} data
+ * @param {'grid'|'list'} viewMode
  */
-export function renderContent(content, data) {
+export function renderContent(content, data, viewMode) {
   const folders = data.folders || [];
   const assets = data.assets || [];
 
   if (!folders.length && !assets.length) {
-    content.replaceChildren(createState('Esta carpeta está vacía'));
+    content.replaceChildren(createEmptyState());
     return;
   }
 
-  const grid = document.createElement('div');
-  grid.className = 'assetslisting-grid';
-  folders.forEach((folder) => grid.append(createFolderCard(folder)));
-  assets.forEach((asset) => grid.append(createAssetCard(asset)));
+  if (viewMode === 'list') {
+    const grid = createGrid(folders, createFolderCard);
+    assets.forEach((asset) => grid.append(createAssetCard(asset)));
+    content.replaceChildren(createListHeader(), grid);
+    return;
+  }
 
-  content.replaceChildren(createListHeader(), grid);
+  // The Subcarpetas/Archivos split only means something when both kinds are
+  // actually present — a folder with just one or the other shows a single
+  // plain grid instead, with no label to distinguish from.
+  const showLabels = folders.length > 0 && assets.length > 0;
+
+  const sections = document.createDocumentFragment();
+  if (folders.length) {
+    if (showLabels) sections.append(createSectionLabel('Subcarpetas', folders.length));
+    sections.append(createGrid(folders, createFolderCard));
+  }
+  if (assets.length) {
+    if (showLabels) sections.append(createSectionLabel('Archivos', assets.length));
+    sections.append(createGrid(assets, createAssetCard));
+  }
+  content.replaceChildren(sections);
 }

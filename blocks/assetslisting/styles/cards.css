@@ -40,6 +40,13 @@
   outline: none;
 }
 
+/* divider between the folder icon area and the name/facts area — a grid-view
+   affordance only (list view resets .assetslisting-body's padding/height and
+   has its own row divider instead). */
+.assetslisting[data-view-mode="grid"] .assetslisting-card-folder .assetslisting-body {
+  border-top: 1px solid var(--ah-border-color);
+}
+
 .assetslisting-card-asset[data-selected="true"],
 .assetslisting-card-asset[data-checked="true"],
 .assetslisting-card-folder[data-checked="true"] {
@@ -224,15 +231,21 @@
   background: var(--ah-tag-amber);
 }
 
-.assetslisting-thumb.is-empty::after,
-.assetslisting-thumb-folder::after {
+.assetslisting-thumb.is-empty::after {
   font-size: 32px;
   line-height: 1;
   content: "🖼️";
 }
 
-.assetslisting-thumb-folder::after {
-  content: "📁";
+/* gray folder glyph (Figma: node 1:4328) — a real inline icon, not the old
+   emoji, sized to read clearly against the thumbnail's light background. */
+.assetslisting-thumb-folder {
+  color: var(--ah-text-placeholder);
+}
+
+.assetslisting-thumb-folder svg {
+  width: 32px;
+  height: 32px;
 }
 
 /* ===================================================================== info === */
@@ -267,6 +280,27 @@
 /* the in-thumbnail badge is a grid-view-only affordance */
 .assetslisting-name-badge {
   display: none;
+}
+
+/* Scoped to the folder card (not the shared .assetslisting-name-row gap,
+   which also spaces an asset's name from its format badge) — the icon should
+   sit right next to the name, tighter than that. */
+.assetslisting-card-folder .assetslisting-name-row {
+  gap: 5.25px;
+}
+
+/* small gray folder glyph next to a folder card's name (Figma: node 1:4328) */
+.assetslisting-folder-name-icon {
+  display: flex;
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--ah-text-placeholder);
+}
+
+.assetslisting-folder-name-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 /* size (left) and date (right) on one row */
@@ -410,8 +444,9 @@
 }
 
 /* folder rows share the asset row's column grid so folders and assets line up
-   in list view; a folder has no category/size/date, so its trailing columns
-   stay empty (check, thumb and name fill the first three). */
+   in list view: check, thumb, name, category (always NO_VALUE — folders have
+   no "subcarpetas" of their own), the asset count (reusing the size column)
+   and modified date all map onto the same six columns asset rows use. */
 .assetslisting[data-view-mode="list"] .assetslisting-card-folder {
   display: grid;
   grid-template-columns: var(--ah-list-columns);
@@ -427,14 +462,35 @@
   border-radius: 3.5px;
 }
 
-.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-thumb-folder::after {
-  font-size: 20px;
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-thumb-folder svg {
+  width: 20px;
+  height: 20px;
 }
 
 .assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-body {
   height: auto;
   min-width: 0;
   padding: 0;
+}
+
+/* the small name-row folder icon is a grid-view-only affordance — list view
+   shows the "CARPETA" badge (assetslisting-name-badge) instead. */
+.assetslisting[data-view-mode="list"] .assetslisting-folder-name-icon {
+  display: none;
+}
+
+/* folders are never individually selectable in list view (unlike grid, where
+   hovering reveals the checkbox) — dropped from the grid entirely rather than
+   just hidden, so its column doesn't leave a dead 14px gap. The thumbnail
+   reclaims that space by spanning columns 1-2 instead of auto-placing at 2,
+   so the remaining columns (name, category, size, modified) still land
+   exactly where auto-placement would've put them — same as an asset row. */
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-check {
+  display: none;
+}
+
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-thumb {
+  grid-column: 1 / span 2;
 }
 
 /* checkbox: floats over the thumbnail corner in grid view; in list view it's

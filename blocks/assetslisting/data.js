@@ -33,6 +33,23 @@ export {
   DAM_ROOT,
 };
 
+/**
+ * Annotates each folder with its own direct (non-recursive) asset count. The
+ * listing endpoint has no dedicated count field, so this fetches every
+ * visible folder's own listing in parallel — one extra request per folder —
+ * and counts its `assets`. A folder that only contains sub-folders (no
+ * assets of its own) genuinely gets 0, not a placeholder: a folder full of
+ * folders and one with no data available would otherwise look identical.
+ * @param {Array<{ path: string }>} folders
+ * @returns {Promise<Array>} the same folders, each with `assetCount` set
+ */
+export async function withFolderAssetCounts(folders) {
+  const counts = await Promise.all(folders.map((folder) => fetchAssetsList(folder.path)
+    .then((data) => (data.assets || []).length)
+    .catch(() => 0)));
+  return folders.map((folder, index) => ({ ...folder, assetCount: counts[index] }));
+}
+
 const ROOT_LABEL = 'Todos los assets';
 const PRODUCT_LABEL = 'Digital Asset Management';
 const COLLECTIONS_LABEL = 'Colecciones';

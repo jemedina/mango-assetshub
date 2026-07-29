@@ -8,8 +8,8 @@
 .assetslisting {
   /* Card dimensions are fixed per Figma; the grid packs as many fixed-size
      cards per row as fit rather than stretching them to fill the row. */
-  --ah-card-width: 208.92px;
-  --ah-card-height: 235.78px;
+  --ah-card-width: 248.62px;
+  --ah-card-height: 265.56px;
   --ah-detail-width: 353px;
 
   display: grid;

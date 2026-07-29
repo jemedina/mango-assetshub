@@ -3,7 +3,7 @@ import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 // eslint-disable-next-line import/no-cycle
 import { isEditMode } from '../../scripts/scripts.js';
 import {
-  fetchAssetsList, fetchCollectionItems, displayLabel, DAM_ROOT,
+  fetchAssetsList, fetchCollectionItems, withFolderAssetCounts, displayLabel, DAM_ROOT,
 } from './data.js';
 import { renderShell, renderContent, createState } from './sections/index.js';
 import bindAssetsListing, { applyUiState } from './events.js';
@@ -65,7 +65,7 @@ export default function decorate(block) {
     renderContent(content, {
       folders: currentFolders,
       assets: sortAssets(currentAssets, ui.sortField, ui.sortDirection),
-    });
+    }, ui.viewMode);
     // Cards were rebuilt: reflect any live selection back onto them.
     if (selection.isActive()) selection.refresh();
     if (detail.isOpen()) markSelected(detail.getPath());
@@ -202,7 +202,11 @@ export default function decorate(block) {
         : await fetchAssetsList(path || DAM_ROOT);
       if (current !== seq) return;
       currentAssets = data.assets || [];
-      currentFolders = data.folders || [];
+      // One extra request per visible folder (its own direct asset count) —
+      // small in practice (a handful of sub-folders per level) and worth the
+      // wait so a folder full of folders shows "0 assets" instead of "—".
+      currentFolders = await withFolderAssetCounts(data.folders || []);
+      if (current !== seq) return;
       renderSorted();
       const count = block.querySelector('.assetslisting-count');
       if (count) count.textContent = `${currentAssets.length} assets`;
