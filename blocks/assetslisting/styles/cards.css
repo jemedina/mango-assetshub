@@ -237,15 +237,13 @@
   content: "🖼️";
 }
 
-/* gray folder glyph (Figma: node 1:4328) — a real inline icon, not the old
-   emoji, sized to read clearly against the thumbnail's light background. */
-.assetslisting-thumb-folder {
-  color: var(--ah-text-placeholder);
-}
-
+/* gray folder glyph (Figma: node 1:4331) — a real inline icon, not the old
+   emoji. Figma applies 40% opacity to the whole icon group; reproduced here
+   via CSS rather than baked into the SVG. */
 .assetslisting-thumb-folder svg {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+  opacity: 0.4;
 }
 
 /* ===================================================================== info === */
@@ -289,12 +287,12 @@
   gap: 5.25px;
 }
 
-/* small gray folder glyph next to a folder card's name (Figma: node 1:4328) */
+/* small gray folder glyph next to a folder card's name (Figma: node 1:4336) */
 .assetslisting-folder-name-icon {
   display: flex;
   flex: none;
-  width: 14px;
-  height: 14px;
+  width: 12px;
+  height: 12px;
   color: var(--ah-text-placeholder);
 }
 

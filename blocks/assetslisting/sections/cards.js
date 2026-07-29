@@ -15,7 +15,7 @@ import {
 } from '../data.js';
 import createPreview, { createBadge } from '../shared/preview.js';
 import createKeywords from '../shared/keywords.js';
-import { ICON_FOLDER } from '../shared/icons.js';
+import { ICON_FOLDER, ICON_FOLDER_THUMB } from '../shared/icons.js';
 
 function fact(className, text) {
   const span = document.createElement('span');
@@ -70,7 +70,7 @@ export function createFolderCard(folder) {
   const thumb = document.createElement('span');
   thumb.className = 'assetslisting-thumb assetslisting-thumb-folder';
   thumb.setAttribute('aria-hidden', 'true');
-  thumb.innerHTML = ICON_FOLDER;
+  thumb.innerHTML = ICON_FOLDER_THUMB;
 
   const body = document.createElement('span');
   body.className = 'assetslisting-body';
