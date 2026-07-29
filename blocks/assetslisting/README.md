@@ -30,6 +30,34 @@ are declared once in `scripts/hub-views.js`.
 | `shared/` | Builders reused by cards and detail panel (`preview.js`, `keywords.js`) |
 | `styles/` | Per-region CSS, imported from `assetslisting.css` |
 
+## Search and filters
+
+Typing in the search box or activating any filter puts the listing in **search
+mode**: folders disappear, only matching assets render, and the count shows the
+server total (`N resultados`). Clearing the term and every filter returns to
+the plain listing. The search state lives in the block controller (not in the
+route), so it survives folder navigation — moving to another folder re-runs the
+search there.
+
+- Filter definitions come from `/bin/assetshub/settings/search-filters` —
+  published "Search Filter" Content Fragments (label, property, type, order,
+  options), so the panel is authorable without a deployment. Supported types:
+  `singleLineText`, `checkBoxes`, `radioButtons`, `toggle`, `choiceChips`,
+  `dateRange`. `sections/filters.js` renders one collapsible per filter and
+  `readFilters()` turns the panel DOM back into the `{ property: value }` wire
+  shape.
+- The query runs server-side per context, always with the user's session:
+  - **Folder**: `/bin/assetshub/assets/search?path=<folder>&q=…&filters=…`
+    (subtree query; the hub settings subtree is excluded).
+  - **Static collection**: `/bin/assetshub/bridge/collections/items?id=…&q=…&filters=…`
+    — an OR-group of the member paths (folders contribute their subtree),
+    capped at 100 members server-side.
+  - **Smart collection**: same endpoint — the saved `dam:query` keeps defining
+    the scope and the refinements are AND-ed onto it.
+- Known limits: `singleLineText` matches are case-sensitive substrings
+  (`jcr:like`); the search state is not shareable via URL (by design, for now);
+  static-collection search only covers the first 100 members.
+
 ## Conventions
 
 - Rendering and interaction are separated: builders set `data-action` /

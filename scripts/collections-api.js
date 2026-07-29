@@ -39,13 +39,23 @@ export async function fetchCollections() {
 /**
  * Fetches a single collection's members, in the same shape as the folder listing
  * ({@code folders} + {@code assets}), so the same card grid can paint them.
+ *
+ * With a search (`q` free text and/or active `filters`) the endpoint switches to
+ * searching *within* the collection — a static playlist through a member-scoped
+ * query, a smart collection by refining its saved search — returning matching
+ * assets only, plus a `total`.
  * @param {string} id collection id (jcr:uuid or path)
+ * @param {{ q?: string, filters?: Object }} [search] free text and active filters
  * @returns {Promise<{ id: string, title: string, public: boolean, smart: boolean,
- *   folders: Array, assets: Array }>}
+ *   total?: number, folders: Array, assets: Array }>}
  */
-export async function fetchCollectionItems(id) {
+export async function fetchCollectionItems(id, { q, filters } = {}) {
   const url = new URL(COLLECTION_ITEMS_ENDPOINT, window.location);
   url.searchParams.set('id', id);
+  if (q) url.searchParams.set('q', q);
+  if (filters && Object.keys(filters).length) {
+    url.searchParams.set('filters', JSON.stringify(filters));
+  }
   const response = await fetch(`${url.pathname}${url.search}`);
   if (!response.ok) {
     throw new Error(`Unable to load collection: ${response.status}`);

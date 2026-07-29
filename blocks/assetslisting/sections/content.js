@@ -44,13 +44,15 @@ function createListHeader() {
  * everything else shows a file-type icon), both in grid and list view.
  * @param {Element} content The `.assetslisting-content` element
  * @param {{ folders?: Array, assets?: Array }} data
+ * @param {string} [emptyMessage] state shown when there is nothing to render
+ *   (search mode says "no results", browsing says "empty folder")
  */
-export function renderContent(content, data) {
+export function renderContent(content, data, emptyMessage = 'Esta carpeta está vacía') {
   const folders = data.folders || [];
   const assets = data.assets || [];
 
   if (!folders.length && !assets.length) {
-    content.replaceChildren(createState('Esta carpeta está vacía'));
+    content.replaceChildren(createState(emptyMessage));
     return;
   }
 
