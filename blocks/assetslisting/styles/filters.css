@@ -3,7 +3,7 @@
 .assetslisting-filters-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--ah-space-l);
+  gap: var(--ah-space-m);
   min-width: 0;
   padding: var(--ah-space-xl) var(--ah-space-l);
   overflow: hidden;
@@ -32,22 +32,222 @@
   display: none;
 }
 
+.assetslisting-filters-header {
+  display: flex;
+  align-items: center;
+  gap: var(--ah-space-s);
+}
+
 .assetslisting-filters-title {
+  flex: 1;
   margin: 0;
   font-size: var(--ah-font-l);
   font-weight: var(--font-weight-bold);
   line-height: 1.3;
 }
 
-.assetslisting-filters-placeholder {
+.assetslisting .assetslisting-filters-clear {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-xs);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.assetslisting .assetslisting-filters-clear:hover {
+  color: var(--ah-text-strong);
+}
+
+.assetslisting .assetslisting-filters-close {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 160px;
-  padding: var(--ah-space-l);
-  border: 1px dashed var(--ah-border-color);
-  border-radius: var(--ah-radius-m);
-  background: var(--ah-surface-muted);
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--ah-radius-xs);
+  background: none;
+  color: var(--ah-text-strong);
+  font-size: var(--ah-font-l);
+  line-height: 1;
+  cursor: pointer;
+}
+
+.assetslisting .assetslisting-filters-close:hover {
+  background: var(--ah-bg-muted);
+}
+
+.assetslisting-filters-empty {
+  margin: 0;
   color: var(--ah-text-muted);
-  font-size: var(--ah-font-m);
+  font-size: var(--ah-font-s);
+}
+
+/* ---------------------------------------------------- collapsible sections --- */
+
+.assetslisting-filters-list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.assetslisting-filter {
+  padding: var(--ah-space-s) 0;
+  border-bottom: 1px solid var(--ah-border-subtle);
+}
+
+.assetslisting-filter:last-child {
+  border-bottom: 0;
+}
+
+.assetslisting .assetslisting-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-s);
+  width: 100%;
+  padding: var(--ah-space-xs) 0;
+  border: 0;
+  background: none;
+  color: var(--ah-text-strong);
+  font-size: var(--ah-font-s);
+  font-weight: var(--font-weight-bold);
+  text-align: left;
+  cursor: pointer;
+}
+
+.assetslisting-filter-chevron {
+  display: flex;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  color: var(--ah-icon);
+  transition: var(--ah-transition);
+}
+
+.assetslisting-filter-chevron svg {
+  width: 100%;
+  height: 100%;
+}
+
+.assetslisting .assetslisting-filter-header[aria-expanded="false"] .assetslisting-filter-chevron {
+  transform: rotate(-90deg);
+}
+
+.assetslisting-filter-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-s);
+  padding: var(--ah-space-xs) 0 var(--ah-space-s);
+}
+
+/* display:flex would beat the [hidden] UA default, so restate the collapse. */
+.assetslisting-filter-body[hidden] {
+  display: none;
+}
+
+/* ------------------------------------------------------------- field types --- */
+
+.assetslisting .assetslisting-filter-text {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 7px 10.5px;
+  border: 1px solid var(--ah-overlay-subtle);
+  border-radius: var(--ah-radius-2xs);
+  background: var(--ah-bg-page);
+  color: var(--ah-text-strong);
+  font-size: var(--ah-font-s);
+  transition: var(--ah-transition);
+}
+
+.assetslisting .assetslisting-filter-text::placeholder {
+  color: var(--ah-text-placeholder);
+}
+
+.assetslisting .assetslisting-filter-text:focus-visible {
+  border-color: var(--ah-accent);
+  outline: none;
+}
+
+.assetslisting-filter-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-xs);
+}
+
+.assetslisting-filter-option {
+  display: flex;
+  align-items: center;
+  gap: var(--ah-space-s);
+  color: var(--ah-text);
+  font-size: var(--ah-font-s);
+  cursor: pointer;
+}
+
+.assetslisting-filter-option input {
+  margin: 0;
+  accent-color: var(--ah-accent);
+}
+
+.assetslisting-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--ah-space-xs);
+}
+
+.assetslisting .assetslisting-filter-chip {
+  padding: var(--ah-space-2xs) var(--ah-space-s);
+  border: 1px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-m);
+  background: var(--ah-bg-subtle);
+  color: var(--ah-text);
+  font-size: var(--ah-font-xs);
+  cursor: pointer;
+  transition: var(--ah-transition);
+}
+
+.assetslisting .assetslisting-filter-chip:hover {
+  border-color: var(--ah-text-muted);
+}
+
+.assetslisting .assetslisting-filter-chip[aria-pressed="true"] {
+  border-color: var(--ah-accent);
+  background: var(--ah-accent);
+  color: var(--ah-on-accent);
+}
+
+.assetslisting-filter-dates {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-s);
+}
+
+.assetslisting-filter-date {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+}
+
+.assetslisting-filter-date-label {
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-xs);
+}
+
+.assetslisting-filter-date input {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid var(--ah-overlay-subtle);
+  border-radius: var(--ah-radius-2xs);
+  background: var(--ah-bg-page);
+  color: var(--ah-text-strong);
+  font-size: var(--ah-font-s);
+}
+
+.assetslisting-filter-date input:focus-visible {
+  border-color: var(--ah-accent);
+  outline: none;
 }

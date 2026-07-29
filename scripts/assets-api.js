@@ -13,6 +13,8 @@ export const DAM_ROOT = '/content/dam';
 
 const LIST_ENDPOINT = '/bin/assetshub/assets/list';
 const DETAIL_ENDPOINT = '/bin/assetshub/assets/detail';
+const SEARCH_ENDPOINT = '/bin/assetshub/assets/search';
+const SEARCH_FILTERS_ENDPOINT = '/bin/assetshub/settings/search-filters';
 
 /**
  * Fetches the folders and assets directly under a DAM path.
@@ -41,6 +43,44 @@ export async function fetchAssetsReveal(paths) {
   const response = await fetch(`${url.pathname}${url.search}`);
   if (!response.ok) {
     throw new Error(`Unable to load folder tree: ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
+ * Fetches the published search-filter definitions (facets) the hub renders in
+ * the filters panel. Authored as Content Fragments, so the set changes with a
+ * publish — never a deployment.
+ * @returns {Promise<{ filters: Array<{ id: string, label: string, property: string,
+ *   type: string, order: number, placeholder?: string,
+ *   options: Array<{ title: string, value: string }> }> }>}
+ */
+export async function fetchSearchFilters() {
+  const response = await fetch(SEARCH_FILTERS_ENDPOINT);
+  if (!response.ok) {
+    throw new Error(`Unable to load search filters: ${response.status}`);
+  }
+  return response.json();
+}
+
+/**
+ * Runs a query-backed asset search under a DAM path: the free-text term plus the
+ * active filters (keyed by the property each published filter declares), scoped
+ * to the subtree. Returns assets only — search mode has no folders.
+ * @param {string} path JCR path under /content/dam to scope to
+ * @param {{ q?: string, filters?: Object }} [search] free text and active filters
+ * @returns {Promise<{ path: string, total: number, assets: Array }>}
+ */
+export async function searchAssets(path = DAM_ROOT, { q, filters } = {}) {
+  const url = new URL(SEARCH_ENDPOINT, window.location);
+  url.searchParams.set('path', path);
+  if (q) url.searchParams.set('q', q);
+  if (filters && Object.keys(filters).length) {
+    url.searchParams.set('filters', JSON.stringify(filters));
+  }
+  const response = await fetch(`${url.pathname}${url.search}`);
+  if (!response.ok) {
+    throw new Error(`Unable to search assets: ${response.status}`);
   }
   return response.json();
 }

@@ -5,7 +5,9 @@ import { isEditMode } from '../../scripts/scripts.js';
 import {
   fetchAssetsList, fetchCollectionItems, withFolderAssetCounts, displayLabel, DAM_ROOT,
 } from './data.js';
+import { fetchSearchFilters, searchAssets } from '../../scripts/assets-api.js';
 import { renderShell, renderContent, createState } from './sections/index.js';
+import { renderFilters, readFilters } from './sections/filters.js';
 import bindAssetsListing, { applyUiState } from './events.js';
 import { getUiState } from './state.js';
 import createSelection from './selection.js';
@@ -35,7 +37,17 @@ export default function decorate(block) {
   let detail = null;
   let currentAssets = [];
   let currentFolders = [];
+  let currentTotal = null;
   let seq = 0;
+
+  // Search state: the free-text term plus the active filter values (keyed by the
+  // property each published filter declares). It lives here — not in the panel
+  // DOM — so it survives the shell rebuild when the user navigates folders.
+  let searchText = '';
+  let activeFilters = {};
+  let filterDefs = null;
+
+  const isSearching = () => searchText.trim() !== '' || Object.keys(activeFilters).length > 0;
 
   const selection = createSelection(block, () => currentAssets, () => currentFolders);
 
@@ -65,10 +77,23 @@ export default function decorate(block) {
     renderContent(content, {
       folders: currentFolders,
       assets: sortAssets(currentAssets, ui.sortField, ui.sortDirection),
-    }, ui.viewMode);
+    }, ui.viewMode, isSearching() ? 'Sin resultados' : null);
     // Cards were rebuilt: reflect any live selection back onto them.
     if (selection.isActive()) selection.refresh();
     if (detail.isOpen()) markSelected(detail.getPath());
+  }
+
+  // Reflects the result count under the search box: total matches while
+  // searching (the server pages/caps what it returns), plain count otherwise.
+  function renderCount() {
+    const count = block.querySelector('.assetslisting-count');
+    if (!count) return;
+    if (isSearching()) {
+      const total = typeof currentTotal === 'number' ? currentTotal : currentAssets.length;
+      count.textContent = `${total} resultados`;
+    } else {
+      count.textContent = `${currentAssets.length} assets`;
+    }
   }
 
   function openAsset(path) {
@@ -131,6 +156,70 @@ export default function decorate(block) {
     else downloadSelected();
   }
 
+  // Fetches whatever the current context calls for: the plain folder/collection
+  // listing, or — when the user typed a term or activated a filter — the
+  // query-backed search over the current folder, collection or smart collection.
+  // Search mode shows assets only (no folders), per the search spec.
+  async function loadData() {
+    const current = seq + 1;
+    seq = current;
+    const searching = isSearching();
+    content.replaceChildren(createState(searching ? 'Buscando...' : 'Cargando assets...'));
+
+    try {
+      const search = { q: searchText.trim(), filters: activeFilters };
+      const inCollectionRoot = currentCollectionId && !currentPath;
+      let data;
+      if (searching) {
+        data = inCollectionRoot
+          ? await fetchCollectionItems(currentCollectionId, search)
+          : await searchAssets(currentPath || DAM_ROOT, search);
+      } else {
+        data = inCollectionRoot
+          ? await fetchCollectionItems(currentCollectionId)
+          : await fetchAssetsList(currentPath || DAM_ROOT);
+      }
+      if (current !== seq) return;
+      currentAssets = data.assets || [];
+      // One extra request per visible folder (its own direct asset count) —
+      // small in practice (a handful of sub-folders per level) and worth the
+      // wait so a folder full of folders shows "0 assets" instead of "—".
+      currentFolders = searching ? [] : await withFolderAssetCounts(data.folders || []);
+      if (current !== seq) return;
+      currentTotal = searching && typeof data.total === 'number' ? data.total : null;
+      renderSorted();
+      renderCount();
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(error);
+      if (current !== seq) return;
+      content.replaceChildren(createState(searching
+        ? 'No se pudo ejecutar la búsqueda'
+        : 'No se pudieron cargar los assets'));
+    }
+  }
+
+  // Re-reads the active filters from the panel DOM and refreshes the listing.
+  function onFiltersChanged() {
+    const panel = block.querySelector('.assetslisting-filters-panel');
+    if (panel) activeFilters = readFilters(panel);
+    loadData();
+  }
+
+  function clearFilters() {
+    activeFilters = {};
+    const panel = block.querySelector('.assetslisting-filters-panel');
+    if (panel && filterDefs) renderFilters(panel, filterDefs, activeFilters);
+    loadData();
+  }
+
+  function setSearchText(value) {
+    const next = value || '';
+    if (next === searchText) return;
+    searchText = next;
+    loadData();
+  }
+
   const controller = {
     getUi: () => ui,
     setUi: (next) => { ui = next; },
@@ -143,6 +232,9 @@ export default function decorate(block) {
     clearSelection: () => selection.clear(),
     closeSelection: () => selection.exit(),
     downloadSelected: shareOrDownloadSelected,
+    setSearchText,
+    filtersChanged: onFiltersChanged,
+    clearFilters,
   };
 
   // (Re)builds the whole shell for a path (and optional collection context), then
@@ -173,6 +265,11 @@ export default function decorate(block) {
     applyUiState(block, ui);
     // A rebuilt shell means a new folder/collection: selection never carries across.
     selection.reset();
+    // The search state survives navigation, so re-apply it to the fresh chrome:
+    // the search box keeps its term and the panel re-renders the active filters.
+    const searchInput = block.querySelector('.assetslisting-search-input');
+    if (searchInput) searchInput.value = searchText;
+    if (filterDefs) renderFilters(shell.filtersPanel, filterDefs, activeFilters);
     currentPath = path;
     currentCollectionId = collection ? collection.id : null;
   }
@@ -192,34 +289,22 @@ export default function decorate(block) {
       mountShell(path, collection);
     }
 
-    const current = seq + 1;
-    seq = current;
-    content.replaceChildren(createState('Cargando assets...'));
-
-    try {
-      const data = (collection && !path)
-        ? await fetchCollectionItems(collection.id)
-        : await fetchAssetsList(path || DAM_ROOT);
-      if (current !== seq) return;
-      currentAssets = data.assets || [];
-      // One extra request per visible folder (its own direct asset count) —
-      // small in practice (a handful of sub-folders per level) and worth the
-      // wait so a folder full of folders shows "0 assets" instead of "—".
-      currentFolders = await withFolderAssetCounts(data.folders || []);
-      if (current !== seq) return;
-      renderSorted();
-      const count = block.querySelector('.assetslisting-count');
-      if (count) count.textContent = `${currentAssets.length} assets`;
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(error);
-      if (current !== seq) return;
-      content.replaceChildren(createState('No se pudieron cargar los assets'));
-    }
+    await loadData();
   }
 
   bindAssetsListing(block, controller);
   update(getRoute());
+
+  // The filter definitions are published config: fetch them once per block life
+  // and render the panel (re-rendered with the active values on every mount).
+  fetchSearchFilters().then((data) => {
+    filterDefs = data.filters || [];
+    const panel = block.querySelector('.assetslisting-filters-panel');
+    if (panel) renderFilters(panel, filterDefs, activeFilters);
+  }).catch((error) => {
+    // eslint-disable-next-line no-console
+    console.error(error);
+  });
 
   const unsubscribe = subscribeRoute((route) => {
     if (!block.isConnected) {

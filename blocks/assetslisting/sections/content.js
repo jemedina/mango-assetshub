@@ -102,13 +102,16 @@ function createGrid(items, build) {
  * @param {Element} content The `.assetslisting-content` element
  * @param {{ folders?: Array, assets?: Array }} data
  * @param {'grid'|'list'} viewMode
+ * @param {string} [emptyMessage] plain state shown when there is nothing to
+ *   render (search mode says "no results"); omitted while browsing, which
+ *   shows the rich empty-folder state instead
  */
-export function renderContent(content, data, viewMode) {
+export function renderContent(content, data, viewMode, emptyMessage) {
   const folders = data.folders || [];
   const assets = data.assets || [];
 
   if (!folders.length && !assets.length) {
-    content.replaceChildren(createEmptyState());
+    content.replaceChildren(emptyMessage ? createState(emptyMessage) : createEmptyState());
     return;
   }
 

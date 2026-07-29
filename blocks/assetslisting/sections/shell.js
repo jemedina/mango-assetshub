@@ -14,7 +14,8 @@ import createFiltersPanel from './filters.js';
  * @param {string} path Current DAM path
  * @param {{ filtersOpen: boolean, viewMode: string }} ui
  * @param {{ id: string, label: string }|null} [collection] active collection context
- * @returns {{ fragment: DocumentFragment, content: Element, workspace: Element }}
+ * @returns {{ fragment: DocumentFragment, content: Element, workspace: Element,
+ *   filtersPanel: Element }}
  */
 export default function renderShell(path, ui, collection = null) {
   const fragment = document.createDocumentFragment();
@@ -44,5 +45,7 @@ export default function renderShell(path, ui, collection = null) {
   main.append(topbar, workspace);
   fragment.append(panel, main);
 
-  return { fragment, content, workspace };
+  return {
+    fragment, content, workspace, filtersPanel: panel,
+  };
 }

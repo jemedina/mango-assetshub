@@ -74,13 +74,16 @@ export function applyUiState(block, ui) {
  *   isSelectionMode: () => boolean, enterSelectionMode: () => void,
  *   toggleSelectionMode: () => void,
  *   toggleSelect: (path: string) => void, clearSelection: () => void,
- *   closeSelection: () => void, downloadSelected: () => void
+ *   closeSelection: () => void, downloadSelected: () => void,
+ *   setSearchText: (value: string) => void, filtersChanged: () => void,
+ *   clearFilters: () => void
  * }} controller
  */
 export default function bindAssetsListing(block, {
   getUi, setUi, openAsset, renderSorted,
   isSelectionMode, enterSelectionMode, toggleSelectionMode, toggleSelect,
   clearSelection, closeSelection, downloadSelected,
+  setSearchText, filtersChanged, clearFilters,
 }) {
   block.addEventListener('click', (event) => {
     const check = event.target.closest('.assetslisting-check');
@@ -181,6 +184,36 @@ export default function bindAssetsListing(block, {
       return;
     }
 
+    if (event.target.closest('.assetslisting-filters-close')) {
+      const ui = setUiState({ filtersOpen: false });
+      setUi(ui);
+      applyUiState(block, ui);
+      return;
+    }
+
+    if (event.target.closest('.assetslisting-filters-clear')) {
+      clearFilters();
+      return;
+    }
+
+    // Collapsing a filter section is pure disclosure: it hides the controls but
+    // never deactivates the values they hold.
+    const filterHeader = event.target.closest('.assetslisting-filter-header');
+    if (filterHeader) {
+      const expanded = filterHeader.getAttribute('aria-expanded') === 'true';
+      filterHeader.setAttribute('aria-expanded', String(!expanded));
+      const body = filterHeader.closest('.assetslisting-filter')?.querySelector('.assetslisting-filter-body');
+      if (body) body.hidden = expanded;
+      return;
+    }
+
+    const chip = event.target.closest('.assetslisting-filter-chip');
+    if (chip) {
+      chip.setAttribute('aria-pressed', String(chip.getAttribute('aria-pressed') !== 'true'));
+      filtersChanged();
+      return;
+    }
+
     const viewButton = event.target.closest('.assetslisting-viewtoggle-button');
     if (viewButton && viewButton.dataset.viewMode) {
       const ui = setUiState({ viewMode: viewButton.dataset.viewMode });
@@ -226,6 +259,32 @@ export default function bindAssetsListing(block, {
     // Any other click inside the block closes open dropdowns (click-outside
     // for anything that isn't a dropdown control itself).
     if (!event.target.closest('.dropdown')) closeAllDropdowns(block);
+  });
+
+  // Typing is debounced: the search box (and the free-text filter fields) fire
+  // a query per pause, not per keystroke. A single shared timer is enough — the
+  // user types in one field at a time and every path refetches the same listing.
+  let typeDebounce;
+  block.addEventListener('input', (event) => {
+    const searchInput = event.target.closest('.assetslisting-search-input');
+    if (searchInput) {
+      clearTimeout(typeDebounce);
+      typeDebounce = setTimeout(() => setSearchText(searchInput.value), 300);
+      return;
+    }
+    if (event.target.closest('.assetslisting-filter-text')) {
+      clearTimeout(typeDebounce);
+      typeDebounce = setTimeout(() => filtersChanged(), 300);
+    }
+  });
+
+  // Discrete filter controls (checkboxes, radios, dates) apply on change; the
+  // text fields are handled above through the debounced input path.
+  block.addEventListener('change', (event) => {
+    if (event.target.closest('.assetslisting-filter')
+        && !event.target.closest('.assetslisting-filter-text')) {
+      filtersChanged();
+    }
   });
 
   // Click-outside (outside the block entirely) and Escape both close open menus.
