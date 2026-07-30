@@ -256,13 +256,19 @@ function loadDelayed() {
 }
 
 async function loadPage() {
-  // Restore the pre-login view (hash) before the router reads the URL. If it
-  // triggers a full navigation the document is unloading, so stop here.
-  if (restoreLoginReturn()) return;
-  // App-wide session guard: signed-out users are redirected to login. Fired
-  // (not awaited) so it runs in parallel with rendering; if there's no session
-  // the redirect interrupts the page before anything signed-out is shown.
-  ensureSession();
+  // Universal Editor renders the page inside the editor iframe with the
+  // author's own session: the app-wide login flow must never run there. Any
+  // status-fetch failure would navigate the iframe to the login servlet and
+  // break authoring — in edit mode, skip all auth handling and just render.
+  if (!isEditMode()) {
+    // Restore the pre-login view (hash) before the router reads the URL. If it
+    // triggers a full navigation the document is unloading, so stop here.
+    if (restoreLoginReturn()) return;
+    // App-wide session guard: signed-out users are redirected to login. Fired
+    // (not awaited) so it runs in parallel with rendering; if there's no session
+    // the redirect interrupts the page before anything signed-out is shown.
+    ensureSession();
+  }
   await loadEager(document);
   await loadLazy(document);
   loadDelayed();
