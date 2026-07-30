@@ -1,7 +1,7 @@
 {
   "definitions": [
     {
-      "title": "ShareLinks",
+      "title": "Share Links",
       "id": "sharelinks",
       "plugins": {
         "xwalk": {

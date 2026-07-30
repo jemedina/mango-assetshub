@@ -1,7 +1,7 @@
 {
   "definitions": [
     {
-      "title": "AssetsNavigation",
+      "title": "Assets Navigation",
       "id": "assetsnavigation",
       "plugins": {
         "xwalk": {

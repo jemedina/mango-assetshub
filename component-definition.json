@@ -83,7 +83,7 @@
       "id": "blocks",
       "components": [
         {
-          "title": "AssetsListing",
+          "title": "Assets Listing",
           "id": "assetslisting",
           "plugins": {
             "xwalk": {
@@ -98,7 +98,7 @@
           }
         },
         {
-          "title": "AssetsNavigation",
+          "title": "Assets Navigation",
           "id": "assetsnavigation",
           "plugins": {
             "xwalk": {
@@ -188,7 +188,7 @@
           }
         },
         {
-          "title": "ShareLinks",
+          "title": "Share Links",
           "id": "sharelinks",
           "plugins": {
             "xwalk": {
