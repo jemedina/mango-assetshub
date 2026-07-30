@@ -87,14 +87,16 @@ export default function bindAssetsListing(block, {
 }) {
   block.addEventListener('click', (event) => {
     const check = event.target.closest('.assetslisting-check');
-    const checkCard = check && check.closest('.assetslisting-card-asset');
-    if (checkCard && checkCard.dataset.assetPath) {
+    const checkCard = check && check.closest('.assetslisting-card-asset, .assetslisting-card-folder');
+    const checkPath = checkCard && (checkCard.dataset.assetPath || checkCard.dataset.href);
+    if (checkCard && checkPath) {
       // The checkbox is how selection mode gets triggered in grid view (a
       // click activates it if it wasn't already on) and always toggles that
-      // one asset's pick state. Several assets can be picked at once this
-      // way, in both grid and list view.
+      // one item's pick state — folders included, a folder pick shares the
+      // whole folder. Several items can be picked at once this way, in both
+      // grid and list view.
       enterSelectionMode();
-      toggleSelect(checkCard.dataset.assetPath);
+      toggleSelect(checkPath);
       return;
     }
 

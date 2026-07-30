@@ -82,11 +82,13 @@
 
 /* grid view: the checkbox is also a discovery affordance — hovering (or
    focusing) a card reveals it even before selection mode is active, so
-   clicking it is how selection mode gets triggered in the first place. List
-   view's checkbox column is handled separately (always a grid item; shown via
-   visibility, not display, once selection mode is on). */
+   clicking it is how selection mode gets triggered in the first place.
+   Folders are selectable too, same as assets. List view's checkbox column is
+   handled separately (always a grid item, always visible). */
 .assetslisting[data-view-mode="grid"] .assetslisting-card-asset:hover .assetslisting-check,
-.assetslisting[data-view-mode="grid"] .assetslisting-card-asset:focus-visible .assetslisting-check {
+.assetslisting[data-view-mode="grid"] .assetslisting-card-asset:focus-visible .assetslisting-check,
+.assetslisting[data-view-mode="grid"] .assetslisting-card-folder:hover .assetslisting-check,
+.assetslisting[data-view-mode="grid"] .assetslisting-card-folder:focus-visible .assetslisting-check {
   display: block;
 }
 
@@ -477,20 +479,6 @@
   display: none;
 }
 
-/* folders are never individually selectable in list view (unlike grid, where
-   hovering reveals the checkbox) — dropped from the grid entirely rather than
-   just hidden, so its column doesn't leave a dead 14px gap. The thumbnail
-   reclaims that space by spanning columns 1-2 instead of auto-placing at 2,
-   so the remaining columns (name, category, size, modified) still land
-   exactly where auto-placement would've put them — same as an asset row. */
-.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-check {
-  display: none;
-}
-
-.assetslisting[data-view-mode="list"] .assetslisting-card-folder .assetslisting-thumb {
-  grid-column: 1 / span 2;
-}
-
 /* checkbox: floats over the thumbnail corner in grid view; in list view it's
    a normal grid item (column 1), its own smaller size per the Figma table.
    Unlike grid view (hidden until hover/selection mode), the table's checkbox
@@ -514,7 +502,8 @@
 
 /* the checkmark's offsets above are tuned for the 20px grid-view checkbox;
    the 14px list checkbox needs its own, scaled to the same border thickness. */
-.assetslisting[data-view-mode="list"] .assetslisting-card-asset[data-checked="true"] .assetslisting-check::after {
+.assetslisting[data-view-mode="list"] .assetslisting-card-asset[data-checked="true"] .assetslisting-check::after,
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder[data-checked="true"] .assetslisting-check::after {
   top: 1px;
   left: 3.9px;
   width: 2.5px;
@@ -528,7 +517,8 @@
    background wash (no accent border/shadow — that's a grid-view affordance,
    where each card is fully bordered; list rows just have the thin divider). */
 .assetslisting[data-view-mode="list"] .assetslisting-card-asset[data-selected="true"],
-.assetslisting[data-view-mode="list"] .assetslisting-card-asset[data-checked="true"] {
+.assetslisting[data-view-mode="list"] .assetslisting-card-asset[data-checked="true"],
+.assetslisting[data-view-mode="list"] .assetslisting-card-folder[data-checked="true"] {
   background: var(--ah-overlay-subtle);
   border-color: var(--ah-overlay-subtle);
   box-shadow: none;

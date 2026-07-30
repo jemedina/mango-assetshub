@@ -54,7 +54,7 @@ export function createBadge(format) {
 
 /**
  * Builds the preview region for an asset.
- * @param {{ path?: string, format?: string, title?: string, name?: string }} asset
+ * @param {{ path?: string, thumbnail?: string, format?: string, title?: string, name?: string }} asset
  * @param {{ badge?: boolean, variant?: string }} [options]
  *   badge   render the uppercase format badge in the top-right corner
  *   variant extra modifier appended to the base class (e.g. 'detail')
@@ -63,13 +63,18 @@ export function createBadge(format) {
 export default function createPreview(asset, options = {}) {
   const { badge = false, variant } = options;
   const format = formatLabel(asset.format);
+  // The listing endpoint's thumbnail rendition is much lighter than the full
+  // asset at `path` — cheaper to render for what's just a small card/detail
+  // preview. Falls back to `path` for callers whose asset summary doesn't
+  // carry one (e.g. a rendition item), rather than showing nothing.
+  const previewSrc = asset.thumbnail || asset.path;
 
   const thumb = document.createElement('span');
   thumb.className = 'assetslisting-thumb';
   if (variant) thumb.classList.add(`assetslisting-thumb-${variant}`);
 
-  if (isPreviewable(format) && asset.path) {
-    renderImage(thumb, asset.path, displayLabel(asset));
+  if (isPreviewable(format) && previewSrc) {
+    renderImage(thumb, previewSrc, displayLabel(asset));
   } else if (format) {
     renderIcon(thumb, format);
   } else {
