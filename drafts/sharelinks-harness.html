@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>sharelinks harness</title>
+  <!-- Redirect the block's scripts.js import to a side-effect-free stub so the
+       harness renders without booting the app (and its auth redirect). -->
+  <script type="importmap">
+    { "imports": { "/scripts/scripts.js": "/drafts/scripts-stub.js" } }
+  </script>
+  <link rel="stylesheet" href="/styles/styles.css">
+  <link rel="stylesheet" href="/styles/fonts.css">
+  <link rel="stylesheet" href="/blocks/sharelinks/sharelinks.css">
+</head>
+<body class="appear">
+  <aside class="leftnav" style="background: #fff; border-right: 1px solid #e8e8e8;"></aside>
+  <main>
+    <div class="hub-view">
+      <div class="section">
+        <div class="sharelinks-wrapper">
+          <div class="sharelinks block">
+            <div>
+              <div>Descargas recientes</div>
+            </div>
+            <div>
+              <div>No hay descargas recientes</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script type="module">
+    import decorate from '/blocks/sharelinks/sharelinks.js';
+
+    decorate(document.querySelector('.sharelinks'));
+  </script>
+</body>
+</html>

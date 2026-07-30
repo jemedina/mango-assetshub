@@ -21,6 +21,5 @@ export const DEFAULT_VIEW = ASSETS_LISTING_VIEW;
 /** Registry of SPA views mapped to their fragment path. */
 export const HUB_VIEWS = {
   [ASSETS_LISTING_VIEW]: { fragment: '/hub-fragments/assets-listing' },
-  recents: { fragment: '/hub-fragments/recents' },
   'recent-downloads': { fragment: '/hub-fragments/recent-downloads' },
 };

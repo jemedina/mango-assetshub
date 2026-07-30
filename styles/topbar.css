@@ -1,0 +1,47 @@
+/*
+ * ======================================================== workspace topbar ===
+ *
+ * Shared chrome for the actions bar every hub view pins at the top of its
+ * workspace (assetslisting, sharelinks...). Blocks compose these classes onto
+ * their own scoped ones — `assetslisting-actionsbar ah-actionsbar` — and add
+ * only what is specific to them (breadcrumb, action buttons, fixed placement).
+ *
+ *   .ah-actionsbar           the bar itself: height, padding, subtle background
+ *   .ah-actionsbar-heading   left column stacking title + subtitle/breadcrumb
+ *   .ah-actionsbar-title     the view title (15px bold)
+ *   .ah-actionsbar-subtitle  a plain muted second line (blocks with a
+ *                            breadcrumb render that instead)
+ */
+
+.ah-actionsbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-l);
+  box-sizing: border-box;
+  height: var(--ah-actionsbar-height);
+  padding: var(--ah-space-xm) var(--ah-topbar-padding-x);
+  background: var(--ah-bg-subtle);
+}
+
+.ah-actionsbar-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ah-space-xs);
+  min-width: 0;
+}
+
+.ah-actionsbar-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: -0.01em;
+  line-height: 15px;
+}
+
+.ah-actionsbar-subtitle {
+  margin: 0;
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-s);
+  line-height: 1.2;
+}

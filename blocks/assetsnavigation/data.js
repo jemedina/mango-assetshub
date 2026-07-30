@@ -20,9 +20,6 @@ export const primaryNavItems = [
     id: 'all-assets', label: 'Todos los assets', view: 'assets-listing', iconClass: 'ah-icon-all-assets',
   },
   {
-    id: 'recent', label: 'Recientes', view: 'recents', iconClass: 'ah-icon-recent',
-  },
-  {
     id: 'recent-downloads', label: 'Descargas recientes', view: 'recent-downloads', iconClass: 'ah-icon-recent-downloads',
   },
 ];

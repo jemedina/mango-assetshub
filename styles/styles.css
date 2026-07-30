@@ -15,6 +15,7 @@
 @import url('variables.css');
 @import url('buttons.css');
 @import url('icons.css');
+@import url('topbar.css');
 
 /* Fallback font: keeps text visible with Inter-matched metrics (Arial as the
    local stand-in) while the lazily-loaded fonts.css swaps in Inter, avoiding

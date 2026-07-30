@@ -245,5 +245,30 @@
         "valueType": "string"
       }
     ]
+  },
+  {
+    "id": "sharelinks",
+    "fields": [
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "title",
+        "label": "Title",
+        "value": ""
+      },
+      {
+        "component": "number",
+        "valueType": "number",
+        "name": "maxItems",
+        "label": "Max items"
+      },
+      {
+        "component": "text",
+        "valueType": "string",
+        "name": "emptyMessage",
+        "label": "Empty message",
+        "value": ""
+      }
+    ]
   }
 ]

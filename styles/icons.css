@@ -5,10 +5,10 @@
  * sits in — the same theming the old inline `stroke="currentColor"` SVGs gave —
  * while staying crisp as raster. One PNG per icon, one class per icon.
  *
- * Usage:  <span class="ah-icon ah-icon-recent" aria-hidden="true"></span>
+ * Usage:  <span class="ah-icon ah-icon-folder" aria-hidden="true"></span>
  * Size:   default 14px; override with the size modifier or --ah-icon-size:
- *           <span class="ah-icon ah-icon-sm ah-icon-recent"></span>   (10px)
- *           <span class="ah-icon ah-icon-recent" style="--ah-icon-size: 20px">
+ *           <span class="ah-icon ah-icon-sm ah-icon-folder"></span>   (10px)
+ *           <span class="ah-icon ah-icon-folder" style="--ah-icon-size: 20px">
  *
  * Sources live in /icons/nav/ as 48x48 transparent PNGs, each trimmed to its
  * glyph and re-padded to a uniform size so every icon reads at the same optical
@@ -35,7 +35,6 @@
 
 /* icon registry — one line per glyph */
 .ah-icon-all-assets { --ah-icon: url('/icons/nav/all-assets.png'); }
-.ah-icon-recent { --ah-icon: url('/icons/nav/recent.png'); }
 .ah-icon-recent-downloads { --ah-icon: url('/icons/nav/recent-downloads.png'); }
 .ah-icon-collections { --ah-icon: url('/icons/nav/collections-list.png'); }
 .ah-icon-collection { --ah-icon: url('/icons/nav/collection.png'); }

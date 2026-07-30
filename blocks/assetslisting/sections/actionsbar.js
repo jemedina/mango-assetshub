@@ -49,13 +49,13 @@ function createBreadcrumb(path, collection) {
  */
 export default function createActionsBar(path, collection = null) {
   const bar = document.createElement('div');
-  bar.className = 'assetslisting-actionsbar';
+  bar.className = 'assetslisting-actionsbar ah-actionsbar';
 
   const heading = document.createElement('div');
-  heading.className = 'assetslisting-heading';
+  heading.className = 'assetslisting-heading ah-actionsbar-heading';
 
   const title = document.createElement('h1');
-  title.className = 'assetslisting-title';
+  title.className = 'assetslisting-title ah-actionsbar-title';
   title.textContent = folderTitle(path, collection);
 
   heading.append(title, createBreadcrumb(path, collection));
