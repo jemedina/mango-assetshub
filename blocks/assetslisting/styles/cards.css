@@ -40,6 +40,20 @@
   outline: none;
 }
 
+/* Info section: a fixed 80px band holding the name, size/date facts and keywords. */
+.assetslisting-body {
+  box-sizing: border-box;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: var(--ah-space-2xs);
+  padding: var(--ah-space-s) var(--ah-space-xm);
+}
+
+.assetslisting-card-asset .assetslisting-body {
+  height: 80px;
+}
+
 /* divider between the folder icon area and the name/facts area — a grid-view
    affordance only (list view resets .assetslisting-body's padding/height and
    has its own row divider instead). */
@@ -120,20 +134,6 @@
 .assetslisting-card-asset:hover .assetslisting-thumb::after,
 .assetslisting-card-asset:focus-visible .assetslisting-thumb::after {
   opacity: 1;
-}
-
-/* Info section: a fixed 80px band holding the name, size/date facts and keywords. */
-.assetslisting-body {
-  box-sizing: border-box;
-  display: flex;
-  flex: none;
-  flex-direction: column;
-  gap: var(--ah-space-2xs);
-  padding: var(--ah-space-s) var(--ah-space-xm);
-}
-
-.assetslisting-card-asset .assetslisting-body {
-  height: 80px;
 }
 
 /* ================================================================== preview === */

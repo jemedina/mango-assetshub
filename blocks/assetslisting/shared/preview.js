@@ -54,7 +54,8 @@ export function createBadge(format) {
 
 /**
  * Builds the preview region for an asset.
- * @param {{ path?: string, thumbnail?: string, format?: string, title?: string, name?: string }} asset
+ * @param {{ path?: string, thumbnail?: string, format?: string,
+ *   title?: string, name?: string }} asset
  * @param {{ badge?: boolean, variant?: string }} [options]
  *   badge   render the uppercase format badge in the top-right corner
  *   variant extra modifier appended to the base class (e.g. 'detail')

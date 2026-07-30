@@ -6,7 +6,9 @@ import {
   fetchAssetsList, fetchCollectionItems, withFolderAssetCounts, displayLabel, DAM_ROOT,
 } from './data.js';
 import { fetchSearchFilters, searchAssets } from '../../scripts/assets-api.js';
-import { renderShell, renderContent, createState, createLoadMoreButton } from './sections/index.js';
+import {
+  renderShell, renderContent, createState, createLoadMoreButton,
+} from './sections/index.js';
 import { renderFilters, readFilters } from './sections/filters.js';
 import bindAssetsListing, { applyUiState } from './events.js';
 import { getUiState } from './state.js';

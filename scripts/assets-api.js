@@ -74,7 +74,9 @@ export async function fetchSearchFilters() {
  *   free text, active filters and paging (servlet defaults: limit 100, capped 200)
  * @returns {Promise<{ path: string, total: number, assets: Array }>}
  */
-export async function searchAssets(path = DAM_ROOT, { q, filters, limit, offset } = {}) {
+export async function searchAssets(path = DAM_ROOT, {
+  q, filters, limit, offset,
+} = {}) {
   const url = new URL(SEARCH_ENDPOINT, window.location);
   url.searchParams.set('path', path);
   if (q) url.searchParams.set('q', q);
