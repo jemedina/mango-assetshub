@@ -5,4 +5,4 @@
  */
 
 export { default as renderShell } from './shell.js';
-export { renderContent, createState } from './content.js';
+export { renderContent, createState, createLoadMoreButton } from './content.js';

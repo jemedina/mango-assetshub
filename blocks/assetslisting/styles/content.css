@@ -81,3 +81,9 @@
 .assetslisting-grid + .assetslisting-section-label {
   margin-top: var(--ah-space-xl);
 }
+
+/* "Mostrar más" — centered below the grid/table, its own row */
+.assetslisting-load-more {
+  display: flex;
+  margin: var(--ah-space-xl) auto 0;
+}

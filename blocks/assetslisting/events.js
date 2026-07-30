@@ -76,14 +76,14 @@ export function applyUiState(block, ui) {
  *   toggleSelect: (path: string) => void, clearSelection: () => void,
  *   closeSelection: () => void, downloadSelected: () => void,
  *   setSearchText: (value: string) => void, filtersChanged: () => void,
- *   clearFilters: () => void
+ *   clearFilters: () => void, loadMoreAssets: () => Promise<void>
  * }} controller
  */
 export default function bindAssetsListing(block, {
   getUi, setUi, openAsset, renderSorted,
   isSelectionMode, enterSelectionMode, toggleSelectionMode, toggleSelect,
   clearSelection, closeSelection, downloadSelected,
-  setSearchText, filtersChanged, clearFilters,
+  setSearchText, filtersChanged, clearFilters, loadMoreAssets,
 }) {
   block.addEventListener('click', (event) => {
     const check = event.target.closest('.assetslisting-check');
@@ -140,6 +140,24 @@ export default function bindAssetsListing(block, {
 
     if (event.target.closest('[data-action="view-all"]')) {
       navigate({ view: ASSETS_LISTING_VIEW, path: DAM_ROOT });
+      return;
+    }
+
+    const loadMoreButton = event.target.closest('[data-action="load-more"]');
+    if (loadMoreButton) {
+      // A successful append re-renders (see renderSorted): this exact button
+      // either gets replaced by a fresh one (more pages left) or dropped
+      // entirely (that was the last page) — either way it's disconnected from
+      // the DOM afterward, so the restore below only ever fires on failure,
+      // where nothing re-renders and the button needs to work again.
+      const originalLabel = loadMoreButton.textContent;
+      loadMoreButton.disabled = true;
+      loadMoreButton.textContent = 'Cargando...';
+      loadMoreAssets().finally(() => {
+        if (!loadMoreButton.isConnected) return;
+        loadMoreButton.disabled = false;
+        loadMoreButton.textContent = originalLabel;
+      });
       return;
     }
 

@@ -93,6 +93,22 @@ function createGrid(items, build) {
 }
 
 /**
+ * "Mostrar más" — the manual paging control for "Todos los assets" (every
+ * asset in the DAM, loaded 100 at a time via the search endpoint; see
+ * assetslisting.js). A button rather than auto-loading on scroll: predictable,
+ * doesn't fight the footer/detail-panel layout, and needs no scroll listener.
+ * @returns {HTMLButtonElement}
+ */
+export function createLoadMoreButton() {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'btn btn-secondary assetslisting-load-more';
+  button.dataset.action = 'load-more';
+  button.textContent = 'Mostrar más';
+  return button;
+}
+
+/**
  * Renders the folder/asset grid (or the empty state) into the content region.
  *
  * List view is one continuous table: folders and assets share a single grid

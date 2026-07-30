@@ -6,13 +6,19 @@ import {
   fetchAssetsList, fetchCollectionItems, withFolderAssetCounts, displayLabel, DAM_ROOT,
 } from './data.js';
 import { fetchSearchFilters, searchAssets } from '../../scripts/assets-api.js';
-import { renderShell, renderContent, createState } from './sections/index.js';
+import { renderShell, renderContent, createState, createLoadMoreButton } from './sections/index.js';
 import { renderFilters, readFilters } from './sections/filters.js';
 import bindAssetsListing, { applyUiState } from './events.js';
 import { getUiState } from './state.js';
 import createSelection from './selection.js';
 import createDetailController from './sections/detail/index.js';
 import { sortAssets } from './shared/sort.js';
+
+// "Todos los assets" and search/filter results both page the search
+// endpoint's default batch size — see AssetSearchServlet's own clampLimit
+// default, kept in step so a request never asks for more than the servlet
+// would give anyway.
+const ASSETS_PAGE_SIZE = 100;
 
 /**
  * Loads and decorates the assetslisting block.
@@ -38,6 +44,9 @@ export default function decorate(block) {
   let currentAssets = [];
   let currentFolders = [];
   let currentTotal = null;
+  let assetsOffset = 0;
+  let hasMoreAssets = false;
+  let loadingMoreAssets = false;
   let seq = 0;
 
   // Search state: the free-text term plus the active filter values (keyed by the
@@ -78,13 +87,18 @@ export default function decorate(block) {
       folders: currentFolders,
       assets: sortAssets(currentAssets, ui.sortField, ui.sortDirection),
     }, ui.viewMode, isSearching() ? 'Sin resultados' : null);
+    // "Todos los assets" pages manually — appended after the grid rather than
+    // built into renderContent, which stays agnostic of paging.
+    if (hasMoreAssets) content.append(createLoadMoreButton());
     // Cards were rebuilt: reflect any live selection back onto them.
     if (selection.isActive()) selection.refresh();
     if (detail.isOpen()) markSelected(detail.getPath());
   }
 
-  // Reflects the result count under the search box: total matches while
-  // searching (the server pages/caps what it returns), plain count otherwise.
+  // Reflects the result count under the search box: the server's total when
+  // it's trustworthy (collection search only — see loadData), otherwise the
+  // count of what's loaded so far, which grows as more pages come in via
+  // "Mostrar más".
   function renderCount() {
     const count = block.querySelector('.assetslisting-count');
     if (!count) return;
@@ -159,43 +173,96 @@ export default function decorate(block) {
   // Fetches whatever the current context calls for: the plain folder/collection
   // listing, or — when the user typed a term or activated a filter — the
   // query-backed search over the current folder, collection or smart collection.
-  // Search mode shows assets only (no folders), per the search spec.
-  async function loadData() {
+  // Search mode shows assets only (no folders), per the search spec. Browsing
+  // the DAM root with nothing searched instead pages through every asset in
+  // the DAM via that same search endpoint (empty query = match everything
+  // under the path) rather than a plain one-level folder listing.
+  //
+  // Both of those (plain "Todos los assets" and an active search/filter) page
+  // through AssetSearchServlet the same way — the only case excluded is a
+  // collection, whose own bridge endpoint has its own documented 100-member
+  // cap and no offset support, so it isn't paginated here.
+  // @param {{ append?: boolean }} [options] append fetches the next page onto
+  //   what's already rendered instead of replacing it with a loading state.
+  async function loadData({ append = false } = {}) {
     const current = seq + 1;
     seq = current;
     const searching = isSearching();
-    content.replaceChildren(createState(searching ? 'Buscando...' : 'Cargando assets...'));
+    const inCollectionRoot = currentCollectionId && !currentPath;
+    const isAllAssetsRoot = !inCollectionRoot && !searching && currentPath === DAM_ROOT;
+    const paginated = !inCollectionRoot && (searching || isAllAssetsRoot);
+
+    if (!append) {
+      content.replaceChildren(createState(searching ? 'Buscando...' : 'Cargando assets...'));
+      assetsOffset = 0;
+    }
 
     try {
-      const search = { q: searchText.trim(), filters: activeFilters };
-      const inCollectionRoot = currentCollectionId && !currentPath;
       let data;
-      if (searching) {
-        data = inCollectionRoot
-          ? await fetchCollectionItems(currentCollectionId, search)
-          : await searchAssets(currentPath || DAM_ROOT, search);
+      if (inCollectionRoot) {
+        data = searching
+          ? await fetchCollectionItems(currentCollectionId, {
+            q: searchText.trim(), filters: activeFilters,
+          })
+          : await fetchCollectionItems(currentCollectionId);
+      } else if (paginated) {
+        data = await searchAssets(currentPath || DAM_ROOT, {
+          q: searchText.trim(),
+          filters: activeFilters,
+          limit: ASSETS_PAGE_SIZE,
+          offset: assetsOffset,
+        });
       } else {
-        data = inCollectionRoot
-          ? await fetchCollectionItems(currentCollectionId)
-          : await fetchAssetsList(currentPath || DAM_ROOT);
+        data = await fetchAssetsList(currentPath || DAM_ROOT);
       }
       if (current !== seq) return;
-      currentAssets = data.assets || [];
+
+      const newAssets = data.assets || [];
+      currentAssets = append ? currentAssets.concat(newAssets) : newAssets;
+      assetsOffset += newAssets.length;
       // One extra request per visible folder (its own direct asset count) —
       // small in practice (a handful of sub-folders per level) and worth the
       // wait so a folder full of folders shows "0 assets" instead of "—".
-      currentFolders = searching ? [] : await withFolderAssetCounts(data.folders || []);
+      currentFolders = (searching || isAllAssetsRoot)
+        ? [] : await withFolderAssetCounts(data.folders || []);
       if (current !== seq) return;
-      currentTotal = searching && typeof data.total === 'number' ? data.total : null;
+      // Only the collection bridge's `total` is trusted — AssetSearchServlet's
+      // p.guessTotal has been observed echoing back the page size instead of
+      // the real match count for both the plain "Todos los assets" query and
+      // an active search, which would make currentAssets.length < currentTotal
+      // always false. A full page (exactly what was asked for) is used as the
+      // "there's probably more" signal for both instead — a short last page
+      // means there's nothing left to fetch.
+      currentTotal = inCollectionRoot && searching && typeof data.total === 'number'
+        ? data.total : null;
+      hasMoreAssets = paginated && newAssets.length === ASSETS_PAGE_SIZE;
       renderSorted();
       renderCount();
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error(error);
       if (current !== seq) return;
-      content.replaceChildren(createState(searching
-        ? 'No se pudo ejecutar la búsqueda'
-        : 'No se pudieron cargar los assets'));
+      // An append failure leaves the already-rendered page as-is (nothing to
+      // replace) — events.js re-enables the button itself so the user can
+      // retry, since no re-render happens here to refresh it.
+      if (!append) {
+        content.replaceChildren(createState(searching
+          ? 'No se pudo ejecutar la búsqueda'
+          : 'No se pudieron cargar los assets'));
+      }
+    }
+  }
+
+  // "Mostrar más" (see events.js): loads the next page — of "Todos los
+  // assets" or of the current search/filter results — and appends it to
+  // what's already rendered.
+  async function loadMoreAssets() {
+    if (!hasMoreAssets || loadingMoreAssets) return;
+    loadingMoreAssets = true;
+    try {
+      await loadData({ append: true });
+    } finally {
+      loadingMoreAssets = false;
     }
   }
 
@@ -235,6 +302,7 @@ export default function decorate(block) {
     setSearchText,
     filtersChanged: onFiltersChanged,
     clearFilters,
+    loadMoreAssets,
   };
 
   // (Re)builds the whole shell for a path (and optional collection context), then

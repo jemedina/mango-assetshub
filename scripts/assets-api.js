@@ -66,18 +66,23 @@ export async function fetchSearchFilters() {
 /**
  * Runs a query-backed asset search under a DAM path: the free-text term plus the
  * active filters (keyed by the property each published filter declares), scoped
- * to the subtree. Returns assets only — search mode has no folders.
+ * to the subtree. Returns assets only — search mode has no folders. An empty
+ * `q`/`filters` still runs (the servlet has no "needs a criterion" guard), so
+ * this doubles as "every asset under `path`, paginated" for a plain browse.
  * @param {string} path JCR path under /content/dam to scope to
- * @param {{ q?: string, filters?: Object }} [search] free text and active filters
+ * @param {{ q?: string, filters?: Object, limit?: number, offset?: number }} [search]
+ *   free text, active filters and paging (servlet defaults: limit 100, capped 200)
  * @returns {Promise<{ path: string, total: number, assets: Array }>}
  */
-export async function searchAssets(path = DAM_ROOT, { q, filters } = {}) {
+export async function searchAssets(path = DAM_ROOT, { q, filters, limit, offset } = {}) {
   const url = new URL(SEARCH_ENDPOINT, window.location);
   url.searchParams.set('path', path);
   if (q) url.searchParams.set('q', q);
   if (filters && Object.keys(filters).length) {
     url.searchParams.set('filters', JSON.stringify(filters));
   }
+  if (limit != null) url.searchParams.set('limit', limit);
+  if (offset != null) url.searchParams.set('offset', offset);
   const response = await fetch(`${url.pathname}${url.search}`);
   if (!response.ok) {
     throw new Error(`Unable to search assets: ${response.status}`);
