@@ -1,8 +1,9 @@
 /*
  * Card builder for the content grid: asset cards (preview + format badge + a
- * three-row info section) and folder cards (folder icon + name, navigated via
- * the delegated handler in events.js off `data-href`). Both are listed here so
- * a folder's contents — assets of any format — stay reachable by drilling in.
+ * name + size info section) and folder cards (folder icon + name, navigated
+ * via the delegated handler in events.js off `data-href`). Both are listed
+ * here so a folder's contents — assets of any format — stay reachable by
+ * drilling in.
  *
  * List view reflows the exact same asset-card markup into a table row (see
  * cards.css): thumb, body, category, size and modified are all direct
@@ -14,7 +15,6 @@ import {
   displayLabel, formatLabel, formatSizeMb, formatDate,
 } from '../data.js';
 import createPreview, { createBadge } from '../shared/preview.js';
-import createKeywords from '../shared/keywords.js';
 import { ICON_FOLDER, ICON_FOLDER_THUMB } from '../shared/icons.js';
 
 function fact(className, text) {
@@ -33,24 +33,23 @@ function assetCountLabel(count) {
 
 /**
  * Builds a folder card: a gray folder glyph over the thumbnail, then a name
- * row and a count/date facts row below it (Figma: node 1:4328, "FolderCard").
+ * row and a count fact below it (Figma: node 1:4328, "FolderCard").
  *
  * Grid and list view diverge here (unlike the asset card, which reuses one
  * markup for both): grid shows a small folder icon next to the name and the
- * facts row inline in the body; list view instead shows a "CARPETA" badge
- * next to the name (reusing the same format-badge look/class asset rows use)
- * and moves count/date into their own list-column cells so folder rows line
- * up with asset rows. Both variants ship in the DOM always — CSS toggles
- * which shows per `data-view-mode`, same pattern as the asset card's name
- * badge — so there's no view-mode branching here.
+ * count inline in the body; list view instead shows a "CARPETA" badge next
+ * to the name (reusing the same format-badge look/class asset rows use) and
+ * moves the count into its own list-column cell so folder rows line up with
+ * asset rows. Both variants ship in the DOM always — CSS toggles which shows
+ * per `data-view-mode`, same pattern as the asset card's name badge — so
+ * there's no view-mode branching here.
  *
  * `assetCount` is the folder's own direct count (annotated by
  * `withFolderAssetCounts` in data.js — the listing endpoint doesn't return it
  * itself), always a real number (0, not a placeholder, for a folder that only
- * holds sub-folders). `modified` has no such backfill yet, so it still falls
- * back to `NO_VALUE`. There's no "subcarpetas" equivalent for a folder, so
- * that list column is always `NO_VALUE`.
- * @param {{ path: string, assetCount?: number, modified?: string }} folder
+ * holds sub-folders). There's no "subcarpetas" or "modificado" equivalent for
+ * a folder, so those list columns are always `NO_VALUE`.
+ * @param {{ path: string, assetCount?: number }} folder
  * @returns {HTMLButtonElement}
  */
 export function createFolderCard(folder) {
@@ -91,16 +90,13 @@ export function createFolderCard(folder) {
   const assetCount = folder.assetCount ?? 0;
   const facts = document.createElement('span');
   facts.className = 'assetslisting-facts';
-  facts.append(
-    fact('assetslisting-size', assetCountLabel(assetCount)),
-    fact('assetslisting-date', formatDate(folder.modified) || NO_VALUE),
-  );
+  facts.append(fact('assetslisting-size', assetCountLabel(assetCount)));
 
   body.append(nameRow, facts);
 
   const category = fact('assetslisting-category', NO_VALUE);
   const sizeCell = fact('assetslisting-size-cell', assetCountLabel(assetCount));
-  const modifiedCell = fact('assetslisting-modified-cell', formatDate(folder.modified) || NO_VALUE);
+  const modifiedCell = fact('assetslisting-modified-cell', NO_VALUE);
 
   card.append(thumb, body, category, sizeCell, modifiedCell);
   return card;
@@ -109,8 +105,8 @@ export function createFolderCard(folder) {
 /**
  * The card's info section: a name row (name + format badge — the badge only
  * shows here in list view; in grid view it stays overlaid on the thumbnail),
- * then size (left) and date (right) — grid view only, list view shows these
- * in their own dedicated columns instead — then keyword chips.
+ * then just the size — grid view only, list view shows it in its own
+ * dedicated column instead.
  */
 function createInfo(asset) {
   const body = document.createElement('figcaption');
@@ -133,17 +129,9 @@ function createInfo(asset) {
 
   const facts = document.createElement('span');
   facts.className = 'assetslisting-facts';
-  facts.append(
-    fact('assetslisting-size', formatSizeMb(asset.size) || NO_VALUE),
-    fact('assetslisting-date', formatDate(asset.uploaded) || NO_VALUE),
-  );
+  facts.append(fact('assetslisting-size', formatSizeMb(asset.size) || NO_VALUE));
 
   body.append(nameRow, facts);
-
-  // The cap only bites in grid view (CSS shows everything unclipped in list
-  // view instead) — see the `assetslisting-keyword-overflow` rules in cards.css.
-  const keywords = createKeywords(asset.tags, asset.smartTags, { limit: 3 });
-  if (keywords) body.append(keywords);
 
   return body;
 }
@@ -169,8 +157,8 @@ function createListColumns(asset) {
 
 /**
  * Builds an asset card: a preview region (image or file icon) with a format
- * badge, above an info region (name, size + date, keywords). Clicking opens the
- * asset, or toggles its selection while selection mode is active; both are wired
+ * badge, above an info region (name, size). Clicking opens the asset, or
+ * toggles its selection while selection mode is active; both are wired
  * by the delegated handler in events.js off `data-asset-path`. The corner
  * checkbox is decorative — hidden until selection mode, driven by the card's
  * `data-checked` flag — so it ships with every card and needs no rebind.

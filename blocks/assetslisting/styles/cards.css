@@ -40,7 +40,7 @@
   outline: none;
 }
 
-/* Info section: a fixed 80px band holding the name, size/date facts and keywords. */
+/* Info section: a fixed 80px band holding the name and the size fact. */
 .assetslisting-body {
   box-sizing: border-box;
   display: flex;
@@ -48,10 +48,6 @@
   flex-direction: column;
   gap: var(--ah-space-2xs);
   padding: var(--ah-space-s) var(--ah-space-xm);
-}
-
-.assetslisting-card-asset .assetslisting-body {
-  height: 80px;
 }
 
 /* divider between the folder icon area and the name/facts area — a grid-view
@@ -139,6 +135,7 @@
 /* ================================================================== preview === */
 
 .assetslisting-thumb {
+  height: 175.95px;
   position: relative;
   display: flex;
   flex: 1;
@@ -303,23 +300,18 @@
   height: 100%;
 }
 
-/* size (left) and date (right) on one row */
+/* size fact — the card's info section no longer shows a date or keywords */
 .assetslisting-facts {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: var(--ah-space-s);
   color: var(--ah-text-muted);
   font-size: var(--ah-font-xs);
   line-height: 1.2;
 }
 
-.assetslisting-facts .assetslisting-date {
-  flex: none;
-  color: var(--ah-text-subtle);
-}
-
-/* keyword chips */
+/* keyword chips — no longer used by the cards themselves, only by the detail
+   panel's Keywords tab (see detail/tabs.js), which shares this builder. */
 .assetslisting-keywords {
   display: flex;
   flex-wrap: wrap;
@@ -327,14 +319,6 @@
   margin: 7px 0 0;
   padding: 0;
   list-style: none;
-}
-
-/* in a card the chips are a single clipped row pinned to the bottom of the band */
-.assetslisting-card-asset .assetslisting-keywords {
-  flex-wrap: nowrap;
-  overflow: hidden;
-  margin-top: auto;
-  height: 18px;
 }
 
 .assetslisting-keyword {
@@ -350,23 +334,6 @@
   text-overflow: ellipsis;
   text-transform: lowercase;
   white-space: nowrap;
-}
-
-/* grid view: show at most 3 chips, then the "+N" overflow chip covers the
-   rest — real chips past the cap stay in the DOM (see keywords.js) so list
-   view (below) can show every one of them unclipped instead. */
-.assetslisting-keyword-overflow {
-  display: none;
-}
-
-.assetslisting[data-view-mode="grid"] .assetslisting-card-asset .assetslisting-keyword:nth-child(n+4) {
-  display: none;
-}
-
-/* matches the hide rule's ancestor chain (plus the extra class) so this wins
-   on specificity regardless of source order, not just by coming later. */
-.assetslisting[data-view-mode="grid"] .assetslisting-card-asset .assetslisting-keyword.assetslisting-keyword-overflow {
-  display: inline-flex;
 }
 
 .assetslisting-keywords-empty {
@@ -606,28 +573,6 @@
 .assetslisting-name-badge[data-format="pdf"] {
   background: rgb(245 166 35 / 13%);
   color: rgb(245 166 35);
-}
-
-/* keywords: plain "#tag" text, no chip background — different from the grid
-   view chip style */
-.assetslisting[data-view-mode="list"] .assetslisting-keywords {
-  flex-wrap: wrap;
-  overflow: visible;
-  height: auto;
-}
-
-/* stylelint-disable-next-line no-descending-specificity -- grid/list view modes
-   are mutually exclusive, so this never actually competes with the grid rule above */
-.assetslisting[data-view-mode="list"] .assetslisting-keyword {
-  padding: 0;
-  background: transparent;
-  color: var(--ah-text-placeholder);
-  font-size: 11px;
-  line-height: 16.5px;
-}
-
-.assetslisting[data-view-mode="list"] .assetslisting-keyword::before {
-  content: "#";
 }
 
 /* category / size / modified — list-view-only columns, siblings of thumb/body */
