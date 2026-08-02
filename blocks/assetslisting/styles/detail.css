@@ -93,6 +93,12 @@
   min-width: 0;
 }
 
+/* empty while the detail is loading (see index.js) — :empty keeps that from
+   still eating a flex gap next to the title. */
+.assetslisting-detail-header-status:empty {
+  display: none;
+}
+
 .assetslisting-detail-header-icon {
   display: flex;
   flex: none;
@@ -226,7 +232,7 @@
   font-size: var(--ah-font-s);
 }
 
-/* stacked (label over value) fields — Nombre, Descripción, Colección */
+/* stacked (label over value) fields — Nombre, Estado */
 .assetslisting-field-stacked {
   display: flex;
   flex-direction: column;
@@ -251,32 +257,37 @@
   overflow-wrap: break-word;
 }
 
-/* Descripción reads smaller and regular-weight, unlike Nombre above it */
-.assetslisting-field-value-body {
-  font-size: var(--ah-font-xs);
-  font-weight: var(--font-weight-regular);
-  line-height: 19.2px;
-}
-
-.assetslisting-collection-row {
-  display: flex;
+/* "Aprobado"-style status pill — the Info tab's own Estado field and the
+   header (see panel.js/index.js) both use this. Only "approved" has a
+   confirmed color (green); anything else — including a status we haven't
+   catalogued yet — falls back to a neutral gray dot rather than guessing. */
+.assetslisting-status-badge {
+  display: inline-flex;
   align-items: center;
-  gap: 5.25px;
-  color: var(--ah-text-strong);
-  font-size: var(--ah-font-xs);
-  line-height: 18px;
+  gap: 3.5px;
+  padding: 1.75px 5.25px;
+  border-radius: 3.5px;
+  background: var(--ah-surface-muted);
+  color: var(--ah-text-muted);
+  font-size: var(--ah-font-2xs);
+  font-weight: var(--font-weight-semibold);
+  line-height: 15px;
 }
 
-.assetslisting-collection-icon {
-  display: flex;
-  flex: none;
-  width: 12px;
-  height: 12px;
+.assetslisting-status-dot {
+  width: 5.25px;
+  height: 5.25px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
-.assetslisting-collection-icon svg {
-  width: 100%;
-  height: 100%;
+.assetslisting-status-badge[data-status="approved"] {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.assetslisting-status-badge[data-status="approved"] .assetslisting-status-dot {
+  background: #16a34a;
 }
 
 /* icon + label (left) / value (right) rows — Modificado, Creado, Tamaño... */
@@ -327,24 +338,128 @@
   text-align: right;
 }
 
-/* side-by-side label/value rows — used by Metadatos */
-.assetslisting-fields {
-  display: grid;
-  grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
-  gap: var(--ah-space-s) var(--ah-space-m);
-  margin: 0;
+/* General-tab sections — "IDENTIFICACIÓN ───", "TEMPORADA ───"... each
+   followed by its own plain/flag row group. */
+.assetslisting-section + .assetslisting-section {
+  margin-top: 14px;
 }
 
-.assetslisting-fields dt {
+.assetslisting-section-title {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 3.5px;
+  color: var(--ah-text-placeholder);
+  font-size: var(--ah-font-2xs);
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.09em;
+  line-height: 15px;
+  text-transform: uppercase;
+}
+
+.assetslisting-section-title::after {
+  flex: 1;
+  height: 1px;
+  background: var(--ah-overlay-subtle);
+  content: "";
+}
+
+/* label (left) / value (right) rows with no icon — Title, Category, Base
+   Comm. Ref... unlike .assetslisting-meta-row-value, the value wraps (see
+   Description) instead of staying on one line. */
+.assetslisting-plain-rows {
+  padding-top: 7px;
+}
+
+.assetslisting-plain-row,
+.assetslisting-flag-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--ah-space-s);
+  padding: 5.25px 0;
+  border-bottom: 1px solid rgb(0 0 0 / 4%);
+}
+
+.assetslisting-plain-row:last-child,
+.assetslisting-flag-row:last-child {
+  border-bottom: 0;
+}
+
+.assetslisting-plain-row-label {
+  flex: none;
+  color: var(--ah-text-placeholder);
+  font-size: 11px;
+  line-height: 16.5px;
+}
+
+.assetslisting-plain-row-value {
+  color: var(--ah-text-strong);
+  font-size: 11px;
+  line-height: 16.5px;
+  overflow-wrap: break-word;
+  text-align: right;
+}
+
+/* binary flags — Is Relabeled, Enable Assets Journeys, State Coral Actions */
+.assetslisting-flag-row-label {
+  display: flex;
+  align-items: center;
+  gap: 5.25px;
+  color: var(--ah-text-placeholder);
+  font-size: 11px;
+  line-height: 16.5px;
+}
+
+.assetslisting-flag-row-label input[type="checkbox"] {
+  width: 12px;
+  height: 12px;
+  accent-color: var(--ah-text-strong);
+}
+
+.assetslisting-flag-row-value {
+  color: var(--ah-text-strong);
+  font-size: 11px;
+  line-height: 16.5px;
+}
+
+/* chip groups — Smart Tags, Smart Color Tag, Keywords (N) */
+.assetslisting-chip-group + .assetslisting-chip-group {
+  margin-top: 10.5px;
+}
+
+.assetslisting-chip-group-title {
+  margin-bottom: 5.25px;
+}
+
+.assetslisting-chip-empty {
   color: var(--ah-text-muted);
   font-size: var(--ah-font-s);
 }
 
-.assetslisting-fields dd {
-  margin: 0;
+.assetslisting-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5.25px;
+}
+
+.assetslisting-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px;
+  padding: 1.75px 7px;
+  border-radius: 10.5px;
+  background: var(--ah-surface-muted);
   color: var(--ah-text);
-  font-size: var(--ah-font-s);
-  overflow-wrap: break-word;
+  font-size: var(--ah-font-2xs);
+  line-height: 15px;
+}
+
+.assetslisting-chip-swatch {
+  width: 8px;
+  height: 8px;
+  border: 1px solid var(--ah-overlay-subtle);
+  border-radius: 50%;
 }
 
 /* renditions list */
@@ -397,8 +512,7 @@
 }
 
 /* footer actions: Descargar fills the row, Share hugs its content, Añadir a
-   colección (no Figma spec — a real feature this mock doesn't show) fills
-   the remaining space like Descargar. */
+   colección is icon-only (Figma: node 283:14939). */
 .assetslisting-detail-footer {
   display: flex;
   flex: none;
@@ -420,6 +534,17 @@
 .assetslisting-detail-footer .btn.assetslisting-detail-share {
   flex: none;
   padding: 7px 10.5px;
+}
+
+/* icon-only: a square button (its own stretched height, aspect-ratio keeps
+   the width matching) with no label, so the `.btn` icon/label gap — which
+   would otherwise leave a sliver of dead space after the icon for the empty
+   label span createIconButton still renders — is zeroed out. */
+.assetslisting-detail-footer .btn.assetslisting-detail-addcol {
+  flex: none;
+  aspect-ratio: 1;
+  padding: 0;
+  gap: 0;
 }
 
 /* ============================================================== responsive === */

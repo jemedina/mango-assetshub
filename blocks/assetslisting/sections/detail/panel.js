@@ -8,7 +8,7 @@
 import { createIconButton } from '../dom.js';
 import TABS from './tabs.js';
 import {
-  ICON_ASSET, ICON_EDIT, ICON_CLOSE, ICON_DOWNLOAD, ICON_SHARE,
+  ICON_ASSET, ICON_EDIT, ICON_CLOSE, ICON_DOWNLOAD, ICON_SHARE, ICON_FOLDER_PLUS,
 } from './icons.js';
 
 function iconButton(className, label, action, svg) {
@@ -38,7 +38,13 @@ function createHeader() {
   title.className = 'assetslisting-detail-title';
   title.textContent = 'Detalles';
 
-  left.append(icon, title);
+  // Empty until the asset detail resolves (see index.js's renderTabs, which
+  // fills this in the same pass it updates the tab counts) — no status is
+  // known yet when the shell is first built.
+  const status = document.createElement('span');
+  status.className = 'assetslisting-detail-header-status';
+
+  left.append(icon, title, status);
 
   const actions = document.createElement('div');
   actions.className = 'assetslisting-detail-header-actions';
@@ -48,7 +54,7 @@ function createHeader() {
   );
 
   header.append(left, actions);
-  return header;
+  return { header, status };
 }
 
 function createTabsNav() {
@@ -89,11 +95,14 @@ function createFooter() {
     { 'data-action': 'detail-share' },
   );
 
-  const addToCollection = document.createElement('button');
-  addToCollection.type = 'button';
-  addToCollection.className = 'btn btn-secondary assetslisting-detail-addcol';
-  addToCollection.dataset.action = 'detail-add-to-collection';
-  addToCollection.textContent = 'Añadir a colección';
+  // Icon-only (Figma: node 283:14939) — the label is only exposed via
+  // aria-label/title, same pattern as the view-toggle buttons in optionsbar.js.
+  const addToCollection = createIconButton(
+    'btn btn-secondary assetslisting-detail-addcol',
+    '',
+    ICON_FOLDER_PLUS,
+    { 'data-action': 'detail-add-to-collection', 'aria-label': 'Añadir a colección', title: 'Añadir a colección' },
+  );
 
   footer.append(download, share, addToCollection);
   return footer;
@@ -103,7 +112,7 @@ function createFooter() {
  * Builds the panel shell.
  * @returns {{
  *   root: HTMLElement, image: HTMLElement, nav: HTMLElement, body: HTMLElement,
- *   tabButtons: Map<string, HTMLButtonElement>
+ *   tabButtons: Map<string, HTMLButtonElement>, headerStatus: HTMLElement
  * }}
  */
 export default function createDetailPanel() {
@@ -111,7 +120,7 @@ export default function createDetailPanel() {
   root.className = 'assetslisting-detail';
   root.setAttribute('aria-label', 'Detalles del asset');
 
-  const header = createHeader();
+  const { header, status: headerStatus } = createHeader();
 
   // `imageWrap` carries the panel's inset padding; `image` is the muted,
   // rounded box the preview drops into — it's the handle the controller
@@ -131,6 +140,6 @@ export default function createDetailPanel() {
 
   root.append(header, imageWrap, nav, body, footer);
   return {
-    root, image, nav, body, tabButtons,
+    root, image, nav, body, tabButtons, headerStatus,
   };
 }

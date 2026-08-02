@@ -58,3 +58,23 @@ export const ICON_SHARE = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://ww
 <path d="M5.41675 7.04167C5.64937 7.35265 5.94615 7.60998 6.28696 7.79618C6.62778 7.98238 7.00465 8.09311 7.39202 8.12085C7.77939 8.14859 8.16819 8.0927 8.53206 7.95697C8.89593 7.82123 9.22635 7.60883 9.50092 7.33417L11.1259 5.70917C11.6193 5.19837 11.8922 4.51424 11.8861 3.80412C11.8799 3.09401 11.5951 2.41472 11.0929 1.91258C10.5908 1.41043 9.91149 1.1256 9.20138 1.11943C8.49126 1.11326 7.80713 1.38624 7.29633 1.87958L6.36466 2.80583" stroke="currentColor" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
 <path d="M7.58344 5.95835C7.35082 5.64737 7.05404 5.39005 6.71323 5.20384C6.37241 5.01764 5.99554 4.90692 5.60817 4.87917C5.2208 4.85143 4.832 4.90732 4.46813 5.04306C4.10426 5.17879 3.77384 5.39119 3.49927 5.66585L1.87427 7.29085C1.38093 7.80165 1.10795 8.48578 1.11412 9.1959C1.12029 9.90602 1.40512 10.5853 1.90727 11.0874C2.40941 11.5896 3.0887 11.8744 3.79881 11.8806C4.50893 11.8868 5.19306 11.6138 5.70386 11.1204L6.63011 10.1942" stroke="currentColor" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+
+// Placeholder "#" glyph for the custom product fields (Ref. comercial, Color
+// Code) — hand-built, not yet verified against the exact Figma vector (API
+// was rate-limited while building this). Swap for the real one if it differs.
+export const ICON_HASH = `<svg viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3.75 1.25L2.5 8.75" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round"/>
+<path d="M7.5 1.25L6.25 8.75" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round"/>
+<path d="M1.25 3.75H8.75" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round"/>
+<path d="M1.25 6.25H8.75" stroke="currentColor" stroke-width="0.833333" stroke-linecap="round"/>
+</svg>`;
+
+// Placeholder folder+plus glyph for the footer's icon-only "Añadir a
+// colección" action — hand-built, not yet verified against the exact Figma
+// vector (API was rate-limited while building this). Swap for the real one
+// if it differs.
+export const ICON_FOLDER_PLUS = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.4167 10.8333C11.6819 10.8333 11.9362 10.728 12.1238 10.5405C12.3113 10.353 12.4167 10.0986 12.4167 9.83333V4.33333C12.4167 4.06811 12.3113 3.81376 12.1238 3.62623C11.9362 3.43869 11.6819 3.33333 11.4167 3.33333H6.71667C6.53276 3.33518 6.35097 3.29391 6.18627 3.21296C6.02157 3.13202 5.87868 3.01362 5.76667 2.86667L5.25 2.16667C5.14807 2.02298 5.01358 1.90474 4.85759 1.82151C4.7016 1.73828 4.52821 1.69214 4.35167 1.69167H2.16667C1.90145 1.69167 1.6471 1.79702 1.45956 1.98456C1.27202 2.1721 1.16667 2.42645 1.16667 2.69167V9.83333C1.16667 10.0986 1.27202 10.353 1.45956 10.5405C1.6471 10.728 1.90145 10.8333 2.16667 10.8333H11.4167Z" stroke="currentColor" stroke-width="1.16667" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M6.79167 5.83333V8.75" stroke="currentColor" stroke-width="1.16667" stroke-linecap="round"/>
+<path d="M5.33333 7.29167H8.25" stroke="currentColor" stroke-width="1.16667" stroke-linecap="round"/>
+</svg>`;

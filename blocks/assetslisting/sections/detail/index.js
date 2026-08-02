@@ -9,7 +9,7 @@
 import { fetchAssetDetail, displayLabel } from '../../data.js';
 import createPreview from '../../shared/preview.js';
 import createDetailPanel from './panel.js';
-import TABS from './tabs.js';
+import TABS, { statusBadge } from './tabs.js';
 
 const DEFAULT_TAB = 'info';
 
@@ -33,7 +33,9 @@ function stateMessage(message) {
  */
 export default function createDetailController(options = {}) {
   const panel = createDetailPanel();
-  const { root, image, body } = panel;
+  const {
+    root, image, body, headerStatus,
+  } = panel;
 
   let currentPath = null;
   let currentAsset = null;
@@ -51,13 +53,15 @@ export default function createDetailController(options = {}) {
   }
 
   function renderTabs(detail) {
+    // Same "Aprobado" pill the Info tab's own Estado field shows — mirrored
+    // here for an at-a-glance status next to the title (Figma: node 283:14939).
+    headerStatus.replaceChildren();
+    if (detail.status) headerStatus.append(statusBadge(detail.status));
+
     const panels = document.createDocumentFragment();
     TABS.forEach((tab) => {
       const button = panel.tabButtons.get(tab.id);
-      if (button) {
-        const count = tab.count ? tab.count(detail) : null;
-        button.textContent = count ? `${tab.label} (${count})` : tab.label;
-      }
+      if (button) button.textContent = tab.label;
 
       const section = document.createElement('div');
       section.className = 'assetslisting-detail-panel';
@@ -82,6 +86,9 @@ export default function createDetailController(options = {}) {
 
     image.replaceChildren(createPreview(asset, { variant: 'detail' }));
     body.replaceChildren(stateMessage('Cargando detalles...'));
+    // Cleared while loading so switching assets never flashes the previous
+    // one's status before the new detail resolves.
+    headerStatus.replaceChildren();
 
     const request = seq + 1;
     seq = request;
@@ -114,6 +121,7 @@ export default function createDetailController(options = {}) {
       root.hidden = true;
       image.replaceChildren();
       body.replaceChildren();
+      headerStatus.replaceChildren();
     }, { once: true });
   }
 
