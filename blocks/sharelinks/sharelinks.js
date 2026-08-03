@@ -20,23 +20,16 @@ const LOAD_ERROR_MESSAGE = 'No se han podido cargar las descargas recientes';
 const NOT_OWNER_HINT = 'Solo quien creó el enlace puede usarlo';
 const COPIED_FEEDBACK_MS = 2000;
 
-const ICON_DOWNLOAD = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M8 2v8m0 0 3-3m-3 3L5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M3 11v2a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1v-2" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
+/* Header + row-action glyphs come from the shared .ah-icon mask system
+   (styles/icons.css): monochrome PNGs filled with currentColor, so they inherit
+   each button's muted→strong hover exactly like the old inline SVGs did. */
+const ICON_DOWNLOAD = '<span class="ah-icon ah-icon-download"></span>';
+const ICON_COPY = '<span class="ah-icon ah-icon-copy"></span>';
+const ICON_OPEN = '<span class="ah-icon ah-icon-open"></span>';
 
-const ICON_COPY = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect x="4.5" y="4.5" width="6.5" height="6.5" rx="1" stroke="currentColor" stroke-width="1.1"/>
-  <path d="M2.5 8.5h-.25A1.25 1.25 0 0 1 1 7.25v-5A1.25 1.25 0 0 1 2.25 1h5A1.25 1.25 0 0 1 8.5 2.25v.25" stroke="currentColor" stroke-width="1.1"/>
-</svg>`;
-
+/* Copy-success feedback only; no PNG for it, so it stays an inline SVG. */
 const ICON_CHECK = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="m2.5 7 2.8 2.8 5.2-6.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>`;
-
-const ICON_OPEN = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path d="M5.5 2.5H3a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 3 11.5h6A1.5 1.5 0 0 0 10.5 10V7.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
-  <path d="M7.5 1.5h4v4M11.25 1.75 6.5 6.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
 function el(tag, className, text) {

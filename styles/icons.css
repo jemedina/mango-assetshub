@@ -49,3 +49,9 @@
 
 /* nav-arrow points down at rest; rotate it per direction (see .ah-button-nav-chevron) */
 .ah-icon-arrow { --ah-icon: url('/icons/nav/nav-arrow.png'); }
+
+/* Descargas recientes (sharelinks) — header + row-action glyphs live in their
+   own /icons/recent-downloads/ folder rather than /icons/nav/. */
+.ah-icon-download { --ah-icon: url('/icons/recent-downloads/downloads-icon.png'); }
+.ah-icon-copy { --ah-icon: url('/icons/recent-downloads/copy-icon.png'); }
+.ah-icon-open { --ah-icon: url('/icons/recent-downloads/open-icon.png'); }

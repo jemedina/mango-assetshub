@@ -12,6 +12,16 @@
   color: var(--ah-text);
 }
 
+/* Tint the whole recent-downloads view and give its header (the fixed topbar)
+   a hairline separator, per the Descargas recientes design. */
+.hub-view[data-view="recent-downloads"] {
+  background: var(--ah-bg-subtle);
+}
+
+.sharelinks-topbar .ah-actionsbar {
+  border-bottom: 1px solid var(--ah-overlay-subtle);
+}
+
 /* Fixed topbar spanning from the leftnav to the right edge, mirroring the
    assetslisting topbar so both views share the same chrome behaviour. */
 .sharelinks-topbar {
@@ -62,9 +72,8 @@
   background: rgb(17 17 17 / 8%);
 }
 
-.sharelinks-panel-icon svg {
-  width: 18px;
-  height: 18px;
+.sharelinks-panel-icon .ah-icon {
+  --ah-icon-size: 18px;
 }
 
 .sharelinks-panel-heading {
@@ -189,6 +198,12 @@
 .sharelinks-card .btn:focus-visible:not(:disabled) {
   border-color: var(--ah-text-strong);
   color: var(--ah-text-strong);
+}
+
+/* Let the masked glyph fill the button's icon slot (which sizes itself to the
+   button font), matching how the inline SVG used to stretch to 100%. */
+.sharelinks-card .btn-icon .ah-icon {
+  --ah-icon-size: 100%;
 }
 
 /* Transient feedback states painted by the block JS after a copy attempt. */

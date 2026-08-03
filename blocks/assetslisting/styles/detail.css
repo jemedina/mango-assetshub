@@ -278,7 +278,7 @@
   width: 5.25px;
   height: 5.25px;
   border-radius: 50%;
-  background: currentColor;
+  background: currentcolor;
 }
 
 .assetslisting-status-badge[data-status="approved"] {
