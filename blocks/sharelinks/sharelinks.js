@@ -88,14 +88,14 @@ function createActionsBar(title) {
 
 /*
  * Display name of a share: the file name of its first shared path, plus how
- * many more items ride along ("lookbook.jpg +3"). The OOTB share stores paths
- * only, so the node name is the closest thing to a title.
+ * many more items ride along ("lookbook.jpg (+3 paths)"). The OOTB share stores
+ * paths only, so the node name is the closest thing to a title.
  */
 function shareName(share) {
   const paths = share.paths || [];
   if (paths.length === 0) return share.id;
   const first = paths[0].split('/').pop();
-  return paths.length > 1 ? `${first} +${paths.length - 1}` : first;
+  return paths.length > 1 ? `${first} (+${paths.length - 1} paths)` : first;
 }
 
 function createCard(share) {
