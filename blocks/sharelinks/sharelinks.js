@@ -1,15 +1,24 @@
 /*
  * ShareLinks block — the "Descargas recientes" view: assets recently shared
- * via Share Link, newest first. Front-only for now: the list below is mock
- * data; the real feed will come from the sharelink registry on author.
+ * via Share Link, newest first, read from the sharelink registry on author
+ * through the publish bridge (scripts/sharelinks-api.js).
+ *
+ * Everyone sees every share, but only its creator can materialize the link
+ * (`canSeeLink`), so Copiar/Abrir render disabled on other people's rows. The
+ * link itself is derived per click — the listing never carries live URLs.
  */
 
 // eslint-disable-next-line import/no-cycle
 import { isEditMode } from '../../scripts/scripts.js';
+import { fetchShareLinks, fetchShareLinkUrl, ShareLinkError } from '../../scripts/sharelinks-api.js';
+import { formatDate } from '../../scripts/assets-api.js';
 
 const DEFAULT_TITLE = 'Descargas recientes';
 const DEFAULT_EMPTY_MESSAGE = 'No hay descargas recientes';
 const SUBTITLE = 'Digital Asset Management';
+const LOAD_ERROR_MESSAGE = 'No se han podido cargar las descargas recientes';
+const NOT_OWNER_HINT = 'Solo quien creó el enlace puede usarlo';
+const COPIED_FEEDBACK_MS = 2000;
 
 const ICON_DOWNLOAD = `<svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M8 2v8m0 0 3-3m-3 3L5 7" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -21,53 +30,14 @@ const ICON_COPY = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org
   <path d="M2.5 8.5h-.25A1.25 1.25 0 0 1 1 7.25v-5A1.25 1.25 0 0 1 2.25 1h5A1.25 1.25 0 0 1 8.5 2.25v.25" stroke="currentColor" stroke-width="1.1"/>
 </svg>`;
 
+const ICON_CHECK = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="m2.5 7 2.8 2.8 5.2-6.6" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 const ICON_OPEN = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
   <path d="M5.5 2.5H3a1.5 1.5 0 0 0-1.5 1.5v6A1.5 1.5 0 0 0 3 11.5h6A1.5 1.5 0 0 0 10.5 10V7.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/>
   <path d="M7.5 1.5h4v4M11.25 1.75 6.5 6.5" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
-
-/*
- * Mock feed. `url` stands in for the real anonymous sharelink; `expires` is
- * pre-formatted because the backend will send display-ready dates.
- */
-const MOCK_SHARELINKS = [
-  {
-    name: '87050534-43_SS26_eComm_Woman_Look01',
-    email: 'maria.garcia@mango.com',
-    expires: '19 jun 2026',
-    url: 'https://example.mango.com/share/87050534-43',
-  },
-  {
-    name: '67184400-99_SS26_eComm_Woman_Look09_A',
-    email: 'carlos.ruiz@mango.com',
-    expires: '19 jun 2026',
-    url: 'https://example.mango.com/share/67184400-99',
-  },
-  {
-    name: '67181011-99_FW25_eComm_Man_Look01',
-    email: 'ana.martinez@mango.com',
-    expires: '18 jun 2026',
-    url: 'https://example.mango.com/share/67181011-99',
-  },
-  {
-    name: '67290100-14_FW25_Campaign_Video_Hero',
-    email: 'maria.garcia@mango.com',
-    expires: '18 jun 2026',
-    url: 'https://example.mango.com/share/67290100-14',
-  },
-  {
-    name: '67181011-07_FW25_Campaign_Woman_Look03',
-    email: 'javier.lópez@mango.com',
-    expires: '17 jun 2026',
-    url: 'https://example.mango.com/share/67181011-07',
-  },
-  {
-    name: 'Mango_Brand_Guidelines_v3',
-    email: 'elena.sanz@mango.com',
-    expires: null,
-    url: 'https://example.mango.com/share/brand-guidelines-v3',
-  },
-];
 
 function el(tag, className, text) {
   const node = document.createElement(tag);
@@ -123,34 +93,54 @@ function createActionsBar(title) {
   return bar;
 }
 
-function createCard(item) {
+/*
+ * Display name of a share: the file name of its first shared path, plus how
+ * many more items ride along ("lookbook.jpg +3"). The OOTB share stores paths
+ * only, so the node name is the closest thing to a title.
+ */
+function shareName(share) {
+  const paths = share.paths || [];
+  if (paths.length === 0) return share.id;
+  const first = paths[0].split('/').pop();
+  return paths.length > 1 ? `${first} +${paths.length - 1}` : first;
+}
+
+function createCard(share) {
   const card = el('li', 'sharelinks-card');
 
   const info = el('div', 'sharelinks-card-info');
   info.append(
-    el('p', 'sharelinks-card-name', item.name),
-    el('p', 'sharelinks-card-email', item.email),
+    el('p', 'sharelinks-card-name', shareName(share)),
+    el('p', 'sharelinks-card-email', share.createdBy),
   );
 
   const side = el('div', 'sharelinks-card-side');
-  if (item.expires) {
+  if (share.expirationDate) {
     const expiry = el('div', 'sharelinks-card-expiry');
     expiry.append(
       el('span', 'sharelinks-card-expiry-label', 'Expira'),
-      el('span', 'sharelinks-card-expiry-date', item.expires),
+      el('span', 'sharelinks-card-expiry-date', formatDate(share.expirationDate)),
     );
     side.append(expiry);
   }
-  side.append(
-    createIconButton('Copiar', ICON_COPY, { 'data-action': 'copy', 'data-url': item.url }),
-    createIconButton('Abrir', ICON_OPEN, { 'data-action': 'open', 'data-url': item.url }),
-  );
+
+  const copy = createIconButton('Copiar', ICON_COPY, { 'data-action': 'copy', 'data-id': share.id });
+  const open = createIconButton('Abrir', ICON_OPEN, { 'data-action': 'open', 'data-id': share.id });
+  // Not the creator: the buttons stay visible so the row reads the same for
+  // everyone, but disabled — author re-checks ownership regardless.
+  if (!share.canSeeLink) {
+    [copy, open].forEach((button) => {
+      button.disabled = true;
+      button.title = NOT_OWNER_HINT;
+    });
+  }
+  side.append(copy, open);
 
   card.append(info, side);
   return card;
 }
 
-function createPanel(title, items, emptyMessage) {
+function createPanel(title, emptyMessage) {
   const panel = el('section', 'sharelinks-panel');
 
   const header = el('div', 'sharelinks-panel-header');
@@ -161,53 +151,105 @@ function createPanel(title, items, emptyMessage) {
   const heading = el('div', 'sharelinks-panel-heading');
   heading.append(
     el('h2', 'sharelinks-panel-title', title),
-    el('p', 'sharelinks-panel-count', `${items.length} compartidos vía Share Link`),
+    el('p', 'sharelinks-panel-count', 'Compartidos vía Share Link'),
   );
   header.append(icon, heading);
   panel.append(header);
 
-  if (items.length === 0) {
-    panel.append(el('p', 'sharelinks-empty', emptyMessage));
-    return panel;
-  }
+  const body = el('div', 'sharelinks-panel-body');
+  body.append(el('p', 'sharelinks-status', 'Cargando…'));
+  panel.append(body);
 
-  const list = el('ul', 'sharelinks-list');
-  items.forEach((item) => list.append(createCard(item)));
-  panel.append(list);
+  panel.renderShares = (shares) => {
+    if (shares.length === 0) {
+      body.replaceChildren(el('p', 'sharelinks-empty', emptyMessage));
+      return;
+    }
+    const count = panel.querySelector('.sharelinks-panel-count');
+    count.textContent = `${shares.length} compartidos vía Share Link`;
+    const list = el('ul', 'sharelinks-list');
+    shares.forEach((share) => list.append(createCard(share)));
+    body.replaceChildren(list);
+  };
+
+  panel.renderError = (message) => {
+    body.replaceChildren(el('p', 'sharelinks-status sharelinks-status-error', message));
+  };
+
   return panel;
+}
+
+/* Transient per-button feedback: swaps icon and label for a moment ("Copiado"),
+   then restores the original content. */
+function flashButton(button, label, icon, className) {
+  const iconEl = button.querySelector('.btn-icon');
+  const labelEl = button.querySelector('.btn-label');
+  const previous = { icon: iconEl.innerHTML, label: labelEl.textContent };
+  iconEl.innerHTML = icon;
+  labelEl.textContent = label;
+  if (className) button.classList.add(className);
+  button.disabled = true;
+  setTimeout(() => {
+    iconEl.innerHTML = previous.icon;
+    labelEl.textContent = previous.label;
+    if (className) button.classList.remove(className);
+    button.disabled = false;
+  }, COPIED_FEEDBACK_MS);
+}
+
+async function handleAction(button) {
+  const { action, id } = button.dataset;
+  try {
+    const url = await fetchShareLinkUrl(id);
+    if (action === 'copy') {
+      await navigator.clipboard?.writeText(url);
+      flashButton(button, 'Copiado', ICON_CHECK, 'sharelinks-copied');
+    } else {
+      window.open(url, '_blank', 'noopener');
+    }
+  } catch (e) {
+    const message = e instanceof ShareLinkError ? e.message : 'No se ha podido generar el enlace';
+    flashButton(button, message, ICON_COPY, 'sharelinks-action-error');
+  }
 }
 
 /**
  * Loads and decorates the sharelinks block.
  * @param {Element} block The sharelinks block element
  */
-export default function decorate(block) {
-  // Same contract as assetslisting: Universal Editor keeps the instrumented
-  // authored markup, so the runtime view is replaced by a static placeholder.
-  if (isEditMode()) {
-    const state = el('div', 'sharelinks-state', 'Descargas recientes (vista dinámica en runtime)');
-    block.replaceChildren(state);
-    return;
-  }
-
+export default async function decorate(block) {
   const { title, maxItems, emptyMessage } = readConfig(block);
-  const items = MOCK_SHARELINKS.slice(0, maxItems);
 
   const topbar = el('div', 'sharelinks-topbar');
   topbar.append(createActionsBar(title));
 
   const main = el('div', 'sharelinks-main');
-  main.append(createPanel(title, items, emptyMessage));
-
+  const panel = createPanel(title, emptyMessage);
+  main.append(panel);
   block.replaceChildren(topbar, main);
+
+  // Universal Editor: render the real shell — header and panel chrome — so
+  // authors preview what they configure (title, empty message), but skip the
+  // data fetch. The instrumentation lives on the block element itself, which
+  // is left untouched, so the properties panel keeps working. data-edit-preview
+  // keeps the topbar in flow: inside the editor iframe there is no app chrome
+  // (leftnav) to pin a fixed bar to.
+  if (isEditMode()) {
+    block.dataset.editPreview = 'true';
+    panel.renderShares([]);
+    return;
+  }
 
   block.addEventListener('click', (event) => {
     const button = event.target.closest('button[data-action]');
-    if (!button) return;
-    if (button.dataset.action === 'copy') {
-      navigator.clipboard?.writeText(button.dataset.url);
-    } else if (button.dataset.action === 'open') {
-      window.open(button.dataset.url, '_blank', 'noopener');
-    }
+    if (!button || button.disabled) return;
+    handleAction(button);
   });
+
+  try {
+    const { shares } = await fetchShareLinks();
+    panel.renderShares(shares.slice(0, maxItems));
+  } catch (e) {
+    panel.renderError(LOAD_ERROR_MESSAGE);
+  }
 }
