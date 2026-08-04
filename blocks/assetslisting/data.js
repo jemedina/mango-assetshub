@@ -51,8 +51,10 @@ export async function withFolderAssetCounts(folders) {
 }
 
 const ROOT_LABEL = 'Todos los assets';
-const PRODUCT_LABEL = 'Digital Asset Management';
-const COLLECTIONS_LABEL = 'Colecciones';
+export const PRODUCT_LABEL = 'Digital Asset Management';
+// First breadcrumb crumb inside a DAM sub-folder: links back to "Todos los
+// assets" (the DAM root), same target as the left-nav entry.
+const HOME_LABEL = 'Todos';
 
 /**
  * Human label for a DAM path segment. Titles are not available for the ancestor
@@ -71,14 +73,6 @@ function damRoute(path) {
   return { view: ASSETS_LISTING_VIEW, path };
 }
 
-/** A route into the assets-listing view within a collection, at a DAM path (or its root). */
-function collectionRoute(collection, path) {
-  const filters = { collection: collection.id, collabel: collection.label };
-  const route = { view: ASSETS_LISTING_VIEW, filters };
-  if (path) route.path = path;
-  return route;
-}
-
 /**
  * Title shown as the current heading in the actions bar. Inside a collection the
  * collection's own title is the root heading; a sub-folder shows its node name.
@@ -92,14 +86,22 @@ export function folderTitle(path, collection = null) {
   return segmentLabel(path.split('/').pop());
 }
 
-/** Breadcrumb from "Digital Asset Management" (DAM root) down to the current folder. */
-function damTrail(path) {
-  const atRoot = !path || path === DAM_ROOT;
+/**
+ * Builds the DAM folder breadcrumb as a list of `{ label, route, current, home }`.
+ * Only rendered while browsing a DAM sub-folder — the root shows the product
+ * label and collections show an asset counter instead (see createActionsBar) —
+ * so the trail always leads with the "Todos" home crumb (flagged `home`, linking
+ * back to the DAM root) followed by one crumb per path segment. The current
+ * (last) crumb has a null route so the renderer draws it inert.
+ * @param {string} path JCR path under /content/dam
+ * @returns {Array<{ label: string, route: Object|null, current: boolean, home?: boolean }>}
+ */
+export function breadcrumbTrail(path) {
   const trail = [{
-    label: PRODUCT_LABEL, route: atRoot ? null : damRoute(DAM_ROOT), current: atRoot,
+    label: HOME_LABEL, route: damRoute(DAM_ROOT), current: false, home: true,
   }];
 
-  if (atRoot || !path.startsWith(`${DAM_ROOT}/`)) {
+  if (!path || path === DAM_ROOT || !path.startsWith(`${DAM_ROOT}/`)) {
     return trail;
   }
 
@@ -112,51 +114,4 @@ function damTrail(path) {
   });
 
   return trail;
-}
-
-function collectionTrail(collection, path) {
-  const atRoot = !path || path === DAM_ROOT;
-  const collectionCrumb = {
-    label: collection.label,
-    route: atRoot ? null : collectionRoute(collection, ''),
-    current: atRoot,
-  };
-  const trail = [
-    { label: COLLECTIONS_LABEL, route: damRoute(DAM_ROOT), current: false },
-    collectionCrumb,
-  ];
-
-  if (atRoot || !path.startsWith(`${DAM_ROOT}/`)) {
-    return trail;
-  }
-
-  const rest = path.slice(DAM_ROOT.length + 1).split('/').filter(Boolean);
-  let acc = DAM_ROOT;
-  rest.forEach((segment, index) => {
-    acc += `/${segment}`;
-    const current = index === rest.length - 1;
-    trail.push({
-      label: segmentLabel(segment),
-      route: current ? null : collectionRoute(collection, acc),
-      current,
-    });
-  });
-
-  return trail;
-}
-
-/**
- * Builds the breadcrumb trail as a list of `{ label, route, current }`. Two
- * shapes:
- *  - DAM: "Digital Asset Management" (root) down to the current folder.
- *  - Collection: "Colecciones" › "<collection>" › sub-folder segments — rooted
- *    at the collection, not /content/dam, so the editor always sees the
- *    collection as the parent of where it is.
- * The current (last) crumb has a null route so the renderer draws it inert.
- * @param {string} path JCR path under /content/dam (may be empty in a collection)
- * @param {{ id: string, label: string }|null} [collection]
- * @returns {Array<{ label: string, route: Object|null, current: boolean }>}
- */
-export function breadcrumbTrail(path, collection = null) {
-  return collection ? collectionTrail(collection, path) : damTrail(path);
 }

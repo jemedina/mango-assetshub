@@ -5,12 +5,35 @@
  * (breadcrumb, primary actions) lives here.
  */
 
-/* breadcrumb */
+/* heading: title + subtitle/breadcrumb/counter line (Figma: 3.5px apart) */
+.assetslisting-heading {
+  gap: 3.5px;
+}
+
+/* product label (DAM root) — the product name under "Todos los assets".
+   Figma box is 137x17 at opacity 1; sized so the text reads at that height
+   without pinning a fixed width that could clip. */
+.assetslisting-product {
+  margin: 0;
+  color: var(--ah-text-muted);
+  font-size: 11px;
+  line-height: 17px;
+  opacity: 1;
+}
+
+/* collection asset counter (replaces the breadcrumb while browsing a collection) */
+.assetslisting-asset-count {
+  margin: 0;
+  color: var(--ah-text-placeholder); /* #888 */
+  font-size: 11px;
+}
+
+/* breadcrumb (DAM sub-folders) */
 .assetslisting-breadcrumb-list {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--ah-space-2xs);
+  gap: 0; /* spacing between crumbs comes from the arrow separator's own margin */
   margin: 0;
   padding: 0;
   list-style: none;
@@ -19,36 +42,53 @@
 .assetslisting-breadcrumb-item {
   display: flex;
   align-items: center;
-  gap: var(--ah-space-2xs);
+  gap: 0;
   color: var(--ah-text-muted);
-  font-size: var(--ah-font-s);
+  font-size: var(--ah-font-xs); /* 12px */
+  font-weight: var(--font-weight-medium); /* 500 */
+  line-height: 18px;
+  letter-spacing: 0;
 }
 
+/* separator between crumbs: the breadcrumb-arrow glyph, masked so it takes the
+   muted crumb color (same mask technique as .ah-icon in styles/icons.css). */
 .assetslisting-breadcrumb-item:not(:first-child)::before {
-  color: var(--ah-text-muted);
-  content: "›";
+  flex: none;
+  width: 11px;
+  height: 11px;
+  margin: 0 3.5px;
+  background-color: var(--ah-text-muted);
+  content: "";
+  mask: url("/icons/asset-listing/breadcrumb-arrow.png") center / contain no-repeat;
 }
 
 .assetslisting-breadcrumb-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3.5px; /* space between the "Todos" home glyph and its label */
   padding: 0;
   border: 0;
   background: transparent;
   color: var(--ah-text-muted);
   cursor: pointer;
   font: inherit;
+  letter-spacing: 0;
+  text-align: center;
   transition: var(--ah-transition);
 }
 
-.assetslisting-breadcrumb-link:hover,
-.assetslisting-breadcrumb-link:focus-visible {
-  color: var(--ah-text);
-  outline: none;
-  text-decoration: underline;
+/* the "Todos" home glyph */
+.assetslisting-breadcrumb-home-icon {
+  --ah-icon-size: 12px;
 }
 
+/* the current (last) crumb and any hovered crumb read a touch heavier */
+.assetslisting-breadcrumb-link:hover,
+.assetslisting-breadcrumb-link:focus-visible,
 .assetslisting-breadcrumb-current {
   color: var(--ah-text);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-semibold); /* 600 */
+  outline: none;
 }
 
 /* primary actions */

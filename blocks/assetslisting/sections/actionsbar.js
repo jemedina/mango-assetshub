@@ -3,34 +3,41 @@
  * actions (upload / select).
  */
 
-import { folderTitle, breadcrumbTrail } from '../data.js';
-import { createButton, createIconButton } from './dom.js';
+import {
+  folderTitle, breadcrumbTrail, PRODUCT_LABEL, DAM_ROOT,
+} from '../data.js';
+import { el, createButton, createIconButton } from './dom.js';
 import { ICON_UPLOAD, ICON_SELECT } from '../shared/icons.js';
 
-function createBreadcrumb(path, collection) {
+function createBreadcrumb(path) {
   const nav = document.createElement('nav');
   nav.className = 'assetslisting-breadcrumb';
-  nav.setAttribute('aria-label', collection ? 'Ruta de colección' : 'Ruta de carpetas');
+  nav.setAttribute('aria-label', 'Ruta de carpetas');
 
   const list = document.createElement('ol');
   list.className = 'assetslisting-breadcrumb-list';
 
-  breadcrumbTrail(path, collection).forEach((crumb) => {
+  breadcrumbTrail(path).forEach((crumb) => {
     const item = document.createElement('li');
     item.className = 'assetslisting-breadcrumb-item';
 
     if (crumb.current || !crumb.route) {
-      const current = document.createElement('span');
-      current.className = 'assetslisting-breadcrumb-current';
+      const current = el('span', 'assetslisting-breadcrumb-current', crumb.label);
       current.setAttribute('aria-current', 'location');
-      current.textContent = crumb.label;
       item.append(current);
     } else {
-      // The full target route rides on the crumb as JSON so a collection crumb
-      // can carry its filters, not just a path.
+      // The full target route rides on the crumb as JSON so the delegated click
+      // handler can navigate straight to it.
       const link = createButton('assetslisting-breadcrumb-link', crumb.label, {
         'data-route': JSON.stringify(crumb.route),
       });
+      // The "Todos" (home) crumb leads with the house glyph and links back to
+      // "Todos los assets" — the same target as the left-nav entry.
+      if (crumb.home) {
+        const icon = el('span', 'ah-icon ah-icon-breadcrumb-home assetslisting-breadcrumb-home-icon');
+        icon.setAttribute('aria-hidden', 'true');
+        link.prepend(icon);
+      }
       item.append(link);
     }
 
@@ -54,11 +61,21 @@ export default function createActionsBar(path, collection = null) {
   const heading = document.createElement('div');
   heading.className = 'assetslisting-heading ah-actionsbar-heading';
 
-  const title = document.createElement('h1');
-  title.className = 'assetslisting-title ah-actionsbar-title';
-  title.textContent = folderTitle(path, collection);
+  const title = el('h1', 'assetslisting-title ah-actionsbar-title', folderTitle(path, collection));
+  heading.append(title);
 
-  heading.append(title, createBreadcrumb(path, collection));
+  // Second line under the title, by context:
+  //  - collection: a plain "{n} Assets" counter (filled once data loads, see
+  //    renderCount in assetslisting.js) — collections carry no folder breadcrumb.
+  //  - DAM root: the product label ("Digital Asset Management").
+  //  - DAM sub-folder: the "Todos › …" breadcrumb trail.
+  if (collection) {
+    heading.append(el('p', 'assetslisting-asset-count'));
+  } else if (!path || path === DAM_ROOT) {
+    heading.append(el('p', 'assetslisting-product', PRODUCT_LABEL));
+  } else {
+    heading.append(createBreadcrumb(path));
+  }
 
   const actions = document.createElement('div');
   actions.className = 'assetslisting-actions';

@@ -50,6 +50,10 @@
 /* nav-arrow points down at rest; rotate it per direction (see .ah-button-nav-chevron) */
 .ah-icon-arrow { --ah-icon: url('/icons/nav/nav-arrow.png'); }
 
+/* Assets listing breadcrumb "Todos" (home) crumb glyph — lives in its own
+   /icons/asset-listing/ folder. */
+.ah-icon-breadcrumb-home { --ah-icon: url('/icons/asset-listing/breadcrumb-home-icon.png'); }
+
 /* Descargas recientes (sharelinks) — header + row-action glyphs live in their
    own /icons/recent-downloads/ folder rather than /icons/nav/. */
 .ah-icon-download { --ah-icon: url('/icons/recent-downloads/downloads-icon.png'); }

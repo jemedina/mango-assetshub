@@ -102,6 +102,11 @@ export default function decorate(block) {
   // count of what's loaded so far, which grows as more pages come in via
   // "Mostrar más".
   function renderCount() {
+    // Collections show a plain asset counter in the actions bar in place of the
+    // breadcrumb (see createActionsBar); it only exists in that context.
+    const headingCount = block.querySelector('.assetslisting-asset-count');
+    if (headingCount) headingCount.textContent = `${currentAssets.length} Assets`;
+
     const count = block.querySelector('.assetslisting-count');
     if (!count) return;
     if (isSearching()) {

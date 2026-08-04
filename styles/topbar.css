@@ -33,9 +33,10 @@
 
 .ah-actionsbar-title {
   margin: 0;
+  font-family: var(--body-font-family);
   font-size: 15px;
   font-weight: var(--font-weight-bold);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.15px;
   line-height: 15px;
 }
 
