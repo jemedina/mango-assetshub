@@ -3,10 +3,8 @@
  * the grid/list view toggle).
  */
 
-import { createButton, createIconButton } from './dom.js';
-import {
-  ICON_SORT, ICON_FILTER, ICON_VIEW_GRID, ICON_VIEW_LIST, ICON_SEARCH,
-} from '../shared/icons.js';
+import { el } from './dom.js';
+import { ICON_SEARCH } from '../shared/icons.js';
 import { SORT_FIELDS } from '../shared/sort.js';
 
 function createSearch() {
@@ -35,20 +33,24 @@ function createViewToggle(viewMode) {
   group.setAttribute('aria-label', 'Modo de vista');
 
   [
-    {
-      mode: 'grid', label: 'Vista de cuadrícula', icon: ICON_VIEW_GRID,
-    },
-    {
-      mode: 'list', label: 'Vista de lista', icon: ICON_VIEW_LIST,
-    },
+    { mode: 'grid', label: 'Vista de cuadrícula', icon: 'ah-icon-view-grid' },
+    { mode: 'list', label: 'Vista de lista', icon: 'ah-icon-view-list' },
   ].forEach(({ mode, label, icon }) => {
-    const button = createIconButton('assetslisting-viewtoggle-button', '', icon, {
-      'data-action': 'set-view',
-      'data-view-mode': mode,
-      'aria-pressed': String(viewMode === mode),
-      'aria-label': label,
-      title: label,
-    });
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'assetslisting-viewtoggle-button';
+    button.dataset.action = 'set-view';
+    button.dataset.viewMode = mode;
+    button.setAttribute('aria-pressed', String(viewMode === mode));
+    button.setAttribute('aria-label', label);
+    button.title = label;
+
+    // Masked SVG glyph — recolors via currentColor (see the viewtoggle CSS: the
+    // active button is #111, the inactive one #888).
+    const iconEl = el('span', `ah-icon ${icon}`);
+    iconEl.setAttribute('aria-hidden', 'true');
+    button.append(iconEl);
+
     group.append(button);
   });
 
@@ -56,60 +58,73 @@ function createViewToggle(viewMode) {
 }
 
 /**
- * Builds the sort control: a trigger (opens the field menu) and a direction
- * button side by side as a split button (same pattern as the view toggle),
- * plus the dropdown menu panel listing the 4 sortable fields.
+ * Builds one field row in the sort menu: the field label plus a trailing
+ * direction indicator ("↓ Desc" / "↑ Asc") that only shows on the active field
+ * (CSS hides it otherwise; applySortState fills its text).
+ * @param {{ field: string, label: string }} sortField
+ * @param {boolean} isCurrent
+ * @returns {HTMLLIElement}
+ */
+function createSortOption({ field, label: fieldLabel }, isCurrent) {
+  const item = document.createElement('li');
+  item.setAttribute('role', 'none');
+
+  const option = document.createElement('button');
+  option.type = 'button';
+  option.className = 'assetslisting-sort-option';
+  option.setAttribute('role', 'menuitemradio');
+  option.dataset.action = 'set-sort-field';
+  option.dataset.sortField = field;
+  option.setAttribute('aria-current', String(isCurrent));
+
+  option.append(
+    el('span', 'assetslisting-sort-option-label', fieldLabel),
+    el('span', 'assetslisting-sort-option-direction'),
+  );
+  item.append(option);
+  return item;
+}
+
+/**
+ * Builds the sort control: a trigger button (a decorative sort glyph, the
+ * active field's label and its direction as a bare "↓" / "↑" arrow) that opens
+ * a menu of the 4 sortable fields. There is no separate ASC/DESC control —
+ * picking the already active field toggles its direction (see events.js), and
+ * the active field's row shows the current direction inline.
  * @param {{ sortField: string, sortDirection: 'asc'|'desc' }} ui
  * @returns {HTMLElement}
  */
 function createSortControl(ui) {
   const current = SORT_FIELDS.find(({ field }) => field === ui.sortField) || SORT_FIELDS[0];
 
-  const trigger = createIconButton('assetslisting-sort-trigger', current.label, ICON_SORT, {
-    'data-action': 'toggle-sort',
-    'aria-haspopup': 'true',
-    'aria-expanded': 'false',
-  });
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'assetslisting-sort-trigger';
+  trigger.dataset.action = 'toggle-sort';
+  trigger.setAttribute('aria-haspopup', 'true');
+  trigger.setAttribute('aria-expanded', 'false');
 
-  const direction = createButton(
-    'assetslisting-sort-direction',
-    ui.sortDirection === 'asc' ? 'ASC' : 'DESC',
-    {
-      'data-action': 'toggle-sort-direction',
-      'data-direction': ui.sortDirection,
-      'aria-label': ui.sortDirection === 'asc' ? 'Orden ascendente' : 'Orden descendente',
-    },
+  const icon = el('span', 'ah-icon ah-icon-sorting assetslisting-sort-icon');
+  icon.setAttribute('aria-hidden', 'true');
+  trigger.append(
+    icon,
+    el('span', 'assetslisting-sort-label', current.label),
+    // Direction arrow ("↓" / "↑"); applySortState keeps its text in sync.
+    el('span', 'assetslisting-sort-direction'),
   );
-
-  const control = document.createElement('div');
-  control.className = 'assetslisting-sort-control';
-  control.append(trigger, direction);
 
   const menu = document.createElement('ul');
   menu.className = 'assetslisting-sort-menu dropdown-panel';
   menu.setAttribute('role', 'menu');
   menu.hidden = true;
 
-  SORT_FIELDS.forEach(({ field, label: fieldLabel }) => {
-    const item = document.createElement('li');
-    item.setAttribute('role', 'none');
-
-    const option = document.createElement('button');
-    option.type = 'button';
-    option.className = 'assetslisting-sort-option';
-    option.setAttribute('role', 'menuitem');
-    option.dataset.action = 'set-sort-field';
-    option.dataset.sortField = field;
-    option.setAttribute('aria-current', String(field === ui.sortField));
-    option.textContent = fieldLabel;
-
-    item.append(option);
-    menu.append(item);
+  SORT_FIELDS.forEach((sortField) => {
+    menu.append(createSortOption(sortField, sortField.field === ui.sortField));
   });
 
   const root = document.createElement('div');
   root.className = 'dropdown assetslisting-sort';
-  root.append(control, menu);
+  root.append(trigger, menu);
   return root;
 }
 
@@ -128,11 +143,19 @@ export default function createOptionsBar(ui) {
   const toolbar = document.createElement('div');
   toolbar.className = 'assetslisting-toolbar';
 
-  const filters = createIconButton('btn btn-secondary assetslisting-filters-toggle', 'Filtros', ICON_FILTER, {
-    'data-action': 'toggle-filters',
-    'aria-expanded': String(ui.filtersOpen),
-    'aria-controls': 'assetslisting-filters-panel',
-  });
+  // Built by hand (not createIconButton) so the leading glyph is the masked PNG
+  // icon (ah-icon-filters → /icons/nav/filters-icon.png), matching the sort
+  // glyph's icon system rather than an inline SVG.
+  const filters = document.createElement('button');
+  filters.type = 'button';
+  filters.className = 'btn btn-secondary assetslisting-filters-toggle';
+  filters.setAttribute('data-action', 'toggle-filters');
+  filters.setAttribute('aria-expanded', String(ui.filtersOpen));
+  filters.setAttribute('aria-controls', 'assetslisting-filters-panel');
+
+  const filtersIcon = el('span', 'ah-icon ah-icon-filters assetslisting-filters-icon');
+  filtersIcon.setAttribute('aria-hidden', 'true');
+  filters.append(filtersIcon, el('span', 'btn-label', 'Filtros'));
 
   toolbar.append(createSortControl(ui), filters, createViewToggle(ui.viewMode));
 

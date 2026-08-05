@@ -38,7 +38,6 @@
 .ah-icon-recent-downloads { --ah-icon: url('/icons/nav/recent-downloads.png'); }
 .ah-icon-collections { --ah-icon: url('/icons/nav/collections-list.png'); }
 .ah-icon-collection { --ah-icon: url('/icons/nav/collection.png'); }
-.ah-icon-filters { --ah-icon: url('/icons/nav/filters-icon.png'); }
 .ah-icon-folders-main { --ah-icon: url('/icons/nav/folders-main.png'); }
 
 /* Default folder glyph (closed). The expanded variant is swapped in by the
@@ -50,9 +49,14 @@
 /* nav-arrow points down at rest; rotate it per direction (see .ah-button-nav-chevron) */
 .ah-icon-arrow { --ah-icon: url('/icons/nav/nav-arrow.png'); }
 
-/* Assets listing breadcrumb "Todos" (home) crumb glyph — lives in its own
-   /icons/asset-listing/ folder. */
+/* Assets listing glyphs — live in their own /icons/asset-listing/ folder. The
+   options-bar toolbar glyphs (filters + grid/list view) are SVGs so they mask
+   crisply and recolor via currentColor per selected/unselected state. */
 .ah-icon-breadcrumb-home { --ah-icon: url('/icons/asset-listing/breadcrumb-home-icon.png'); }
+.ah-icon-sorting { --ah-icon: url('/icons/asset-listing/sorting-icon.png'); }
+.ah-icon-filters { --ah-icon: url('/icons/asset-listing/sorting-icon.svg'); }
+.ah-icon-view-grid { --ah-icon: url('/icons/asset-listing/card-view-icon.svg'); }
+.ah-icon-view-list { --ah-icon: url('/icons/asset-listing/list-view-icon.svg'); }
 
 /* Descargas recientes (sharelinks) — header + row-action glyphs live in their
    own /icons/recent-downloads/ folder rather than /icons/nav/. */

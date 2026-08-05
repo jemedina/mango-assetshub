@@ -25,7 +25,8 @@ import { formatSizeMb } from './data.js';
  * @returns {{
  *   isActive: () => boolean,
  *   enter: () => void, exit: () => void,
- *   clear: () => void, reset: () => void, refresh: () => void,
+ *   selectFirst: () => void, toggleAll: () => void,
+ *   reset: () => void, refresh: () => void,
  *   toggle: (path: string) => void,
  *   selectedPaths: () => string[],
  *   hasFolderSelected: () => boolean,
@@ -67,14 +68,34 @@ export default function createSelection(block, getAssets, getFolders = () => [])
     const sizeLabel = q('.assetslisting-selection-size');
     if (sizeLabel) sizeLabel.textContent = `${formatSizeMb(totalBytes()) || '0 MB'} en total`;
 
+    // "Seleccionar los N": offer a one-click pick of every asset, hidden once
+    // there is nothing left to add (no assets, or all of them already picked).
+    const assets = getAssets();
+    const allPicked = assets.length > 0 && assets.every((asset) => selected.has(asset.path));
+
+    // Same tri-state toggle as the checkbox, spelled out: "Seleccionar los N"
+    // until everything is picked, then "Deseleccionar todo" (which clears the
+    // selection and leaves selection mode).
+    const selectAllButton = q('.assetslisting-selection-selectall');
+    if (selectAllButton) {
+      selectAllButton.textContent = allPicked ? 'Deseleccionar todo' : `Seleccionar los ${assets.length}`;
+      selectAllButton.hidden = assets.length === 0;
+    }
+
+    // Tri-state checkbox: a checkmark once every asset is picked, otherwise the
+    // indeterminate dash (it only ever shows while at least one is selected).
+    const checkbox = q('.assetslisting-selection-checkbox');
+    if (checkbox) checkbox.setAttribute('aria-checked', allPicked ? 'true' : 'mixed');
+
     // The primary bulk action morphs by content: a single asset downloads, but
     // more than one — or any folder — shares (an anonymous link is cheaper than
     // N download hits and a folder cannot download directly). The controller
-    // reads the same rule.
+    // reads the same rule. Only the label span changes so the leading icon stays.
     const download = q('.assetslisting-selection-download');
     if (download) {
       const shares = count > 1 || hasFolderSelected();
-      download.textContent = shares ? `Compartir (${count})` : `Descargar (${count})`;
+      const downloadLabel = download.querySelector('.btn-label');
+      if (downloadLabel) downloadLabel.textContent = shares ? `Compartir (${count})` : `Descargar (${count})`;
       download.disabled = count === 0;
     }
 
@@ -96,6 +117,23 @@ export default function createSelection(block, getAssets, getFolders = () => [])
     });
   }
 
+  function allAssetsPicked() {
+    const assets = getAssets();
+    return assets.length > 0 && assets.every((asset) => selected.has(asset.path));
+  }
+
+  // Pick every asset in the current folder. Folders are left untouched — a
+  // folder pick shares the whole folder, a separate gesture from bulk assets.
+  function selectAllAssets() {
+    getAssets().forEach((asset) => selected.add(asset.path));
+  }
+
+  function exitMode() {
+    active = false;
+    selected.clear();
+    apply();
+  }
+
   return {
     isActive: () => active,
 
@@ -105,23 +143,37 @@ export default function createSelection(block, getAssets, getFolders = () => [])
       apply();
     },
 
-    exit() {
-      active = false;
-      selected.clear();
+    exit: exitMode,
+
+    // Entering from the toolbar pre-picks the first asset, so the bar always
+    // opens with something selected ("1 seleccionado"). Read it from the DOM,
+    // not getAssets(), so it matches what the user actually sees first — the
+    // cards render in sorted order, which getAssets() does not reflect.
+    selectFirst() {
+      const firstCard = block.querySelector('.assetslisting-card-asset');
+      const path = firstCard && firstCard.dataset.assetPath;
+      if (path) selected.add(path);
       apply();
     },
 
-    // Deselect everything but stay in selection mode (the "−" control).
-    clear() {
-      selected.clear();
-      apply();
+    // The selection-bar checkbox is a tri-state select-all: pick every asset
+    // when not all are picked, or clear the selection — which drops out of
+    // selection mode — once they already are.
+    toggleAll() {
+      if (allAssetsPicked()) exitMode();
+      else {
+        selectAllAssets();
+        apply();
+      }
     },
 
     toggle(path) {
       if (!path) return;
       if (selected.has(path)) selected.delete(path);
       else selected.add(path);
-      apply();
+      // Deselecting the last pick drops out of selection mode entirely.
+      if (active && selected.size === 0) exitMode();
+      else apply();
     },
 
     // Called after the shell is rebuilt for a new folder: drop all state and

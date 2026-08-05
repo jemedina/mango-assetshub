@@ -17,29 +17,32 @@ import { SORT_FIELDS } from './shared/sort.js';
 
 /**
  * Reflects the current sort field/direction onto the sort control: the
- * trigger's label, the direction button's rotation, and which menu item is
- * marked current.
+ * trigger's label and direction arrow, plus which menu row is active and the
+ * inline "Asc"/"Desc" indicator shown on that row.
  * @param {Element} block
  * @param {{ sortField: string, sortDirection: 'asc'|'desc' }} ui
  */
 export function applySortState(block, ui) {
   const current = SORT_FIELDS.find(({ field }) => field === ui.sortField) || SORT_FIELDS[0];
+  const directionArrow = ui.sortDirection === 'asc' ? '↑' : '↓';
+  const directionLabel = ui.sortDirection === 'asc' ? '↑ Asc' : '↓ Desc';
 
-  const label = block.querySelector('.assetslisting-sort-trigger .btn-label');
+  const label = block.querySelector('.assetslisting-sort-label');
   if (label) label.textContent = current.label;
 
-  const direction = block.querySelector('.assetslisting-sort-direction');
-  if (direction) {
-    direction.dataset.direction = ui.sortDirection;
-    direction.setAttribute(
-      'aria-label',
-      ui.sortDirection === 'asc' ? 'Orden ascendente' : 'Orden descendente',
-    );
-    direction.textContent = ui.sortDirection === 'asc' ? 'ASC' : 'DESC';
-  }
+  // The trigger shows only the direction arrow; the "Asc"/"Desc" wording lives
+  // solely on the active menu row.
+  const triggerDirection = block.querySelector('.assetslisting-sort-trigger .assetslisting-sort-direction');
+  if (triggerDirection) triggerDirection.textContent = directionArrow;
 
   block.querySelectorAll('.assetslisting-sort-option').forEach((option) => {
-    option.setAttribute('aria-current', String(option.dataset.sortField === ui.sortField));
+    const isCurrent = option.dataset.sortField === ui.sortField;
+    option.setAttribute('aria-current', String(isCurrent));
+
+    // The direction indicator only carries meaning on the active field; CSS
+    // reveals it there.
+    const direction = option.querySelector('.assetslisting-sort-option-direction');
+    if (direction) direction.textContent = isCurrent ? directionLabel : '';
   });
 }
 
@@ -73,7 +76,7 @@ export function applyUiState(block, ui) {
  *   openAsset: (path: string) => void, renderSorted: () => void,
  *   isSelectionMode: () => boolean, enterSelectionMode: () => void,
  *   toggleSelectionMode: () => void,
- *   toggleSelect: (path: string) => void, clearSelection: () => void,
+ *   toggleSelect: (path: string) => void, toggleAll: () => void,
  *   closeSelection: () => void, downloadSelected: () => void,
  *   setSearchText: (value: string) => void, filtersChanged: () => void,
  *   clearFilters: () => void, loadMoreAssets: () => Promise<void>
@@ -82,7 +85,7 @@ export function applyUiState(block, ui) {
 export default function bindAssetsListing(block, {
   getUi, setUi, openAsset, renderSorted,
   isSelectionMode, enterSelectionMode, toggleSelectionMode, toggleSelect,
-  clearSelection, closeSelection, downloadSelected,
+  toggleAll, closeSelection, downloadSelected,
   setSearchText, filtersChanged, clearFilters, loadMoreAssets,
 }) {
   block.addEventListener('click', (event) => {
@@ -166,8 +169,8 @@ export default function bindAssetsListing(block, {
       return;
     }
 
-    if (event.target.closest('[data-action="selection-clear"]')) {
-      clearSelection();
+    if (event.target.closest('[data-action="selection-toggle-all"]')) {
+      toggleAll();
       return;
     }
 
@@ -247,21 +250,23 @@ export default function bindAssetsListing(block, {
       return;
     }
 
-    const sortDirection = event.target.closest('.assetslisting-sort-direction');
-    if (sortDirection) {
-      const ui = setUiState({ sortDirection: getUi().sortDirection === 'asc' ? 'desc' : 'asc' });
-      setUi(ui);
-      applySortState(block, ui);
-      renderSorted();
-      return;
-    }
-
     const sortOption = event.target.closest('.assetslisting-sort-option');
     if (sortOption && sortOption.dataset.sortField) {
-      const ui = setUiState({ sortField: sortOption.dataset.sortField });
+      const { sortField, sortDirection } = getUi();
+      const field = sortOption.dataset.sortField;
+      let ui;
+      if (field === sortField) {
+        // Re-picking the active field toggles its direction; keep the menu open
+        // so the user can flip it again or read the updated indicator.
+        ui = setUiState({ sortDirection: sortDirection === 'asc' ? 'desc' : 'asc' });
+      } else {
+        // A different field switches to it (keeping the current direction) and
+        // closes the menu.
+        ui = setUiState({ sortField: field });
+        closeAllDropdowns(block);
+      }
       setUi(ui);
       applySortState(block, ui);
-      closeAllDropdowns(block);
       renderSorted();
       return;
     }

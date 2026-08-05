@@ -15,6 +15,24 @@ export const ICON_SELECT = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://w
 <path d="M4.875 5.95833L6.5 7.58333L11.9167 2.16667" stroke="currentColor" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+// Selection-bar bulk actions. Download mirrors ICON_UPLOAD with the arrow
+// reversed (down into the tray); edit is a standard pencil.
+export const ICON_DOWNLOAD = `<svg viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M11.375 8.125V10.2917C11.375 10.579 11.2609 10.8545 11.0577 11.0577C10.8545 11.2609 10.579 11.375 10.2917 11.375H2.70833C2.42102 11.375 2.14547 11.2609 1.9423 11.0577C1.73914 10.8545 1.625 10.579 1.625 10.2917V8.125" stroke="currentColor" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M3.79163 5.41667L6.49996 8.125L9.20829 5.41667" stroke="currentColor" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M6.5 8.125V1.625" stroke="currentColor" stroke-width="1.08333" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+export const ICON_EDIT = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
+// Close (Lucide "x") — used by the selection bar's dismiss control.
+export const ICON_CLOSE = `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="m6 6 12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
+
 /*
  * Generic standard icons (sort, filter, grid/list view, search) — the Figma
  * MCP hit its API rate limit before these could be extracted 1:1, so these

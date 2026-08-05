@@ -140,8 +140,14 @@ export default function decorate(block) {
   }
 
   function toggleSelectionMode() {
-    if (selection.isActive()) selection.exit();
-    else enterSelectionMode();
+    if (selection.isActive()) {
+      selection.exit();
+    } else {
+      // Entering from the toolbar "Seleccionar" opens the bar with the first
+      // asset already picked (the bar is meaningless with nothing selected).
+      enterSelectionMode();
+      selection.selectFirst();
+    }
   }
 
   // Best-effort bulk download: one download link per selected asset, mirroring
@@ -303,7 +309,7 @@ export default function decorate(block) {
     enterSelectionMode,
     toggleSelectionMode,
     toggleSelect: (path) => selection.toggle(path),
-    clearSelection: () => selection.clear(),
+    toggleAll: () => selection.toggleAll(),
     closeSelection: () => selection.exit(),
     downloadSelected: shareOrDownloadSelected,
     setSearchText,

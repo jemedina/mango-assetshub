@@ -26,7 +26,7 @@
   display: inline-flex;
   overflow: hidden;
   border: 1px solid var(--ah-border-color);
-  border-radius: var(--ah-radius-s);
+  border-radius: var(--ah-radius-2xs);
 }
 
 .assetslisting-viewtoggle-button {
@@ -34,14 +34,15 @@
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  width: 34px;
-  height: 34px;
-  padding: 0 var(--ah-space-s);
+
+  /* padding centres the 14px glyph: 35px wide, 28px tall */
+  padding: 7px var(--ah-space-xm);
   border: 0;
   background: var(--ah-surface);
-  color: var(--ah-text-muted);
+
+  /* inactive view glyph: #888 (see optionsbar.js — the icon masks currentColor) */
+  color: var(--ah-text-placeholder);
   cursor: pointer;
-  font-size: var(--ah-font-l);
   line-height: 1;
   transition: var(--ah-transition);
 }
@@ -52,14 +53,14 @@
 
 .assetslisting-viewtoggle-button:hover,
 .assetslisting-viewtoggle-button:focus-visible {
-  color: var(--ah-text);
+  color: var(--ah-text-strong);
   outline: none;
 }
 
-/* mirrors .assetslisting-filters-toggle's hover/active treatment (subtle
-   surface-muted tint, no border-color swap) — these buttons sit inside the
-   segmented control's own border, so they never carry one of their own. */
+/* the selected view sits on a #e8e8e8 fill (no border-color swap — these
+   buttons live inside the segmented control's own border) and its glyph reads
+   at full strength: #111. */
 .assetslisting-viewtoggle-button[aria-pressed="true"] {
-  background: var(--ah-surface-muted);
-  color: var(--ah-text);
+  background: #e8e8e8;
+  color: var(--ah-text-strong);
 }

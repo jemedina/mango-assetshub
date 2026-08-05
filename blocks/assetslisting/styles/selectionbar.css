@@ -11,9 +11,10 @@
   gap: var(--ah-space-l);
   box-sizing: border-box;
   height: var(--ah-selectionbar-height);
-  padding: 0 var(--ah-topbar-inset);
+  padding: 8.75px 17.5px;
   background: var(--ah-selectionbar-bg);
   border-top: 1px solid var(--ah-border-color);
+  border-bottom: 1px solid rgb(26 26 26 / 20%);
 
   /* [hidden] -> shown flips display:none to flex, which re-triggers this on
      every appearance (a plain transition can't animate out of display:none). */
@@ -41,74 +42,152 @@
 .assetslisting-selection-right {
   display: flex;
   align-items: center;
-  gap: var(--ah-space-m);
   min-width: 0;
 }
 
+/* checkbox · "N seleccionados" · size · "Seleccionar los N" */
+.assetslisting-selection-left {
+  gap: var(--ah-space-xm);
+}
+
+.assetslisting-selection-right {
+  gap: var(--ah-space-m);
+}
+
 .assetslisting-selection-count {
-  font-size: var(--ah-font-m);
-  font-weight: var(--font-weight-semibold);
-  color: var(--ah-text);
+  font-size: var(--ah-font-s);
+  font-weight: var(--font-weight-medium);
+  color: var(--ah-text-strong);
   white-space: nowrap;
 }
 
 .assetslisting-selection-size {
-  font-size: var(--ah-font-s);
-  color: var(--ah-text-muted);
+  font-size: var(--ah-font-xs);
+  color: var(--ah-text-placeholder);
   white-space: nowrap;
 }
 
-/* round "−" deselect-all control */
-.assetslisting-selection-clear {
-  display: inline-flex;
+/* "Seleccionar los N": a plain text button that fades on interaction. */
+.assetslisting-selection-selectall {
   flex: none;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: 1px solid var(--ah-border-color);
-  border-radius: 50%;
-  background: var(--ah-surface);
-  color: var(--ah-text);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #1a1a1a;
   cursor: pointer;
-  font-size: var(--ah-font-l);
-  line-height: 1;
+  font: inherit;
+  font-size: var(--ah-font-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
   transition: var(--ah-transition);
 }
 
-.assetslisting-selection-clear:hover,
-.assetslisting-selection-clear:focus-visible {
+.assetslisting-selection-selectall:hover,
+.assetslisting-selection-selectall:focus-visible {
+  color: color-mix(in oklab, #1a1a1a 80%, transparent);
+  outline: none;
+}
+
+/* Tri-state select-all checkbox — same look as the card checkbox
+   (.assetslisting-check): a 20px rounded square that fills with the accent when
+   active. It only shows while something is picked, so it renders as a dash
+   (partial, aria-checked="mixed") or a check (all, aria-checked="true"). */
+.assetslisting-selection-checkbox {
+  position: relative;
+  box-sizing: border-box;
+  display: inline-flex;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 2px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-2xs);
+  background: var(--ah-surface);
+  cursor: pointer;
+  transition: var(--ah-transition);
+}
+
+/* partial: empty box with a strong-gray border and a dark dash */
+.assetslisting-selection-checkbox[aria-checked="mixed"] {
+  border-color: var(--ah-text-placeholder);
+  background: transparent;
+}
+
+/* all picked: solid #1a1a1a box with a white check */
+.assetslisting-selection-checkbox[aria-checked="true"] {
+  border-color: #1a1a1a;
+  background: #1a1a1a;
+}
+
+.assetslisting-selection-checkbox:hover,
+.assetslisting-selection-checkbox:focus-visible {
   border-color: var(--ah-accent);
   outline: none;
 }
 
-/* the bulk-action buttons match the actions-bar button sizing */
-.assetslisting-selectionbar .btn {
-  height: 32px;
-  padding: 7px 10.5px;
+/* indeterminate dash (some but not all picked) */
+.assetslisting-selection-checkbox[aria-checked="mixed"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 8px;
+  height: 2px;
+  background: #1a1a1a;
+  transform: translate(-50%, -50%);
 }
 
-/* borderless "✕" close control */
+/* checkmark (all picked) — the rotated border-corner used by the card check */
+.assetslisting-selection-checkbox[aria-checked="true"]::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 9px;
+  border: solid var(--ah-on-accent);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* the bulk-action buttons follow the design's compact spec: 6px/12px padding,
+   4px radius and a 6px icon gap (height resolves to 32px). */
+.assetslisting-selectionbar .btn {
+  gap: var(--ah-space-xs);
+  padding: var(--ah-space-xs) var(--ah-space-m);
+  border-radius: 4px;
+}
+
+/* download: solid #1a1a1a, medium (not semibold) label */
+.assetslisting-selectionbar .btn-primary {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  font-weight: var(--font-weight-medium);
+}
+
+/* borderless close control — a 15px "x" glyph with 5.25px padding all round */
 .assetslisting-selection-close {
   display: inline-flex;
   flex: none;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  padding: 5.25px;
   border: 0;
   border-radius: var(--ah-radius-s);
   background: transparent;
   color: var(--ah-text-muted);
   cursor: pointer;
-  font-size: var(--ah-font-m);
-  line-height: 1;
   transition: var(--ah-transition);
+}
+
+.assetslisting-selection-close svg {
+  width: 15px;
+  height: 15px;
 }
 
 .assetslisting-selection-close:hover,
 .assetslisting-selection-close:focus-visible {
-  background: var(--ah-surface);
+  background: #e8e8e8;
   color: var(--ah-text);
   outline: none;
 }

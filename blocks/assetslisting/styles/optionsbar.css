@@ -69,27 +69,22 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--ah-space-s);
+  gap: var(--ah-space-xm); /* 10.5px between sort, filters and the view toggle */
   margin-left: auto;
 }
 
-/* sort control — a trigger + direction split button, same language as the view toggle */
-.assetslisting-sort-control {
-  display: inline-flex;
-  overflow: hidden;
-  border: 1px solid var(--ah-border-color);
-  border-radius: var(--ah-radius-2xs);
-}
-
-.assetslisting-sort-trigger,
-.assetslisting-sort-direction {
+/* sort control — a single trigger button that opens the field menu. The
+   decorative sort glyph sits left, the active field label centre, and the
+   direction arrow ("↓" / "↑") right. */
+.assetslisting-sort-trigger {
   display: inline-flex;
   align-items: center;
   gap: 5.25px;
   box-sizing: border-box;
   height: 34px;
   padding: 0 var(--ah-space-s);
-  border: 0;
+  border: 1px solid var(--ah-border-color);
+  border-radius: var(--ah-radius-2xs);
   background: var(--ah-surface);
   color: var(--ah-text);
   cursor: pointer;
@@ -98,21 +93,37 @@
   transition: var(--ah-transition);
 }
 
-.assetslisting-sort-direction {
-  padding: 0 var(--ah-space-xs);
-  border-left: 1px solid var(--ah-border-color);
-  color: var(--ah-text-muted);
-  font-size: var(--ah-font-2xs);
-  font-weight: var(--font-weight-semibold);
-  letter-spacing: 0.05em;
-}
-
 .assetslisting-sort-trigger:hover,
-.assetslisting-sort-trigger:focus-visible,
-.assetslisting-sort-direction:hover,
-.assetslisting-sort-direction:focus-visible {
+.assetslisting-sort-trigger:focus-visible {
   background: var(--ah-surface-muted);
   outline: none;
+}
+
+/* active/expanded state — while the field menu is open, mirror the filters
+   toggle's enabled treatment (surface-muted tint + accent border) so the
+   trigger reads as "on". */
+.assetslisting-sort-trigger[aria-expanded="true"] {
+  background: var(--ah-surface-muted);
+  border-color: var(--ah-accent);
+}
+
+/* decorative up/down sort glyph */
+.assetslisting-sort-icon {
+  --ah-icon-size: 13px;
+
+  color: var(--ah-text-strong);
+}
+
+/* the trigger's direction arrow ("↓" / "↑") */
+.assetslisting-sort-direction {
+  color: var(--ah-text-muted);
+  white-space: nowrap;
+}
+
+/* filters toggle glyph — masked PNG icon, sized to match the sort glyph and
+   tinted by the button's own text color (currentcolor). */
+.assetslisting-filters-icon {
+  --ah-icon-size: 13px;
 }
 
 .assetslisting-sort-menu {
@@ -120,7 +131,9 @@
 }
 
 .assetslisting-sort-option {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: var(--ah-space-m);
   width: 100%;
   box-sizing: border-box;
   padding: var(--ah-space-s) var(--ah-space-m);
@@ -134,14 +147,29 @@
   transition: var(--ah-transition);
 }
 
+.assetslisting-sort-option-label {
+  flex: 1 1 auto;
+}
+
 .assetslisting-sort-option:hover,
 .assetslisting-sort-option:focus-visible {
-  background: var(--ah-surface-muted);
+  background: #e8e8e8;
   outline: none;
 }
 
+/* The selected field carries no background highlight — only hover paints one.
+   Selection stays legible via the bolder label and its inline "↓ Desc" arrow. */
 .assetslisting-sort-option[aria-current="true"] {
-  background: var(--ah-bg-muted);
   color: var(--ah-text-strong);
   font-weight: var(--font-weight-semibold);
+}
+
+/* the inline "↓ Desc" / "↑ Asc" indicator: only the active field carries a
+   direction, so it stays empty (and takes no space) on every other row. */
+.assetslisting-sort-option-direction {
+  flex: none;
+  color: #1a1a1a;
+  font-size: var(--ah-font-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
 }
