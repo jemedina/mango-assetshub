@@ -3,8 +3,10 @@ import { ASSETS_LISTING_VIEW } from '../../scripts/hub-views.js';
 // eslint-disable-next-line import/no-cycle
 import { isEditMode } from '../../scripts/scripts.js';
 import {
-  fetchAssetsList, fetchCollectionItems, withFolderAssetCounts, displayLabel, DAM_ROOT,
+  fetchAssetsList, fetchCollectionItems, withFolderAssetCounts, DAM_ROOT,
 } from './data.js';
+import { canAutoDownload } from './sections/download/download-rule.js';
+import requestDownload, { saveBlob } from './sections/download/download-api.js';
 import { fetchSearchFilters, searchAssets } from '../../scripts/assets-api.js';
 import {
   renderShell, renderContent, createState, createLoadMoreButton,
@@ -150,24 +152,39 @@ export default function decorate(block) {
     }
   }
 
-  // Best-effort bulk download: one download link per selected asset, mirroring
-  // the detail panel's single-asset download.
-  function downloadSelected() {
-    const picked = new Set(selection.selectedPaths());
-    currentAssets
-      .filter((asset) => picked.has(asset.path))
-      .forEach((asset) => {
-        const link = document.createElement('a');
-        link.href = asset.path;
-        link.download = asset.name || displayLabel(asset);
-        document.body.append(link);
-        link.click();
-        link.remove();
-      });
+  // Direct download (Scenario A): POST the selection to the download servlet and
+  // save the originals it streams back from publish (a single file, or a ZIP for
+  // several). No modal — the new OOTB Assets UI downloads originals only, and this
+  // client does not use OOTB renditions. The download button doubles as the busy
+  // indicator while the ZIP is prepared; the selection controller restores its
+  // label afterwards.
+  async function downloadSelected() {
+    const paths = selection.selectedPaths();
+    const button = block.querySelector('.assetslisting-selection-download');
+    const label = button && button.querySelector('.btn-label');
+    if (button) button.disabled = true;
+    if (label) label.textContent = 'Preparando…';
+
+    let result;
+    try {
+      result = await requestDownload(paths);
+    } catch (error) {
+      result = { ok: false, reason: 'network' };
+    }
+
+    if (result.ok) {
+      saveBlob(result.blob, result.filename);
+      selection.refresh();
+    } else {
+      // Routing keeps Scenario A bounded, so failures here are rare (network or a
+      // transient server error). Surface it briefly on the button, then restore.
+      if (label) label.textContent = 'Error al descargar';
+      window.setTimeout(() => selection.refresh(), 2500);
+    }
   }
 
   // Share: generate an anonymous OOTB link on author (via the publish bridge)
-  // for the selection — folders and/or assets — instead of firing N downloads.
+  // for the selection — folders and/or assets — instead of a direct download.
   function shareSelected() {
     const paths = selection.selectedPaths();
     import('./sections/share/share.js').then(({ default: openShareModal }) => {
@@ -175,12 +192,18 @@ export default function decorate(block) {
     });
   }
 
-  // The primary bulk action: one asset downloads; several elements — or any
-  // folder — share. Mirrors the selection bar's label morph so button and
+  // The primary bulk action: a bounded, folder-free selection downloads directly
+  // (Scenario A); a folder, more than 50 assets or 256 MiB+ shares instead
+  // (Scenario B). Mirrors the selection bar's label morph so button and
   // behaviour never disagree.
   function shareOrDownloadSelected() {
-    if (selection.selectedPaths().length > 1 || selection.hasFolderSelected()) shareSelected();
-    else downloadSelected();
+    const downloads = canAutoDownload({
+      count: selection.selectedPaths().length,
+      totalBytes: selection.selectedBytes(),
+      hasFolder: selection.hasFolderSelected(),
+    });
+    if (downloads) downloadSelected();
+    else shareSelected();
   }
 
   // Fetches whatever the current context calls for: the plain folder/collection

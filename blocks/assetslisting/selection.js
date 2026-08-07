@@ -14,6 +14,7 @@
  */
 
 import { formatSizeMb } from './data.js';
+import { canAutoDownload } from './sections/download/download-rule.js';
 
 /**
  * @param {Element} block The assetslisting block element (query root; rebuilt on
@@ -87,15 +88,18 @@ export default function createSelection(block, getAssets, getFolders = () => [])
     const checkbox = q('.assetslisting-selection-checkbox');
     if (checkbox) checkbox.setAttribute('aria-checked', allPicked ? 'true' : 'mixed');
 
-    // The primary bulk action morphs by content: a single asset downloads, but
-    // more than one — or any folder — shares (an anonymous link is cheaper than
-    // N download hits and a folder cannot download directly). The controller
-    // reads the same rule. Only the label span changes so the leading icon stays.
+    // The primary bulk action morphs by content: a bounded, folder-free selection
+    // downloads directly (Scenario A); a folder, more than 50 assets or 256 MiB+
+    // shares instead (Scenario B). The controller and the action read the same
+    // rule (canAutoDownload) so they never disagree. Only the label span changes
+    // so the leading icon stays.
     const download = q('.assetslisting-selection-download');
     if (download) {
-      const shares = count > 1 || hasFolderSelected();
+      const downloads = canAutoDownload({
+        count, totalBytes: totalBytes(), hasFolder: hasFolderSelected(),
+      });
       const downloadLabel = download.querySelector('.btn-label');
-      if (downloadLabel) downloadLabel.textContent = shares ? `Compartir (${count})` : `Descargar (${count})`;
+      if (downloadLabel) downloadLabel.textContent = downloads ? `Descargar (${count})` : `Compartir (${count})`;
       download.disabled = count === 0;
     }
 
@@ -189,6 +193,8 @@ export default function createSelection(block, getAssets, getFolders = () => [])
     refresh: apply,
 
     selectedPaths: () => [...selected],
+
+    selectedBytes: totalBytes,
 
     hasFolderSelected,
   };
